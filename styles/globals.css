@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.modal-90w{
+    width: 70%;
+    max-width: fit-content !important;
+}
+.modal-body {
+    padding: 0 !important;
+}
+.modal-content{
+    border: 0 !important;
+    border-radius: 0;
+}
+a{
+    text-decoration: none !important;
+    color: unset !important;
+}
+  /* for horizontal scrollbar */
+  ::-webkit-scrollbar {
+    width: 0.2em;
+    background-color: #FFFFFF;
+  }
+   
+  ::-webkit-scrollbar-thumb {
+  }
+   
+  ::-webkit-scrollbar-track {
+    border-radius: 10px;
+    background-color: #FFFFFF;
+  }
+  
+  /* for vertical scrollbar */
+  ::-webkit-scrollbar {
+    width: 0.2em;
+    background-color: #FFFFFF;
+  }
+   
+  ::-webkit-scrollbar-thumb {
+  }
+   
+  ::-webkit-scrollbar-track {
+    border-radius: 10px;
+    background-color: #FFFFFF;
+  }
+  
