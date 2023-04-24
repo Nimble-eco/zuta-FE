@@ -221,6 +221,7 @@ function profile() {
                         </div>
                         <div 
                             className="flex flex-row cursor-pointer"
+                            onClick={() => getPage('vendor/product/')}
                         >
                             <MdStore className="text-xl mr-2" />
                             <p>My Store</p>
@@ -415,91 +416,6 @@ function profile() {
                             </div>
                         </div>
 
-                    </div>
-
-                    <div className='flex flex-col md:flex-row w-[90%] mx-auto bg-white'>
-                        <div className='flex flex-col bg-white px-10 py-4 shadow-md w-fit mr-[5%]'>
-                            <a 
-                                href="#0"
-                                className="text-black hover:!text-orange-500 cursor-pointer mb-6"
-                            >
-                                Products
-                            </a>
-                            <a 
-                                href="#0"
-                                className="text-black hover:!text-orange-500 cursor-pointer mb-6"
-                            >
-                                Transactions
-                            </a>
-                            <a 
-                                href="#0"
-                                className="text-black hover:!text-orange-500 cursor-pointer mb-6"
-                            >
-                                Settings
-                            </a>
-                            <a 
-                                href="#0"
-                                className="text-black hover:!text-orange-500 cursor-pointer mb-6"
-                            >
-                                Feedback
-                            </a>
-                        </div>
-
-                        <div className="flex flex-col w-full shadow-md bg-white">
-                            <div className="flex flex-row text-sm font-semibold !text-gray-400 px-4 py-5">
-                                <a href="#0" className="hover:!text-orange-500 mr-3">
-                                    Active
-                                </a>
-                                <a href="#0" className="hover:!text-orange-500 mr-3">
-                                    Pending
-                                </a>
-                                <a href="#0" className="hover:!text-orange-500 mr-3">
-                                    Inactive
-                                </a>
-                                <a href="#0" className="hover:!text-orange-500 mr-3">
-                                    Featured
-                                </a>
-                            </div>
-
-                            <div className="flex flex-row py-3 px-4 relative">
-                                <FilterAndSearchGroup 
-                                    searchInputPlaceHolder="Search name, price, category"
-                                    onSearch={searchProducts}
-                                    onFilterButtonClick={() => setShowFilterInput(!showFilterInput)}
-                                />
-                                <div className="w-fit absolute right-1">
-                                    <ButtonFull 
-                                        action="Create Product"
-                                        onClick={() => {}}
-                                    />
-                                </div>
-                            </div>
-                            {/* PRODUCTS TABLE */}
-                            <div className="flex flex-col pb-8">
-                                <MyTable
-                                    headings={['image', 'name', 'price', 'discount']}
-                                    content={productsPages[currentProductPage]} 
-                                    onRowButtonClick={() => {}}
-                                />
-                                <div className='flex flex-row justify-end text-sm w-[80%] mx-auto'>
-                                    <button disabled={currentProductPage === 0} onClick={() => setCurrentProductPage(currentProductPage - 1)} className='mr-3 cursor-pointer'>Previous</button>
-                                    <button disabled={currentProductPage === productsPages.length - 1} onClick={() => setCurrentProductPage(currentProductPage + 1)} className='mr-3 cursor-pointer'>Next</button>
-                                </div>
-                            </div>
-
-                            {/* TRANSACTIONS TABLE */}
-                            <div className="flex flex-col pb-8">
-                                <MyTable
-                                    headings={['name', 'quantity', 'price', 'total', 'status']}
-                                    content={transactionsPages[currentTransactionsPage]} 
-                                    onRowButtonClick={() => {}}
-                                />
-                                <div className='flex flex-row justify-end text-sm w-[80%] mx-auto'>
-                                    <button disabled={currentTransactionsPage === 0} onClick={() => setCurrentTransactionsPage(currentTransactionsPage - 1)} className='mr-3 cursor-pointer'>Previous</button>
-                                    <button disabled={currentTransactionsPage === transactionsPages.length - 1} onClick={() => setCurrentTransactionsPage(currentTransactionsPage + 1)} className='mr-3 cursor-pointer'>Next</button>
-                                </div>
-                            </div>
-                        </div>
                     </div>
 
                 </div>

@@ -15,7 +15,11 @@ const MyTable = ({headings, content, onRowButtonClick}: IMyTableProps) => {
                     {
                         headings?.map((heading: string) => (
                             <th key={heading}>
-                                <p className="mb-3">{heading.toLocaleUpperCase()}</p>
+                                <p className="mb-3">{heading.includes("_") ?
+                                    heading.split("_").join(" ").toLocaleUpperCase() : 
+                                    heading.toLocaleUpperCase()
+                                }
+                            </p>
                             </th>
                         ))
                     }
@@ -40,7 +44,7 @@ const MyTable = ({headings, content, onRowButtonClick}: IMyTableProps) => {
                                             className="w-12 rounded-full my-2 align-middle"
                                         />
                                     ) : (
-                                        <p className='align-middle'>{item[heading]}</p>
+                                        <p className='align-middle pb-3'>{item[heading]}</p>
                                     )}
                                 </td>
                             ))}

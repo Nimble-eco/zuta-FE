@@ -6,23 +6,24 @@ interface IMyDropDownInputProps {
     name?: string;
     options: any[];
     onSelect: () => void;
+    value?: string;
 }
 
-const MyDropDownInput = ({label, name, options, onSelect}: IMyDropDownInputProps) => {
+const MyDropDownInput = ({label, name, options, value, onSelect}: IMyDropDownInputProps) => {
   return (
     <div className='flex flex-col mb-4 px-3 py-2'>
         <label className='font-semibold mb-3 text-sm'>
             {capitalizeFirstLetter(label)}:
         </label>
-        <select name={name || label} className='text-gray-500 text-sm bg-gray-100 py-2 px-4'>
+        <select name={name || label} defaultValue={value}  className='text-gray-500 text-sm bg-gray-100 py-2 px-4'>
             {
                 options?.map((item: any) => (
                     <option 
-                        value={item.value} 
-                        key={item.value}
+                        value={item.value || item.name} 
+                        key={item.value || item.name}
                         className="mb-3 border-b border-gray-200"
                     >
-                        {item.title}
+                        {item.title || item.name}
                     </option>
                 ))
             }

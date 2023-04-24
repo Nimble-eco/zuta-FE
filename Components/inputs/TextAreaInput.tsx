@@ -1,21 +1,19 @@
-import React from 'react'
-import { capitalizeFirstLetter } from '../../Utils/capitalizeFirstLettersOfString';
+import { capitalizeFirstLetter } from "../../Utils/capitalizeFirstLettersOfString";
 
-interface ITextInputProps {
+interface ITextAreaInputProps {
     label: string;
     value: string | string[];
     onInputChange: (e: any) => void;
     placeHolder?: string;
 }
 
-const TextInput = ({label, value, onInputChange, placeHolder}: ITextInputProps) => {
+const TextAreaInput = ({label, value, onInputChange, placeHolder}: ITextAreaInputProps) => {
   return (
     <div className="flex flex-col mb-4 px-3 py-2">
       <label htmlFor={label} className='font-semibold mb-3 text-sm'>{capitalizeFirstLetter(label)}:</label>
-      <input
-        type="text"
+      <textarea
         placeholder={placeHolder || ''}
-        className="text-base text-gray-700 bg-gray-100 px-3 py-2"
+        className="text-base text-gray-700 bg-gray-100 px-3 py-2 h-40 outline-none rounded-md"
         name={label}
         value={value || ''}
         onChange={(e) => onInputChange(e)}
@@ -24,4 +22,4 @@ const TextInput = ({label, value, onInputChange, placeHolder}: ITextInputProps) 
   )
 }
 
-export default TextInput
+export default TextAreaInput

@@ -1,4 +1,5 @@
 export const productDummyData = {
+    "id": "re6485789rtjr3tq6rrt483",
     "name": "Smartphone X",
     "description": "The latest smartphone from company Y, with cutting edge technology and a sleek design.",
     "price": 999,
@@ -6,6 +7,13 @@ export const productDummyData = {
     "rating": 4.7,
     "potential_price": 1199,
     "potential_discount": 10,
+    "product_category": ['technology'],
+    "product_tags": ['technology', 'gadgets', 'phone'],
+    "flag": 0,
+    "featured_status": 'active',
+    "position": 0,
+    "stock": 12,
+    "status": "active",
     "images": [
       'https://via.placeholder.com/100',
       'https://dl.dropbox.com/s/gabwxlw971ijgov/shoeib-abolhassani-ukDEbYnyDsU-unsplash.jpg?dl=0',
@@ -13,6 +21,7 @@ export const productDummyData = {
       'https://via.placeholder.com/100',
       'https://dl.dropbox.com/s/gabwxlw971ijgov/shoeib-abolhassani-ukDEbYnyDsU-unsplash.jpg?dl=0',
     ],
+    "created_at": "2023-02-08T16:00:00",
     "reviews": [
       {
         "name": "John Doe",
@@ -64,5 +73,11 @@ export const productDummyData = {
         "message": "This phone is great for the price! The specs are impressive and it's perfect for everyday use.",
         'image': 'https://via.placeholder.com/100'
       }
-    ]
+    ],
+    "featured": {
+      "cost": 2000,
+      "status": "active",
+      "duration_in_hours": 24,
+      "time_left": 12
+    }
 }  

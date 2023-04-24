@@ -24,12 +24,12 @@ const index = () => {
     }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-gray-100 flex flex-col">
         <div className="flex flex-row w-[90%] mx-auto mt-8 relative mb-10">
             <VendorSideNavPanel />
-            <div className="flex flex-col w-[80%] absolute right-0 left-[23%]">
+            <div className="flex flex-col w-[80%] absolute right-0 left-[21%]">
                 <h2 className="text-2xl font-bold text-slate-700 mb-4">Products</h2>
-                <div className="flex flex-row text-sm font-semibold !text-gray-400 px-4 py-5">
+                <div className="flex flex-row text-sm font-semibold !text-gray-400 px-4 py-5 bg-white">
                     <a href="#0" className="hover:!text-orange-500 mr-3">
                         Active
                     </a>
@@ -44,7 +44,7 @@ const index = () => {
                     </a>
                 </div>
 
-                <div className="flex flex-row py-3 px-4 relative">
+                <div className="flex flex-row py-3 px-4 relative bg-white">
                     <FilterAndSearchGroup 
                         searchInputPlaceHolder="Search name, price, category"
                         onSearch={searchProducts}
@@ -58,11 +58,11 @@ const index = () => {
                     </div>
                 </div>
                 {/* PRODUCTS TABLE */}
-                <div className="flex flex-col pb-8">
+                <div className="flex flex-col pb-8 bg-white">
                     <MyTable
                         headings={['image', 'name', 'price', 'discount']}
                         content={productsPages[currentProductPage]} 
-                        onRowButtonClick={() => {}}
+                        onRowButtonClick={() => router.push('product/singleProductPage')}
                     />
                     <div className='flex flex-row justify-end text-sm w-[80%] mx-auto'>
                         <button disabled={currentProductPage === 0} onClick={() => setCurrentProductPage(currentProductPage - 1)} className='mr-3 cursor-pointer'>Previous</button>
