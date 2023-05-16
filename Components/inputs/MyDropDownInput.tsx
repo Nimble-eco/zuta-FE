@@ -5,7 +5,7 @@ interface IMyDropDownInputProps {
     label: string;
     name?: string;
     options: any[];
-    onSelect: () => void;
+    onSelect: (e: any) => void;
     value?: string;
 }
 
@@ -15,7 +15,7 @@ const MyDropDownInput = ({label, name, options, value, onSelect}: IMyDropDownInp
         <label className='font-semibold mb-3 text-sm'>
             {capitalizeFirstLetter(label)}:
         </label>
-        <select name={name || label} defaultValue={value}  className='text-gray-500 text-sm bg-gray-100 py-2 px-4'>
+        <select name={name || label} defaultValue={value}  className='text-gray-500 text-sm bg-gray-100 py-2 px-4' onChange={onSelect}>
             {
                 options?.map((item: any) => (
                     <option 

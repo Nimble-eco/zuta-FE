@@ -7,9 +7,27 @@ import FilterAndSearchGroup from "../../../Components/inputs/FilterAndSearchGrou
 import MyTable from "../../../Components/tables/MyTable";
 import VendorSideNavPanel from "../../../Components/vendor/layout/VendorSideNavPanel"
 import { transactionsDummyData } from "../../../data/transactions";
+import FilterContainer from "../../../Components/modals/address/containers/FilterContainer";
+import TextInput from "../../../Components/inputs/TextInput";
+import MyNumberInput from "../../../Components/inputs/MyNumberInput";
+import MyDropDownInput from "../../../Components/inputs/MyDropDownInput";
 
 const index = () => {
     const router = useRouter();
+    const [loading, setLoading] = useState(false);
+    const [filterByDetails, setFilterByDetails] = useState({
+        product_name: '',
+        product_price: 0,
+        product_quantity: 0,
+        order_id: '',
+        order_amount: 0,
+        service_fee: 0,
+        total_amount: 0,
+        start_date: '',
+        end_date: '',
+        order_status: '',
+        payment_status: ''
+    });
 
     // PRODUCT FUNCTIONS
     const searchProducts = (value: string) => {}
@@ -25,8 +43,109 @@ const index = () => {
         transactionsPages.push(transactionsDummyData.slice(i, i + itemsPerPage));
     }
 
+    const handleFilterByDetailsChange = (e: any) => {
+        setFilterByDetails((prevState) => ({
+            ...prevState,
+            [e.target.name] : e.target.value
+        }))
+    }
+
+    const filterTransactionsPage = async () => {
+        setLoading(true);
+        setShowFilterInput(false);
+
+        //TODO: MAKE API CALL
+    }
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
+         {
+            showFilterInput && <FilterContainer 
+                show={showFilterInput}
+                setShow={() => setShowFilterInput(!showFilterInput)}
+                onFilter={filterTransactionsPage}
+                children={[
+                    <>
+                        <TextInput 
+                            label="PRODUCT NAME"
+                            name="product_name"
+                            value={filterByDetails?.product_name}
+                            placeHolder="Enter a product name here"
+                            onInputChange={handleFilterByDetailsChange}
+                        />
+                        
+                        <MyNumberInput 
+                            label="PRODUCT PRICE"
+                            name="product_price"
+                            value={filterByDetails?.product_price}
+                            onInputChange={handleFilterByDetailsChange}
+                        />
+
+                        <MyNumberInput 
+                            label="PRODUCT QUANTITY"
+                            name="product_quantity"
+                            value={filterByDetails?.product_quantity}
+                            onInputChange={handleFilterByDetailsChange}
+                        />
+
+                        <TextInput 
+                            label="ORDER ID"
+                            name="order_id"
+                            value={filterByDetails?.order_id}
+                            placeHolder="Enter a product id here"
+                            onInputChange={handleFilterByDetailsChange}
+                        />
+
+                        <MyNumberInput 
+                            label="ORDER AMOUNT"
+                            name="order_amount"
+                            value={filterByDetails?.order_amount}
+                            onInputChange={handleFilterByDetailsChange}
+                        />
+
+                        <MyNumberInput 
+                            label="SERVICE FEE"
+                            name="service_fee"
+                            value={filterByDetails?.service_fee}
+                            onInputChange={handleFilterByDetailsChange}
+                        />
+
+                        <MyNumberInput 
+                            label="TOTAL AMOUNT"
+                            name="total_amount"
+                            value={filterByDetails?.total_amount}
+                            onInputChange={handleFilterByDetailsChange}
+                        />
+
+                        <MyDropDownInput 
+                            label="ORDER STATUS"
+                            onSelect={handleFilterByDetailsChange}
+                            name="order_status"
+                            options={[
+                                {name: 'completed'}, 
+                                {name: 'delivered'}, 
+                                {name: 'pending'}, 
+                                {name: 'cancelled'}, 
+                                {name: 'rejected'}]}
+                            value='completed'
+                        />
+
+                        <MyDropDownInput 
+                            label="PAYMENT STATUS"
+                            onSelect={handleFilterByDetailsChange}
+                            name="payment_status"
+                            options={[
+                                {name: 'paid'}, 
+                                {name: 'not paid'}, 
+                                {name: 'unconfirmed'}, 
+                                {name: 'dispute'}
+                            ]}
+                            value='paid'
+                        />
+                    </>
+                ]}
+            />
+        }
         <div className="flex flex-row w-[90%] mx-auto mt-8 relative mb-10">
             <VendorSideNavPanel />
             <div className="flex flex-col w-[80%] absolute right-0 left-[21%]">

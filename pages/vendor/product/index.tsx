@@ -5,9 +5,37 @@ import FilterAndSearchGroup from "../../../Components/inputs/FilterAndSearchGrou
 import MyTable from "../../../Components/tables/MyTable";
 import VendorSideNavPanel from "../../../Components/vendor/layout/VendorSideNavPanel"
 import { productsDummyData } from "../../../data/products";
+import FilterContainer from "../../../Components/modals/address/containers/FilterContainer";
+import TextInput from "../../../Components/inputs/TextInput";
+import MyNumberInput from "../../../Components/inputs/MyNumberInput";
+import MyDropDownInput from "../../../Components/inputs/MyDropDownInput";
+import { categoriesDummyData } from "../../../data/categories";
 
 const index = () => {
     const router = useRouter();
+    const [loading, setLoading] = useState(false);
+    const [filterByDetails, setFilterByDetails] = useState({
+        name: '',
+        price: 0,
+        discount: 0,
+        stock: 0,
+        category: '',
+        tags: ''
+    });
+
+    const handleFilterByDetailsChange = (e: any) => {
+        setFilterByDetails((prevState) => ({
+            ...prevState,
+            [e.target.name] : e.target.value
+        }))
+    }
+
+    const filterProductsPage = async () => {
+        setLoading(true);
+        setShowFilterInput(false);
+
+        //TODO: MAKE API CALL
+    }
 
     // PRODUCT FUNCTIONS
     const searchProducts = (value: string) => {}
@@ -25,6 +53,59 @@ const index = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
+        {
+            showFilterInput && <FilterContainer 
+                show={showFilterInput}
+                setShow={() => setShowFilterInput(!showFilterInput)}
+                onFilter={filterProductsPage}
+                children={[
+                    <>
+                        <TextInput 
+                            label="NAME"
+                            value={filterByDetails?.name}
+                            placeHolder="Enter a name here"
+                            onInputChange={handleFilterByDetailsChange}
+                        />
+                        
+                        <MyNumberInput 
+                            label="PRICE"
+                            name="price"
+                            value={filterByDetails?.price}
+                            onInputChange={handleFilterByDetailsChange}
+                        />
+
+                        <MyNumberInput 
+                            label="STOCK"
+                            name="stock"
+                            value={filterByDetails?.stock}
+                            onInputChange={handleFilterByDetailsChange}
+                        />
+
+                        <MyDropDownInput 
+                            label="CATEGORY"
+                            onSelect={handleFilterByDetailsChange}
+                            name="category"
+                            options={categoriesDummyData}
+                            value='Choose a category'
+                        />
+
+                        <TextInput 
+                            label="TAGS"
+                            value={filterByDetails?.tags}
+                            placeHolder="Enter comma separated tags"
+                            onInputChange={handleFilterByDetailsChange}
+                        />
+
+                        <MyNumberInput 
+                            label="DISCOUNT"
+                            name="discount"
+                            value={filterByDetails?.discount}
+                            onInputChange={handleFilterByDetailsChange}
+                        />
+                    </>
+                ]}
+            />
+        }
         <div className="flex flex-row w-[90%] mx-auto mt-8 relative mb-10">
             <VendorSideNavPanel />
             <div className="flex flex-col w-[80%] absolute right-0 left-[21%]">
