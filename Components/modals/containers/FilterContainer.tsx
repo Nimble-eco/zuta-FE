@@ -3,7 +3,7 @@ import { ToastContainer } from 'react-toastify';
 import Modal from 'react-bootstrap/Modal';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { MdOutlineClose } from 'react-icons/md';
-import ButtonFull from '../../../buttons/ButtonFull';
+import ButtonFull from '../../buttons/ButtonFull';
 
 type FilterComponentProps = {
     show: boolean;
