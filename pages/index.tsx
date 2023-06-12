@@ -13,6 +13,7 @@ import { openOrderProductsDummyData } from '../data/openOrderProducts';
 import { productsDummyData } from '../data/products';
 import { tagsDummyData } from '../data/tags';
 import { sendAxiosRequest } from '../Utils/sendAxiosRequest';
+import ParallaxAnimation from '../Components/experiments/ParallaxAnimation';
 
 
 interface IHomePageProps {
@@ -75,6 +76,7 @@ const Home = ({products, openOrders, categories, tags, catalogues}: IHomePagePro
           slides={catalogues}
         />
       </div>
+      <ParallaxAnimation />
       <div 
         className="flex flex-col justify-between w-[80%] mx-auto my-16"
       >

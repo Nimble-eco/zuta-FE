@@ -4,12 +4,21 @@ import VendorSideNavPanel from "../../../Components/vendor/layout/VendorSideNavP
 import { useState } from 'react'
 import { HiOutlineInformationCircle } from "react-icons/hi"
 import ButtonGhost from "../../../Components/buttons/ButtonGhost"
+import AddPaymentMethodModal from "../../../Components/modals/settings/AddPaymentMethodModal"
 
 const index = () => {
     const [showFilterInput, setShowFilterInput] = useState<boolean>(false);
+    const [showAddPaymentMethodModal, setShowAddPaymentMethodModal] = useState<boolean>(false);
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
+        {
+            showAddPaymentMethodModal && <AddPaymentMethodModal
+                show={showAddPaymentMethodModal}
+                setShow={() => setShowAddPaymentMethodModal(!showAddPaymentMethodModal)}
+            />
+        }
+
         <VendorSideNavPanel />
         <div className="flex flex-col w-[80%] absolute right-2 left-[20%]">
             <h2 className="text-2xl font-bold text-slate-700 mb-4">Settings</h2>
@@ -38,7 +47,7 @@ const index = () => {
                     <div className="w-fit absolute right-2 hidden md:flex">
                         <ButtonFull 
                             action="Add Payment Method"
-                            onClick={() => {}}
+                            onClick={() => setShowAddPaymentMethodModal(!showAddPaymentMethodModal)}
                         />
                     </div>
                 </div>
