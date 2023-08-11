@@ -13,8 +13,6 @@ import { openOrderProductsDummyData } from '../data/openOrderProducts';
 import { productsDummyData } from '../data/products';
 import { tagsDummyData } from '../data/tags';
 import { sendAxiosRequest } from '../Utils/sendAxiosRequest';
-import ParallaxAnimation from '../Components/experiments/ParallaxAnimation';
-
 
 interface IHomePageProps {
   products: any[];
@@ -32,6 +30,8 @@ const Home = ({products, openOrders, categories, tags, catalogues}: IHomePagePro
     localStorage.removeItem('cart');
     localStorage.removeItem('total');
   }
+
+  console.log({products, openOrders, tags, categories});
 
   const handleClick = (tag: string) => {
     router.push(`/results?tag=${tag}`);
@@ -72,11 +72,11 @@ const Home = ({products, openOrders, categories, tags, catalogues}: IHomePagePro
         </div>
       </div>
       <div className='h-[50vh] my-10 w-[80%] mx-auto'>
-        <SwiperSlider 
+        {/* <SwiperSlider 
           slides={catalogues}
-        />
+        /> */}
       </div>
-      <ParallaxAnimation />
+
       <div 
         className="flex flex-col justify-between w-[80%] mx-auto my-16"
       >
@@ -89,7 +89,7 @@ const Home = ({products, openOrders, categories, tags, catalogues}: IHomePagePro
           className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:flex lg:flex-row justify-between px-5 max-w-full"
         >
           {
-            categories && categories.map((category: any, index: number) => (
+            categories.length > 0 && categories?.map((category: any, index: number) => (
               <CategoryCard 
                 key={`${category.name} ${index}`}
                 image={category?.image}
@@ -109,7 +109,7 @@ const Home = ({products, openOrders, categories, tags, catalogues}: IHomePagePro
         className='flex flex-col md:grid md:grid-cols-2 md:gap-6 lg:grid-cols-3 lg:gap-4 xl:grid-cols-4 xl:gap-6 justify-between w-[80%] mx-auto my-3 px-5 py-2'
       >
         {
-          openOrders?.map((product:any, index: number) => (
+          openOrders.length > 0 && openOrders?.map((product:any, index: number) => (
             <OpenOrderProductCard
               key={`${product.name} + ${index}`}
               product={product} 
@@ -128,7 +128,7 @@ const Home = ({products, openOrders, categories, tags, catalogues}: IHomePagePro
         </h2>
         <div className='grid grid-cols-2 gap-3 md:grid-cols-3 lg:flex lg:flex-row justify-between px-5'>
           {
-            tags && tags.map((tag: any, index: number) => (
+            tags.length > 0 && tags?.map((tag: any, index: number) => (
               <CategoryCard 
                 key={`${tag.name} ${index}`}
                 image={tag?.image}
@@ -143,7 +143,7 @@ const Home = ({products, openOrders, categories, tags, catalogues}: IHomePagePro
         className='flex flex-col md:grid md:grid-cols-2 md:gap-6 lg:grid-cols-3 lg:gap-4 xl:grid-cols-4 xl:gap-6 justify-between w-[80%] mx-auto my-3 px-5 py-2'
       >
         {
-          products?.map((product:any, index: number) => (
+          products.length > 0 && products?.map((product:any, index: number) => (
             <ProductComponent 
               key={`${product.name} + ${index}`}
               product={product} 
@@ -161,40 +161,53 @@ export default Home
 export async function getServerSideProps() {
   try{
       const getProducts = await sendAxiosRequest(
-        `/api/products/all`,
+        `/api/public/product/index`,
         "get",
         {},
         "",
         ''
       )
       const getOpenOrders = await sendAxiosRequest(
-        '/api/open-orders/all',
+        '/api/open-order/index?properties=1',
+        'get',
+        {},
+        '',
+        ''
+      );
+      const getCategories = await sendAxiosRequest(
+        '/api/product/category/index',
+        'get',
+        {},
+        '',
+        ''
+      );
+      const getTags = await sendAxiosRequest(
+        '/api/product/tag/index',
         'get',
         {},
         '',
         ''
       );
 
-      const [products, openOrders] = await Promise.all([
-        getProducts.products,
-        getOpenOrders. orders
+      const [products, openOrders, categories, tags] = await Promise.all([
+        getProducts.data,
+        getOpenOrders.data,
+        getCategories.data,
+        getTags.data
       ]);
-
-      const categories: any[] = categoriesDummyData;
-      const tags: any[] = tagsDummyData;
-      const catalogues: any[] = cataloguesDummyData;
 
       return {
         props: {
-          products: productsDummyData,
-          openOrders: openOrderProductsDummyData,
-          categories,
-          tags,
-          catalogues
+          products : products.data,
+          openOrders: openOrders.data,
+          categories: categories.data,
+          tags: tags.data,
+          catalogues: []
         },
       }
   }
   catch(err) {
+    console.log({err})
     return {
       props: {
         products: productsDummyData,

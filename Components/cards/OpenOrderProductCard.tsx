@@ -7,8 +7,8 @@ import RatingsCard from './RatingsCard';
 
 interface IOpenOrderProductCardProps {
     product: {
-        name: string,
-        uuid: string;
+        product_name: string,
+        product_id: string;
         description?: string,
         image: string,
         price: number,
@@ -47,7 +47,7 @@ const OpenOrderProductCard: FC<IOpenOrderProductCardProps> = ({product}) => {
                     width={100}
                     height={200}
                     className='rounded-t-md justify-center mr-4 h-48 cursor-pointer w-full'
-                    onClick={() => goToProductPage(product?.uuid)}
+                    onClick={() => goToProductPage(product?.product_id)}
                 />
             </div>
             <div 
@@ -55,7 +55,7 @@ const OpenOrderProductCard: FC<IOpenOrderProductCardProps> = ({product}) => {
             >
                 <div className='flex flex-row justify-between mb-3'>
                     <h3 className='text-base font-mono line-clamp-1'>
-                        {product?.name}
+                        {product?.product_name}
                     </h3>
                     { product.rating && <RatingsCard rating={product.rating} /> }
                 </div>

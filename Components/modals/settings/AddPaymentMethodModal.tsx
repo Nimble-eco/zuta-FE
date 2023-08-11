@@ -81,6 +81,14 @@ const AddPaymentMethodModal = ({show, setShow}: IAddPaymentMethodModalProps) => 
                         onInputChange={handleChange}
                       />
                     </div>
+
+                    <div className="w-fit mx-auto">
+                      <ButtonFull 
+                        action="Save"
+                        loading={loading}
+                        onClick={() => {}}
+                      />
+                    </div>
                   </div>
                 ) : newPaymentInfo.type.toLowerCase() === 'crypto' ? (
                   <div>
@@ -88,14 +96,6 @@ const AddPaymentMethodModal = ({show, setShow}: IAddPaymentMethodModalProps) => 
                   </div>
                 ) : null
               }
-
-              <div className="w-fit mx-auto">
-                <ButtonFull 
-                  action="Save"
-                  loading={loading}
-                  onClick={() => {}}
-                />
-              </div>
             </form>
           </div>
         </Modal.Body>
