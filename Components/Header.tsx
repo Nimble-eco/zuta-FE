@@ -1,36 +1,32 @@
 import { useRouter } from 'next/router';
-import React, { FC, useEffect, useRef, useState, useImperativeHandle, forwardRef } from "react";
+import { useEffect, useState } from "react";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { HiSearch, HiUser, HiUserAdd ,HiLogout, HiMenu } from "react-icons/hi";
 import { MdOutlineShoppingCart } from "react-icons/md";
 import { AiFillCloseCircle } from "react-icons/ai";
 import axios from 'axios';
 
-type Props = {};
+interface INavBarProps {
+    search?: boolean;
+    onSearch?: (searchStr: string) => void;
+};
 
 export type HeaderRef = {
   updateCartCount: (count: number) => void;
 };
 
-const Header = (props: Props, ref: React.Ref<HeaderRef>) => {
+const Header = ({search = true, onSearch}: INavBarProps) => {
     const router = useRouter();
-    const searchInputRef = useRef<HTMLInputElement>(null);
     const { data: session } = useSession();
     let token: string = '';
     const [mobileMenu, showMobileMenu] = useState<boolean>(false);
+    const [searchStr, setSearchStr] = useState<string>('');
 
     const goToCartPage = () => {
         router.push(`/cart`);
     }
 
     const [cartCount, setCartCount] = useState(0);
-
-    useImperativeHandle(ref, () => ({
-        updateCartCount(count) {
-            setCartCount(count);
-            console.log({cartCount})
-        },
-    }));
 
     async function sendSessionData() {
         if (session) {
@@ -64,14 +60,6 @@ const Header = (props: Props, ref: React.Ref<HeaderRef>) => {
         setCartCount(cart?.length);
     }, [session]);
 
-    const search = (e: any) => {
-        e.preventDefault();
-        const item = searchInputRef.current?.value;
-    
-        if(!item) return;
-    
-        router.push(`/results?search=${item}`);
-    };
 
     return (
         <div
@@ -92,23 +80,30 @@ const Header = (props: Props, ref: React.Ref<HeaderRef>) => {
                         />
                     </a>
                 </div>
-                <form 
-                    className={"w-[50%] max-w-[50%] mx-auto bg-gray-200 hidden md:flex flex-row rounded-md"}
-                >
-                    <input 
-                        type="text" 
-                        ref={searchInputRef} 
-                        placeholder="Search for products"
-                        className="flex-grow focus:outline-none bg-transparent w-[80%] text-sm pl-5 text-gray-600 rounded-l-md" 
-                    />
-                    <button 
-                        type="submit" 
-                        onClick={search}
-                        className='text-gray-600 text-sm hover:text-orange-500 bg-orange-500 rounded-r-md px-4'
+                {
+                    search && 
+                    <form 
+                        className={"w-[50%] max-w-[50%] mx-auto bg-gray-200 hidden md:flex flex-row rounded-md"}
                     >
-                        <HiSearch className='text-white'/>
-                    </button>
-                </form>
+                        <input 
+                            type="text" 
+                            placeholder="Search for products"
+                            value={searchStr}
+                            onChange={(e: any) => setSearchStr(e.target.value)}
+                            className="flex-grow focus:outline-none bg-transparent w-[80%] text-sm pl-5 text-gray-600 rounded-l-md" 
+                        />
+                        <button 
+                            type="submit" 
+                            onClick={(e: any) => {
+                                e.preventDefault();
+                                onSearch!(searchStr)
+                            }}
+                            className='text-gray-600 text-sm hover:text-orange-500 bg-orange-500 rounded-r-md px-4'
+                        >
+                            <HiSearch className='text-white'/>
+                        </button>
+                    </form>
+                }
             
                 <ul className="flex flex-row my-auto justify-evenly">
                     <li className="pr-3">
@@ -161,13 +156,17 @@ const Header = (props: Props, ref: React.Ref<HeaderRef>) => {
                 >
                     <input 
                         type="text" 
-                        ref={searchInputRef} 
                         placeholder="Search for products"
+                        value={searchStr}
+                        onChange={(e: any) => setSearchStr(e.target.value)}
                         className="flex-grow focus:outline-none bg-transparent w-[80%] text-gray-600 text-sm pl-4 py-2" 
                     />
                     <button 
                         type="submit" 
-                        onClick={search}
+                        onClick={(e: any) => {
+                            e.preventDefault();
+                            onSearch!(searchStr)
+                        }}
                         className='text-gray-600 text-base bg-orange-500 px-4 py-2 rounded-r-md'
                     >
                         <HiSearch className='text-white'/>
@@ -204,4 +203,4 @@ const Header = (props: Props, ref: React.Ref<HeaderRef>) => {
     )
 }
 
-export default forwardRef<HeaderRef, Props>(Header);
+export default Header;

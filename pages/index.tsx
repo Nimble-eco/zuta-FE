@@ -7,12 +7,8 @@ import OpenOrderProductCard from '../Components/cards/OpenOrderProductCard';
 import Header from '../Components/Header';
 import ProductComponent from '../Components/ProductComponent';
 import SwiperSlider from '../Components/sliders/Swiper';
-import { cataloguesDummyData } from '../data/catalogues';
-import { categoriesDummyData } from '../data/categories';
-import { openOrderProductsDummyData } from '../data/openOrderProducts';
-import { productsDummyData } from '../data/products';
-import { tagsDummyData } from '../data/tags';
 import { sendAxiosRequest } from '../Utils/sendAxiosRequest';
+import { cataloguesDummyData } from '../data/catalogues';
 
 interface IHomePageProps {
   products: any[];
@@ -31,7 +27,9 @@ const Home = ({products, openOrders, categories, tags, catalogues}: IHomePagePro
     localStorage.removeItem('total');
   }
 
-  console.log({products, openOrders, tags, categories});
+  const searchProducts = (searchStr: string) => {
+    router.push(`/results?search=${searchStr}`)
+  }
 
   const handleClick = (tag: string) => {
     router.push(`/results?tag=${tag}`);
@@ -42,7 +40,7 @@ const Home = ({products, openOrders, categories, tags, catalogues}: IHomePagePro
     <div 
       className=" min-h-screen"
     >
-      <Header />
+      <Header onSearch={searchProducts}/>
 
       <div
         className='flex flex-col justify-center w-[90%] md:w-[80%] mx-auto px-5 py-10 my-10'
@@ -72,13 +70,13 @@ const Home = ({products, openOrders, categories, tags, catalogues}: IHomePagePro
         </div>
       </div>
       <div className='h-[50vh] my-10 w-[80%] mx-auto'>
-        {/* <SwiperSlider 
-          slides={catalogues}
-        /> */}
+        <SwiperSlider 
+          slides={cataloguesDummyData}
+        />
       </div>
 
       <div 
-        className="flex flex-col justify-between w-[80%] mx-auto my-16"
+        className="flex flex-col justify-between w-[80%] mx-auto mb-16"
       >
         <span
           className='text-left text-xl font-mono pl-6 mb-5 text-gray-700 font-extrabold'
@@ -86,10 +84,24 @@ const Home = ({products, openOrders, categories, tags, catalogues}: IHomePagePro
           Categories
         </span>
         <div
-          className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:flex lg:flex-row justify-between px-5 max-w-full"
+          className="hidden lg:flex lg:flex-row gap-4 px-5 py-8 overflow-x-scroll"
         >
           {
             categories.length > 0 && categories?.map((category: any, index: number) => (
+              <CategoryCard 
+                key={`${category.name} ${index}`}
+                image={category?.image}
+                title={category.name}
+              />
+            ))
+          }
+        </div>
+
+        <div
+          className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:hidden px-5 max-w-full"
+        >
+          {
+            categories.length > 0 && categories?.slice(0, 8).map((category: any, index: number) => (
               <CategoryCard 
                 key={`${category.name} ${index}`}
                 image={category?.image}
@@ -109,10 +121,10 @@ const Home = ({products, openOrders, categories, tags, catalogues}: IHomePagePro
         className='flex flex-col md:grid md:grid-cols-2 md:gap-6 lg:grid-cols-3 lg:gap-4 xl:grid-cols-4 xl:gap-6 justify-between w-[80%] mx-auto my-3 px-5 py-2'
       >
         {
-          openOrders.length > 0 && openOrders?.map((product:any, index: number) => (
+          openOrders.length > 0 && openOrders?.map((order:any, index: number) => (
             <OpenOrderProductCard
-              key={`${product.name} + ${index}`}
-              product={product} 
+              key={`${order.name} + ${index}`}
+              order={order} 
             />
           ))
         }
@@ -126,7 +138,19 @@ const Home = ({products, openOrders, categories, tags, catalogues}: IHomePagePro
         >
           Tags
         </h2>
-        <div className='grid grid-cols-2 gap-3 md:grid-cols-3 lg:flex lg:flex-row justify-between px-5'>
+        <div className='hidden lg:flex lg:flex-row gap-4 px-5 py-8 overflow-x-scroll'>
+          {
+            tags.length > 0 && tags?.map((tag: any, index: number) => (
+              <CategoryCard 
+                key={`${tag.name} ${index}`}
+                image={tag?.image}
+                title={tag.name}
+              />
+            ))
+          }
+        </div>
+
+        <div className='grid grid-cols-2 gap-3 md:grid-cols-3 lg:hidden px-5'>
           {
             tags.length > 0 && tags?.map((tag: any, index: number) => (
               <CategoryCard 
@@ -161,7 +185,7 @@ export default Home
 export async function getServerSideProps() {
   try{
       const getProducts = await sendAxiosRequest(
-        `/api/public/product/index`,
+        `/api/public/product/index?properties=1`,
         "get",
         {},
         "",
@@ -189,13 +213,18 @@ export async function getServerSideProps() {
         ''
       );
 
-      const [products, openOrders, categories, tags] = await Promise.all([
-        getProducts.data,
-        getOpenOrders.data,
-        getCategories.data,
-        getTags.data
+      const [productsResult, openOrdersResult, categoriesResult, tagsResult] = await Promise.allSettled([
+        getProducts,
+        getOpenOrders,
+        getCategories,
+        getTags
       ]);
-
+      
+      const products = productsResult.status === 'fulfilled' ? productsResult.value.data : [];
+      const openOrders = openOrdersResult.status === 'fulfilled' ? openOrdersResult.value.data : [];
+      const categories = categoriesResult.status === 'fulfilled' ? categoriesResult.value.data : [];
+      const tags = tagsResult.status === 'fulfilled' ? tagsResult.value.data : [];      
+      console.log({tags, categories})
       return {
         props: {
           products : products.data,
@@ -210,11 +239,11 @@ export async function getServerSideProps() {
     console.log({err})
     return {
       props: {
-        products: productsDummyData,
-        openOrders: openOrderProductsDummyData,
-        categories: categoriesDummyData,
-        tags: tagsDummyData,
-        catalogues: cataloguesDummyData
+        products: [],
+        openOrders: [],
+        categories: [],
+        tags: [],
+        catalogues: []
       },
     }
   }

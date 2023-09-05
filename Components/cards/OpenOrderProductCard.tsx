@@ -6,25 +6,26 @@ import en from 'javascript-time-ago/locale/en'
 import RatingsCard from './RatingsCard';
 
 interface IOpenOrderProductCardProps {
-    product: {
-        product_name: string,
-        product_id: string;
-        description?: string,
-        image: string,
-        price: number,
-        discount?: number,
-        rating?: number,
-        openOrder?: {
-            ordersCount: number,
-            currentPrice: number,
-            currentDiscount: number,
-            user_id: string,
-            created_at: string | Date,
-        }
+    order: {
+        id: string,
+        open_order_price: number,
+        open_order_discount: number,
+        user_id: string,
+        created_at: string | Date,
+        product: {
+            product_name: string,
+            product_id: string;
+            product_description?: string,
+            product_images: string[],
+            product_price: number,
+            product_discount?: number,
+            reviews?: number,
+        },
+        subscribers: any[]
     }
 }
 
-const OpenOrderProductCard: FC<IOpenOrderProductCardProps> = ({product}) => {
+const OpenOrderProductCard: FC<IOpenOrderProductCardProps> = ({order}) => {
     TimeAgo.addLocale(en)
     const timeAgo = new TimeAgo('en-US')
     const router = useRouter();
@@ -42,12 +43,12 @@ const OpenOrderProductCard: FC<IOpenOrderProductCardProps> = ({product}) => {
                     <span className=''>200</span>
                 </div>
                 <img
-                    src={product?.image}
+                    src={order.product?.product_images[0]}
                     alt="product image"
                     width={100}
                     height={200}
                     className='rounded-t-md justify-center mr-4 h-48 cursor-pointer w-full'
-                    onClick={() => goToProductPage(product?.product_id)}
+                    onClick={() => goToProductPage(order.product?.product_id)}
                 />
             </div>
             <div 
@@ -55,22 +56,20 @@ const OpenOrderProductCard: FC<IOpenOrderProductCardProps> = ({product}) => {
             >
                 <div className='flex flex-row justify-between mb-3'>
                     <h3 className='text-base font-mono line-clamp-1'>
-                        {product?.product_name}
+                        {order.product?.product_name}
                     </h3>
-                    { product.rating && <RatingsCard rating={product.rating} /> }
+                    { order.product?.reviews && <RatingsCard rating={order.product.reviews} /> }
                 </div>
-                <p className='text-sm mb-3 text-slate-900'>
-                    ${product.openOrder?.user_id} purchased about {timeAgo.format(new Date(product.openOrder?.created_at!))}
-                </p>
-                <div className='flex flex-row mb-4'>
-                    <p className='text-xl text-orange-300 font-semibold mr-2'>
-                        {product.openOrder?.currentPrice}
+            
+                <div className='flex flex-row mb-4 align-middle'>
+                    <p className='text-base text-green-600 font-semibold mr-2'>
+                        {order?.open_order_price}
                     </p>
-                    <p className='text-base font-thin line-through mr-2 my-auto'>
-                        {product.price}
+                    <p className='text-sm font-thin line-through mr-2 my-auto'>
+                        {order.product?.product_price}
                     </p>
-                    <span className='text-base my-auto'>
-                        {product.openOrder?.currentDiscount}% Off
+                    <span className='text-sm my-auto'>
+                        {order?.open_order_discount}% Off
                     </span>
                 </div>
             </div>

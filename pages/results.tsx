@@ -3,13 +3,12 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import Header from "../Components/Header";
 import ProductComponent from "../Components/ProductComponent"
 import ResultsPageSideNavPanel from "../Components/navigation/SideNavPanel";
-import { productsDummyData } from "../data/products";
-import { sendAxiosRequest } from "../Utils/sendAxiosRequest";
 import HorizontalSlider from "../Components/lists/HorizontalSlider";
-import { openOrderProductsDummyData } from "../data/openOrderProducts";
 import FeaturedProductCard from "../Components/cards/FeaturedProductCard";
 import BottomDrawer from "../Components/drawer/BottomDrawer";
 import { MdOutlineFilterList } from "react-icons/md";
+import axiosInstance from "../Utils/axiosConfig";
+import { useRouter } from "next/router";
 
 interface IResultsPageProps {
     products: any[];
@@ -18,21 +17,49 @@ interface IResultsPageProps {
 }
 
 function results({products, openOrderProducts, featuredProducts}: IResultsPageProps) {
-    const [data, setData] = useState(products?.slice(0, 6));
-    const [featuredProductsList, setFeaturedProductsList] = useState(products?.slice(0, 1));
+    const router = useRouter();
+    const [data, setData] = useState(products);
+    const [featuredProductsList, setFeaturedProductsList] = useState(featuredProducts);
     const [sortType, setSortType] = useState('location')
     const cartRef = useRef<any>({});
     const [page, setPage] = useState(1);
     const [showMobileFilterDrawer, setShowMobileFilterDrawer] = useState<boolean>(false);
+    const { search } = router.query;
+    const [moreProducts, setMoreProducts] = useState(true);
+    const [moreFeatures, setMoreFeatures] = useState(true);
 
-    const loadMoreData = () => {
-        console.log('loading more data');
-        setTimeout(() => setData(data.concat(data)), 3000);
+    const loadMoreData = async () => {
+        
+        await axiosInstance.post('/api/public/product/search/index', {
+            search: search,
+            pagination: page + 1
+        })
+        .then((response) => {
+            console.log({response})
+            if(response.data.data) {
+                setData(data.concat(response.data.data));
+                setPage(page + 1);
+            }
+            else setMoreProducts(false);
+          
+        })
+
     };
 
-    const loadFeaturedProductsData = () => {
-        console.log('loading more data');
-        setTimeout(() => setFeaturedProductsList(featuredProductsList.concat(data.slice(0,1))), 3000);
+    const loadFeaturedProductsData = async () => {
+       
+        await axiosInstance.post('/api/public/product/search/index', {
+            search: search,
+            pagination: page + 1
+        })
+        .then((response) => {
+            if(response.data.data) {
+                setFeaturedProductsList(featuredProductsList.concat(response.data.data));
+                setPage(page + 1);
+            }
+            else setMoreFeatures(false);
+          
+        })
     };
 
     // useEffect(() => {
@@ -105,15 +132,10 @@ function results({products, openOrderProducts, featuredProducts}: IResultsPagePr
                     <ResultsPageSideNavPanel />
                     <div className="md:w-full lg:w-[95%] mx-auto">
                         <InfiniteScroll
-                            dataLength={data?.length}
+                            dataLength={featuredProductsList?.length}
                             next={loadFeaturedProductsData}
-                            hasMore={true}
-                            loader={<h4>Loading...</h4>}
-                            endMessage={
-                                <p style={{ textAlign: 'center' }}>
-                                    End of list
-                                </p>
-                            }
+                            hasMore={moreFeatures}
+                            loader={<h4 className="block text-center">...</h4>}
                             className='flex flex-col w-full gap-y-48'
                         >
                             {
@@ -137,17 +159,18 @@ function results({products, openOrderProducts, featuredProducts}: IResultsPagePr
                         />
                     </div>}
                     
-                    <h3 className="text-lg font-bold mb-4 pl-4">RESULTS</h3>
+                    <h3 className="text-lg font-bold mb-4 pl-4">Product Results</h3>
                     <div className="">
                         <InfiniteScroll
                             dataLength={data?.length}
                             next={loadMoreData}
-                            hasMore={true}
-                            loader={<h4>Loading...</h4>}
-                            endMessage={
-                                <p style={{ textAlign: 'center' }}>
-                                    End of list
-                                </p>
+                            hasMore={moreProducts}
+                            loader={<h4 style={{ 
+                                display: "block",
+                                textAlign: 'center' 
+                                }}>
+                                    Loading...
+                                </h4>
                             }
                             className='flex flex-col gap-y-10 md:grid md:grid-cols-2 md:gap-4 lg:grid-cols-3 lg:gap-5 xl:grid-cols-4 md:w-full px-5'
                         >
@@ -170,25 +193,47 @@ export default results
 export async function getServerSideProps(context: any) {
     try{
         const search = context.query.search;
-        // const res = await sendAxiosRequest(
-        //     `/api/products/search/${search}`,
-        //     "get",
-        //     {},
-        //     "",
-        //     ''
-        // )
+
+        const getProducts = await axiosInstance.post(
+            `/api/public/product/search/index`,
+            {search}
+        );
+
+        const getOpenOrders = await axiosInstance.post(
+            '/api/open-order/search/index',
+            {search}
+        );
+
+        const getFeaturedProducts = await axiosInstance.post(
+            '/api/featured/product/search/index',
+            {search}
+        );
+
+        const [productsResult, openOrderProductsResult, featuredProductsResult] = await Promise.allSettled([
+            getProducts.data,
+            getOpenOrders.data,
+            getFeaturedProducts.data
+        ]);
+
+        const products = productsResult.status === 'fulfilled' && productsResult.value.data ? productsResult.value.data?.data : [];
+        const openOrderProducts = openOrderProductsResult.status === 'fulfilled' && openOrderProductsResult.value.data ? openOrderProductsResult.value.data?.data : [];
+        const featuredProducts = featuredProductsResult.status === 'fulfilled' && featuredProductsResult.value.data ? featuredProductsResult.value.data?.data : [];
+
         return {
             props: {
-                products: productsDummyData,
-                openOrderProducts: openOrderProductsDummyData
+                products,
+                openOrderProducts,
+                featuredProducts
             },
         }
     }
     catch(err) {
+        console.log({err})
         return {
             props: {
                 products: [],
                 openOrderProducts: [],
+                featuredProducts: []
             },
         }
     }
