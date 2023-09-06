@@ -71,7 +71,7 @@ function product({product, similar_products}: IProductPageProps) {
             localStorage.setItem("cart", JSON.stringify(cart));
         }
 
-        if(user && user.access_token) {
+        if(user?.access_token) {
             await axiosInstance.post('/api/cart/update', {
                 ...cart,
                 user_id: user.id
