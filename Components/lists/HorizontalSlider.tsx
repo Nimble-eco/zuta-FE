@@ -21,16 +21,16 @@ const HorizontalSlider = ({ list, list_name }: IHorizontalSliderProps) => {
         <div className="flex flex-row overflow-x-auto">
             {
                 list?.map((item, index) => (
-                    <div className="flex flex-col bg-white rounded-md mb-8 shadow-xl mx-4 xs:min-w-[45%] min-w-[30%] md:min-w-[20%] lg:!min-w-[25%]" key={index}>
+                    <div className="flex flex-col bg-white rounded-md mb-8 shadow-xl mx-4 xs:min-w-[45%] min-w-[30%] md:min-w-[20%] lg:!min-w-[20%]" key={index}>
                         <img
-                            src={item?.image}
-                            alt={item?.name}
+                            src={item?.product_images[0]}
+                            alt={item?.product_name}
                             className='rounded-t-md justify-center h-48 cursor-pointer w-full'
                             onClick={() => goToProductPage(item?.id)}
                         />
                         <div className="flex flex-row justify-between px-3 py-2">
-                            <h4 className="text-sm line-clamp-2">{item?.name}</h4>
-                            <p className="">{item?.price}</p>
+                            <h4 className="text-sm line-clamp-2">{item?.product_name}</h4>
+                            <p className="">{item?.product_price}</p>
                         </div>
                     </div>
                 ))

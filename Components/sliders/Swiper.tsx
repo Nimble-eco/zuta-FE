@@ -17,13 +17,13 @@ const SwiperSlider = ({slides}: ISwiperProps) => {
       grabCursor={true}
       slidesPerView={2}
       autoplay
-      className='max-h-full'
+      className='max-h-full h-full'
     >
       {
         slides?.map((slide, index) => (
           <SwiperSlide
             key={index}
-            className='rounded-md'
+            className='rounded-md h-full'
           >
             <img src={slide} alt='image' className='w-full h-full rounded-md object-cover object-center'/>
           </SwiperSlide>

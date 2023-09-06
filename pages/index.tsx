@@ -1,6 +1,4 @@
-import type { NextPage } from 'next'
 import { useRouter } from 'next/router';
-import { useRef, useState } from 'react';
 import {MdArrowForward} from 'react-icons/md'
 import CategoryCard from '../Components/cards/CategoryCard';
 import OpenOrderProductCard from '../Components/cards/OpenOrderProductCard';
@@ -20,12 +18,6 @@ interface IHomePageProps {
 
 const Home = ({products, openOrders, categories, tags, catalogues}: IHomePageProps) => {
   const router = useRouter();
-  const cartRef = useRef<any>({});
-
-  if(typeof window !== 'undefined'){
-    localStorage.removeItem('cart');
-    localStorage.removeItem('total');
-  }
 
   const searchProducts = (searchStr: string) => {
     router.push(`/results?search=${searchStr}`)
