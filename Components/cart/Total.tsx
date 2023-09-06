@@ -1,8 +1,10 @@
 interface ICartTotalProps {
-    items: any[];
+    items: any;
 }
 const Total = ({ items }: ICartTotalProps) => {
-  const total: number = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  const products_total: number = items.products?.reduce((acc: number, item: any) => acc + item.product_price * item.order_count, 0);
+  const bundles_total: number = items.bundles?.reduce((acc: number, item: any) => acc + item.product_price * item.order_count, 0);
+  const total = products_total + bundles_total;
 
   return (
     <div className="justify-center text-center text-lg mb-8">

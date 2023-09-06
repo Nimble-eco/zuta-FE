@@ -4,15 +4,15 @@ import CartComponent from "../Components/cart/Cart";
 import Total from "../Components/cart/Total";
 import Header from "../Components/Header";
 import HorizontalSlider from "../Components/lists/HorizontalSlider";
-import { cartProductsDummyData } from "../data/cart";
 import { openOrderProductsDummyData } from "../data/openOrderProducts";
-import { productsDummyData } from "../data/products";
 import { sendAxiosRequest } from "../Utils/sendAxiosRequest";
 
+interface ICartPageProps {
+    similar_products: any[];
+}
 
-const cart = () => {
-  const [items, setItems] = useState<any[]>([]);
-  const [similarProducts, setSimilarProducts] = useState<any[]>(productsDummyData);
+const cart = ({similar_products}: ICartPageProps) => {
+  const [items, setItems] = useState<any>({});
   const [openOrderProducts, setOpenOrderProducts] = useState<any[]>(openOrderProductsDummyData.splice(0, 4));
 
   const handleQuantityChange = (index: number, newQuantity: number) => {
@@ -22,44 +22,45 @@ const cart = () => {
     localStorage.setItem("cart", JSON.stringify(updatedItems));
   };
 
-  const handleRemove = (index: number) => {
-    setItems(items.filter((item, i) => i !== index));
+  const handleRemove = (type: string, index: number) => {
+    setItems(items[type].filter((item: any, i: number) => i !== index));
   };
 
-  const getFeaturedProductsInCategory = async () => {
-    let categoryList = items?.map((item) => item.categories);
-    let tagList = items?.map((item) => item.tags);
+//   const getFeaturedProductsInCategory = async () => {
+//     let categoryList = items?.map((item) => item.categories);
+//     let tagList = items?.map((item) => item.tags);
 
-    categoryList = categoryList.reduce((acc, curr) => acc.concat(curr), []);
-    tagList = tagList.reduce((acc, curr) => acc.concat(curr), []);
+//     categoryList = categoryList.reduce((acc, curr) => acc.concat(curr), []);
+//     tagList = tagList.reduce((acc, curr) => acc.concat(curr), []);
 
-    const res = await sendAxiosRequest('public/open-order/filter', 'post', {categories: categoryList, tags: tagList});
+//     const res = await sendAxiosRequest('public/open-order/filter', 'post', {categories: categoryList, tags: tagList});
 
-    if(res.status === 200) {
-        const openOrderProductsList = res.data?.splice(0, 4);
-        setOpenOrderProducts(openOrderProductsList);
-    }
-  }
+//     if(res.status === 200) {
+//         const openOrderProductsList = res.data?.splice(0, 4);
+//         setOpenOrderProducts(openOrderProductsList);
+//     }
+//   }
 
-  const getSimilarProductsInCategory = async () => {
-    let categoryList = items?.map((item) => item.categories);
-    let tagList = items?.map((item) => item.tags);
+//   const getSimilarProductsInCategory = async () => {
+//     let categoryList = items?.map((item) => item.categories);
+//     let tagList = items?.map((item) => item.tags);
 
-    categoryList = categoryList.reduce((acc, curr) => acc.concat(curr), []);
-    tagList = tagList.reduce((acc, curr) => acc.concat(curr), []);
+//     categoryList = categoryList.reduce((acc, curr) => acc.concat(curr), []);
+//     tagList = tagList.reduce((acc, curr) => acc.concat(curr), []);
 
-    const res = await sendAxiosRequest('public/featured/filter', 'post', {categories: categoryList, tags: tagList});
+//     const res = await sendAxiosRequest('public/featured/filter', 'post', {categories: categoryList, tags: tagList});
 
-    if(res.status === 200) {
-        const similarProductsList = res.data?.splice(0, 4);
-        setSimilarProducts(similarProductsList);
-    }
-  }
+//     if(res.status === 200) {
+//         const similarProductsList = res.data?.splice(0, 4);
+//     }
+//   }
 
   useEffect(() => {
-    let cart = JSON.parse(localStorage.getItem("cart")!) || [];
+    let cart = JSON.parse(localStorage.getItem("cart")!);
+    console.log({cart})
     setItems(cart);
   }, []);
+  console.log({items})
 
   return (
     <div className="flex flex-col bg-gray-100 relative">
@@ -129,13 +130,17 @@ const cart = () => {
                 </div>
             </div>
         </div>
-        <div className='mt-10 w-[98%] ml-[2%]'>
-            <HorizontalSlider
-                list={similarProducts}
-                list_name='Similar items'
-            />
-        </div>
-        
+
+        {
+            similar_products && similar_products.length > 0 && (
+                <div className='mt-10 w-[98%] ml-[2%]'>
+                    <HorizontalSlider
+                        list={similar_products}
+                        list_name='Similar items'
+                    />
+                </div>
+            )
+        }
     </div>
   );
 };
