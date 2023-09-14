@@ -5,7 +5,6 @@ import Total from "../Components/cart/Total";
 import Header from "../Components/Header";
 import HorizontalSlider from "../Components/lists/HorizontalSlider";
 import { openOrderProductsDummyData } from "../data/openOrderProducts";
-import { sendAxiosRequest } from "../Utils/sendAxiosRequest";
 
 interface ICartPageProps {
     similar_products: any[];

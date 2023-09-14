@@ -48,7 +48,7 @@ const OpenOrderProductCard: FC<IOpenOrderProductCardProps> = ({order}) => {
                     width={100}
                     height={200}
                     className='rounded-t-md justify-center mr-4 h-48 cursor-pointer w-full'
-                    onClick={() => goToProductPage(order.product?.product_id)}
+                    onClick={() => goToProductPage(order.id)}
                 />
             </div>
             <div 

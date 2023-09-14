@@ -6,7 +6,7 @@ import { ToastContainer } from 'react-toastify';
 import { injectStyle } from 'react-toastify/dist/inject-style';
 import MyDropDownInput from "../../inputs/MyDropDownInput";
 import MySearchInput from "../../inputs/MySearchInput";
-import TextInput from "../../inputs/TextInput";
+import TextInput from "../../inputs/ColumnTextInput";
 import MyNumberInput from "../../inputs/MyNumberInput";
 import ButtonFull from "../../buttons/ButtonFull";
 

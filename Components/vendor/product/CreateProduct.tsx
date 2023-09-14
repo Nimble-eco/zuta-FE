@@ -3,7 +3,7 @@ import ImagePicker from "../../inputs/ImagePicker"
 import MyDropDownInput from "../../inputs/MyDropDownInput"
 import MyNumberInput from "../../inputs/MyNumberInput"
 import MySearchInput from "../../inputs/MySearchInput"
-import TextInput from "../../inputs/TextInput"
+import TextInput from "../../inputs/ColumnTextInput"
 
 const CreateProduct = () => {
   return (

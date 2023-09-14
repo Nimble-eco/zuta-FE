@@ -8,7 +8,7 @@ import MyTable from "../../../Components/tables/MyTable";
 import VendorSideNavPanel from "../../../Components/vendor/layout/VendorSideNavPanel"
 import { transactionsDummyData } from "../../../data/transactions";
 import FilterContainer from "../../../Components/modals/containers/FilterContainer";
-import TextInput from "../../../Components/inputs/TextInput";
+import TextInput from "../../../Components/inputs/ColumnTextInput";
 import MyNumberInput from "../../../Components/inputs/MyNumberInput";
 import MyDropDownInput from "../../../Components/inputs/MyDropDownInput";
 

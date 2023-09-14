@@ -18,7 +18,7 @@ import { RiHomeSmileLine } from "react-icons/ri";
 import { MdOutlineRateReview, MdStore } from "react-icons/md";
 import { CgMoreO } from "react-icons/cg";
 import { GiPerson } from "react-icons/gi";
-import TextInput from "../Components/inputs/TextInput";
+import TextInput from "../Components/inputs/ColumnTextInput";
 import { HiOutlineMail, HiOutlinePhone } from "react-icons/hi";
 import { BsPersonSquare } from "react-icons/bs";
 import { capitalizeFirstLetter } from "../Utils/capitalizeFirstLettersOfString";

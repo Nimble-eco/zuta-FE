@@ -1,6 +1,7 @@
 import Head from 'next/head'
 import Cookies from 'js-cookie'
 import { toast, ToastContainer } from 'react-toastify';
+import { injectStyle } from "react-toastify/dist/inject-style";
 import { useEffect, useState } from 'react';
 import Header from "../Components/Header"
 import { sendAxiosRequest } from '../Utils/sendAxiosRequest';
@@ -38,9 +39,9 @@ function product({product, similar_products}: IProductPageProps) {
     const [currentReviewPage, setCurrentReviewPage] = useState(0);
 
     let user: any = {};
-    let token = '';
 
     if(typeof window !== 'undefined') {
+        injectStyle();
         user = JSON.parse(Cookies.get('user')!);
     }
 
@@ -57,7 +58,7 @@ function product({product, similar_products}: IProductPageProps) {
     }
 
     const addToCart = async (newProduct:any) => {
-        const cart: any = JSON.parse(localStorage.getItem('cart')!) || {products: [], bundles: []};
+        const cart: any = JSON.parse(localStorage.getItem('cart')!) || {products: [], bundles: [], subscriptions: []};
         let newCart = cart;
         let obj = newCart.products.find((item: any, i: number) => {
           if(item.id === newProduct.id){
@@ -101,6 +102,8 @@ function product({product, similar_products}: IProductPageProps) {
             </Head>
 
             <Header />
+
+            <ToastContainer />
 
             <MyGallery 
                 show={showImageGallery}
@@ -266,7 +269,7 @@ export async function getServerSideProps(context: any) {
         return {
             props: {
                 product: getProduct.data.product,
-                similar_products: getProduct.data.similar_products.data
+                similar_products: getProduct.data.similar_products
             }
         }
     }

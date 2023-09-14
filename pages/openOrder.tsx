@@ -1,17 +1,16 @@
 import Head from 'next/head'
-import { useRef, useState } from 'react';
-import Cart from '../Components/Cart';
+import Cookies from 'js-cookie'
+import { useState } from 'react';
+import { toast, ToastContainer } from 'react-toastify';
+import { injectStyle } from "react-toastify/dist/inject-style";
 import Header from "../Components/Header"
 import TimeAgo from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en'
-import { sendAxiosRequest } from '../Utils/sendAxiosRequest';
 import SwiperSlider from '../Components/sliders/Swiper';
-import { calculateDiscount } from '../Utils/calculateDiscount';
 import MyGallery from '../Components/sliders/MyGallery';
-import { productsDummyData } from '../data/products';
 import HorizontalSlider from '../Components/lists/HorizontalSlider';
 import VerticalTextSlider from '../Components/sliders/VerticalTextSlider';
-import { openOrderProductDummyData } from '../data/openOrderProduct';
+import axiosInstance from '../Utils/axiosConfig';
 
 interface IOpenOrderProductPageProps {
     product: any;
@@ -19,10 +18,17 @@ interface IOpenOrderProductPageProps {
 }
 
 const openOrder = ({product, similar_products}: IOpenOrderProductPageProps) => {
-    const cartRef = useRef<any>({});
+    console.log({product})
     const [showImageGallery, setShowImageGallery] = useState<boolean>(false);
     TimeAgo.addLocale(en)
     const timeAgo = new TimeAgo('en-US')
+
+    let user: any = {};
+
+    if(typeof window !== 'undefined') {
+        injectStyle();
+        user = JSON.parse(Cookies.get('user')!);
+    }
 
     const toggleImageGallery = () => setShowImageGallery(!showImageGallery);
 
@@ -35,94 +41,127 @@ const openOrder = ({product, similar_products}: IOpenOrderProductPageProps) => {
         reviewPages.push(product?.reviews?.slice(i, i + itemsPerPage));
     }
 
-    const addToCart = (newProduct:any) => {
-        cartRef.current?.addToCart(newProduct);
-    }
-
     const getRecentOrderList = () => {
         const recentOrders: string[] = [];
-        product?.recent_orders?.map((order: any) => {
+        product?.subscribers?.map((order: any) => {
             recentOrders.push(`${order?.user_id} purchased about ${timeAgo.format(new Date(order?.created_at))}`)
         });
         return recentOrders;
     }
 
-  return (
-    <div
+    const addToCart = async (newProduct:any) => {
+        const cart: any = JSON.parse(localStorage.getItem('cart')!) || {products: [], bundles: [], subscriptions: []};
+        let newCart = cart;
+        let obj = newCart.subscriptions.find((item: any, i: number) => {
+          if(item.id === newProduct.id){
+            newCart.subscriptions[i].order_count++;
+            localStorage.setItem("cart", JSON.stringify(newCart));
+            return true;
+          }
+        })
+        if(!obj) {
+            cart?.subscriptions.push({...newProduct, order_count: 1});
+            localStorage.setItem("cart", JSON.stringify(cart));
+        }
+        console.log({cart})
+        toast.success('cart updated');
+
+        if(user?.access_token) {
+            await axiosInstance.post('/api/cart/update', {
+                ...cart,
+                user_id: user.id,
+                open_order_products: cart.subscriptions
+            }, {
+                headers: {
+                    Authorization: `Bearer ${user.access_token}`
+                }
+            })
+            .then((response) => console.log({response}))
+            .catch(error => {
+                console.log({error})
+                // toast.error(error.response?.message || "You might need to log in")
+            })
+        }
+    }
+
+    return (
+        <div
             className='w-full bg-white min-h-screen relative'
         >
             <Head>
                 <title>{product.name}</title>
                 <meta name="viewport" content="initial-scale=1.0, width=device-width" />
             </Head>
+
             <Header />
 
             <MyGallery 
                 show={showImageGallery}
                 setShow={toggleImageGallery}
-                slides={product?.images}
+                slides={product?.product?.product_images}
             />
+            <ToastContainer />
 
             <div 
                 className="flex flex-col md:flex-row justify-between w-[95%] mx-auto px-5 py-4 mt-10"
             >
                 <div className='w-full md:w-1/3 md:!mr-3 cursor-pointer max-w-1/3 h-fit' onClick={toggleImageGallery}>
                     <SwiperSlider 
-                        slides={product?.images}
+                        slides={product?.product?.product_images}
                     />
                 </div>
                 <div className="w-[95%] mx-auto md:w-2/3 flex flex-col mt-10 md:mt-0 md:!ml-8">
                     <h1 className="text-xl md:text-3xl font-mono justify-center">
-                        {product.name}
+                        {product.product?.product_name}
                     </h1>
                     <p className="text-gray-600 py-2">
-                        {product.description}
+                        {product.product?.product_description}
                     </p>
-                    <div className="flex flex-row justify-between w-full md:w-[70%] mr-2 my-1 text-sm">
+                    <div className="flex flex-row gap-6 w-full my-1">
                         <div 
-                            className='flex flex-row w-[50%] justify-between'
+                            className='flex flex-row gap-2'
                         >
-                            <p className="text-gray-600 pr-5 flex flex-col md:flex-row">
+                            <p className="text-gray-600 flex flex-col md:flex-row">
                                 Price:
-                                <span className='font-semibold'>
-                                    {product.price}
-                                </span>
                             </p>
+                            <span className='font-bold text-green-500'>
+                                {product.open_order_price}
+                            </span>
                         </div>
                         <div 
-                            className='flex flex-row w-[50%] justify-between'
+                            className='flex flex-row gap-2'
                         >
-                            <p className="text-gray-600 pr-5 flex flex-col md:flex-row">
+                            <p className="text-gray-600">
                                 Current discount: 
-                                <span className='font-semibold line-through'>
-                                    {calculateDiscount(product.discount, product.price)}
-                                </span>
                             </p>
+                            <span className='font-semibold line-through'>
+                                {product.open_order_discount}
+                            </span>
                         </div>
                           
                     </div>
                     <div
-                        className='flex flex-row justify-between w-full md:w-[70%] my-1 text-sm'
+                        className='flex flex-row gap-6 my-1'
                     >
                         <div 
-                            className='flex flex-row w-[50%] mr-2'
+                            className='flex flex-row gap-2'
                         >
-                            <p className="text-gray-600 pr-5 flex flex-col md:flex-row">
-                                Potential price: {" "}
-                                <span className='text-orange-500 font-thin'>
-                                    N{product.potential_price}
-                                </span>
+                            <p className="text-gray-600">
+                                Next price: {" "}
                             </p>
+                            <span className='text-orange-500 font-semibold'>
+                                N{product.next_price}
+                            </span>
                         </div>
                         <div 
-                            className='flex flex-row w-[50%] justify-between'
+                            className='flex flex-row gap-2'
                         >
-                            <p className="text-gray-600 pr-5 flex flex-col md:flex-row">
-                                Potential discount:
-                                <span className='text-orange-500 font-thin line-through'>
-                                    {calculateDiscount(product.potential_discount, product.price)}
-                                </span>
+                            <p className="text-gray-600 flex flex-col md:flex-row">
+                                Next discount:
                             </p>
+                            <span className='text-orange-500 font-medium line-through'>
+                                {product.next_discount}
+                            </span>
                         </div>   
                     </div>
                 </div>
@@ -146,7 +185,7 @@ const openOrder = ({product, similar_products}: IOpenOrderProductPageProps) => {
 
             <div className='mt-10 w-[95%] ml-[5%]'>
                 <HorizontalSlider 
-                    list={productsDummyData}
+                    list={similar_products}
                     list_name='Similar items'
                 />
             </div>
@@ -180,35 +219,14 @@ export default openOrder
 
 export async function getServerSideProps(context: any) {
     try{
-        const { id } = context.query
+        const { id } = context.query;
 
-        // const getProduct = await sendAxiosRequest(
-        //     `/api/open-order/product/${id}`,
-        //     "get",
-        //     {},
-        //     "",
-        //     ""
-        // );
-
-        // const getProdctSimilarProducts = await sendAxiosRequest(
-        //     `/api/products/similar/${id}`,
-        //     'get',
-        //     {},
-        //     '',
-        //     ''
-        // );
-
-        // const [productData, similar_products] = await Promise.all([
-        //     getProduct,
-        //     getProdctProducts
-        // ]);
-
-
+        const getProduct = await axiosInstance.get(`/api/open-order/show?id=${id}&properties=1`);
 
         return {
             props: {
-                product: openOrderProductDummyData,
-                similar_products: productsDummyData
+                product: getProduct.data.data.openOrder,
+                similar_products: getProduct.data.data.similar_products.data
             }
         }
     }
