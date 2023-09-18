@@ -1,10 +1,9 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState } from "react";
-import { useSession, signIn, signOut } from "next-auth/react";
-import { HiSearch, HiUser, HiUserAdd ,HiLogout, HiMenu } from "react-icons/hi";
+import { HiSearch, HiUser, HiUserAdd ,HiLogout, HiMenu, HiOutlineLogout } from "react-icons/hi";
 import { MdOutlineShoppingCart } from "react-icons/md";
 import { AiFillCloseCircle } from "react-icons/ai";
-import axios from 'axios';
+import Cookies from 'js-cookie';
 
 interface INavBarProps {
     search?: boolean;
@@ -17,7 +16,6 @@ export type HeaderRef = {
 
 const Header = ({search = true, onSearch}: INavBarProps) => {
     const router = useRouter();
-    const { data: session } = useSession();
     let token: string = '';
     const [mobileMenu, showMobileMenu] = useState<boolean>(false);
     const [searchStr, setSearchStr] = useState<string>('');
@@ -28,38 +26,15 @@ const Header = ({search = true, onSearch}: INavBarProps) => {
 
     const [cartCount, setCartCount] = useState(0);
 
-    async function sendSessionData() {
-        if (session) {
-            try {
-                await axios({
-                    method: 'post',
-                    url: 'http://localhost:3333/api/auth/signin',
-                    data: {
-                        name: session.user?.name,
-                        email: session.user?.email,
-                        image: session.user?.image
-                    }
-                })
-                .then(res => {
-                    if (typeof window !== "undefined") {
-                        token = res.data.token;
-                        localStorage.setItem('token', token);
-                    }
-                })
-            }
-            catch (err) {
-                console.log(err);
-            }
-        }
-    }
-
-    // SEND SESSION DATA TO BACKEND
     useEffect(() => {
-        sendSessionData();
         const cart = JSON.parse(localStorage.getItem('cart')!) || [];
         setCartCount(cart?.length);
-    }, [session]);
+    }, []);
 
+    if(typeof window !== 'undefined') {
+        let user = Cookies.get('user') ? JSON.parse(Cookies.get('user')!) : null;
+        token = user?.access_token;
+    }
 
     return (
         <div
@@ -105,39 +80,40 @@ const Header = ({search = true, onSearch}: INavBarProps) => {
                     </form>
                 }
             
-                <ul className="flex flex-row my-auto justify-evenly">
-                    <li className="pr-3">
-                        {session ? (
-                            <div className="flex flex-row">   
-                                <a 
-                                    href="/profile"
-                                >
-                                    <HiUser className="text-3xl text-white" />
-                                </a>
-                            
-                                <a 
-                                    href="#"
-                                    onClick={() => signOut()}
-                                >
-                                    <HiLogout className="text-3xl text-white" />
-                                </a>
-                            </div>
-                        ) : (
-                            <a 
-                                href="#"
-                                onClick={() => signIn()}
-                            >
-                                <HiUserAdd className="text-3xl text-white" />
-                            </a>
-                        )}
-                    </li>
-                    <li className='flex flex-col relative' onClick={() => goToCartPage()}>
+                <div className="flex flex-row my-auto gap-4">
+                    <div className='flex flex-col relative' onClick={() => goToCartPage()}>
                         <span className='text-base text-orange-500 z-10 absolute -top-4 p-1  -right-2'>{cartCount}</span>
                         <MdOutlineShoppingCart 
                             className='text-3xl text-white cursor-pointer'
                         />
-                    </li>
-                </ul>
+                    </div>
+                    {token ? (
+                        <div className="flex flex-row gap-4">   
+                            <a 
+                                href="/profile"
+                            >
+                                <HiUser className="text-3xl text-white" />
+                            </a>
+                        
+                            <a 
+                                href="#"
+                                onClick={() => {
+                                    Cookies.remove('user')
+                                    router.push('/')
+                                }}
+                            >
+                                <HiOutlineLogout className="text-3xl text-white" />
+                            </a>
+                        </div>
+                    ) : (
+                        <a 
+                            href="#"
+                            onClick={() => router.push('/auth/signIn')}
+                        >
+                            <HiUserAdd className="text-3xl text-white" />
+                        </a>
+                    )}
+                </div>
             </div>
             <div className='hidden md:flex flex-row bg-slate-600 py-3 !text-white pl-8 font-semibold'>
                 <a href='#0' className='mr-6'>

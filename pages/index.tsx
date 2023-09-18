@@ -216,7 +216,7 @@ export async function getServerSideProps() {
       const openOrders = openOrdersResult.status === 'fulfilled' ? openOrdersResult.value.data : [];
       const categories = categoriesResult.status === 'fulfilled' ? categoriesResult.value.data : [];
       const tags = tagsResult.status === 'fulfilled' ? tagsResult.value.data : [];      
-      console.log({tags, categories})
+    
       return {
         props: {
           products : products.data,

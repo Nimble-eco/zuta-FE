@@ -1,48 +1,28 @@
 import { useState } from 'react'
 import { toast, ToastContainer } from 'react-toastify';
 import { injectStyle } from "react-toastify/dist/inject-style";
-import ButtonFull from "../../Components/buttons/ButtonFull"
-import Password from "../../Components/inputs/Password"
-import TextInput from "../../Components/inputs/MyTextInput"
-import axiosInstance from '../../Utils/axiosConfig';
-import { useRouter } from 'next/router';
-import Cookies from 'js-cookie';
+import { getCsrfToken, getProviders, getSession, signIn } from "next-auth/react";
 import { FaGoogle,
     FaTwitter,
     FaFacebook
 } from "react-icons/fa";
+import Password from "../../Components/inputs/Password";
+import ButtonFull from "../../Components/buttons/ButtonFull";
+import { useRouter } from 'next/router';
+import axiosInstance from '../../Utils/axiosConfig';
+import Cookies from 'js-cookie';
+import TextInput from '../../Components/inputs/MyTextInput';
 
-const register = () => {
+export default function SignIn({ providers }: any) {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [data, setData] = useState({
-        name: '',
         email: '',
-        phone: '',
         password: '',
-        password_confirmation: '',
     });
 
     const handleDataChange = (e: any) => {
         setData({...data, [e.target.name]: e.target.value});
-    }
-
-    const submit = async () => {
-        if(data.password !== data.password_confirmation) return toast.error('Password mismatch');
-        if(!data.email) return toast.error('Add a valid email address');
-        if(!data.phone || data.phone.length <= 10) toast.error('Add a valid phone number');
-
-        setIsLoading(true);
-
-        await axiosInstance.post('/api/auth/register', data)
-        .then((response) => {
-            Cookies.set('user', JSON.stringify(response.data.data))
-            toast.success('Registration successful');
-            setTimeout(() => router.push('/'), 3000)
-        })
-        .catch(error => {
-            toast.error(error.message || 'Error try again later');
-        })
     }
 
     if(typeof window !== 'undefined') injectStyle();
@@ -77,6 +57,27 @@ const register = () => {
         }
     }
 
+    const submit = async () => {
+        if(!data.email) return toast.error('Add a valid email address');
+
+        setIsLoading(true);
+
+        await axiosInstance.post('/api/auth/login', data)
+        .then((response) => {
+            if(response.status === 200) {
+                setIsLoading(false);
+                Cookies.set('user', JSON.stringify(response.data.data))
+                toast.success('Login successful');
+                setTimeout(() => router.push('/'), 3000)
+            }
+        })
+        .catch(error => {
+            console.log({error})
+            setIsLoading(false);
+            toast.error(error.response?.data?.message || 'Error try again later');
+        })
+    }
+
   return (
     <div className="min-h-screen flex flex-row my-0 mx-0 overflow-y-scroll">
         <ToastContainer />
@@ -85,33 +86,17 @@ const register = () => {
         </div>
 
         <div className="flex flex-col w-full md:w-[80%] md:mx-auto lg:w-[50%] lg:mx-0 px-8 py-6 align-middle my-auto !bg-white">
-            <h2 className="text-orange-600 text-lg lg:text-2xl text-center font-semibold">Sign Up Here</h2>
+            <h2 className="text-orange-600 text-lg lg:text-2xl text-center font-semibold">Sign In Here</h2>
             <p className='text-xs lg:text-sm text-gray-700 font-medium opacity-30 mb-8 text-center'>Buy with a community and enjoy whole sale discounts</p>
 
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-8">
+
                 <TextInput
-                    label="Name"
-                    name="name"
-                    value={data.name}
+                    label="Email"
+                    name="email"
+                    value={data.email}
                     handleChange={handleDataChange}
                 />
-
-                <div className="flex flex-col lg:flex-row gap-4">
-                    <TextInput
-                        label="Email"
-                        name="email"
-                        value={data.email}
-                        handleChange={handleDataChange}
-                    />
-
-                    <TextInput
-                        label="Phone Number"
-                        name="phone"
-                        type="number"
-                        value={data.phone}
-                        handleChange={handleDataChange}
-                    />
-                </div>
 
                 <Password
                     label="Password"
@@ -120,25 +105,18 @@ const register = () => {
                     handleChange={handleDataChange}
                 />
 
-                <Password
-                    label="Confirm Password"
-                    name="password_confirmation"
-                    value={data.password_confirmation}
-                    handleChange={handleDataChange}
-                />
-
                 <div className="w-[80%] lg:w-[50%] mx-auto h-14">
                     <ButtonFull
-                        action="Submit"
+                        action="Login"
                         loading={isLoading}
                         onClick={submit}
                     />
                 </div>
 
                 <p className="font-lg text-center">
-                    Already got an account ? {" "}
-                    <span className="text-orange-500 cursor-pointer font-medium" onClick={() => router.push('/auth/signIn')}>
-                        Sign in here
+                    Don't have an account ? {" "}
+                    <span className="text-orange-500 cursor-pointer font-medium" onClick={() => router.push('/auth/register')}>
+                        Sign up here
                     </span>
                 </p>
             </div>
@@ -182,7 +160,22 @@ const register = () => {
             </div>
         </div>
     </div>
-  )
+  );
 }
-
-export default register
+export async function getServerSideProps(context: any) {
+    const { req } = context;
+    const session = await getSession({ req });
+  
+    if (session) {
+      return {
+        redirect: { destination: "back" },
+      };
+    }
+  
+    return {
+      props: {
+        providers: await getProviders(),
+        csrfToken: await getCsrfToken(context),
+      },
+    };
+}

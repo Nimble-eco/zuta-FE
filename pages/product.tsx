@@ -6,10 +6,11 @@ import { useEffect, useState } from 'react';
 import Header from "../Components/Header"
 import { sendAxiosRequest } from '../Utils/sendAxiosRequest';
 import SwiperSlider from '../Components/sliders/Swiper';
-import { calculateDiscount } from '../Utils/calculateDiscount';
+import { calculateDiscount, calculateNextDiscount } from '../Utils/calculateDiscount';
 import MyGallery from '../Components/sliders/MyGallery';
 import HorizontalSlider from '../Components/lists/HorizontalSlider';
 import axiosInstance from '../Utils/axiosConfig';
+import router from 'next/router';
 
 interface IProductPageProps {
     product: {
@@ -101,7 +102,7 @@ function product({product, similar_products}: IProductPageProps) {
                 <meta name="viewport" content="initial-scale=1.0, width=device-width" />
             </Head>
 
-            <Header />
+            <Header search={false} />
 
             <ToastContainer />
 
@@ -171,7 +172,7 @@ function product({product, similar_products}: IProductPageProps) {
                                 Current discount: 
                             </p>
                             <span className='font-semibold line-through'>
-                                {calculateDiscount(product.product_discount, product.product_price)}
+                                {calculateNextDiscount(4, product.product_discount, product.product_price)}
                             </span>
                         </div>
                     </div>
@@ -189,10 +190,10 @@ function product({product, similar_products}: IProductPageProps) {
                         <span className='text-orange-600'> N {product.product_price - ((product.product_discount/100) * product.product_price)}</span>
                     </p>
                     <button
-                        onClick={() => {}}
+                        onClick={() => router.push(`/order-train/${product.id}`)}
                         className="bg-orange-500 hover:bg-orange-700 text-white flex text-center justify-center font-bold py-2 px-4 rounded w-[80%] md:w-[80%] mx-auto whitespace-nowrap"
                     >
-                        Open Subscription
+                        Open Order Train
                     </button>
                     <p className='text-xs text-orange-900 mb-0 text-center'>Terms and conditions apply</p>
                 </div>
@@ -207,7 +208,7 @@ function product({product, similar_products}: IProductPageProps) {
                                 onClick={() => {}}
                                 className="bg-orange-500 hover:bg-orange-700 text-white flex text-center justify-center font-bold py-2 px-4 rounded w-[80%] md:w-[80%] mx-auto whitespace-nowrap"
                             >
-                                Subscribe
+                                Join Order Train
                             </button>
                             <p className='text-xs text-orange-900 mb-0 text-center'>Terms and conditions apply</p>
                         </div>

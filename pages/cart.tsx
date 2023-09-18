@@ -56,10 +56,8 @@ const cart = ({similar_products}: ICartPageProps) => {
 
   useEffect(() => {
     let cart = JSON.parse(localStorage.getItem("cart")!);
-    console.log({cart})
     setItems(cart);
   }, []);
-  console.log({items})
 
   return (
     <div className="flex flex-col bg-gray-100 relative">

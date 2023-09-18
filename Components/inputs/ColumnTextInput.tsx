@@ -10,7 +10,7 @@ interface ITextInputProps {
     type?: string;
 }
 
-const TextInput = ({label, name, value, onInputChange, placeHolder, type='text'}: ITextInputProps) => {
+const ColumnTextInput = ({label, name, value, onInputChange, placeHolder, type='text'}: ITextInputProps) => {
   return (
     <div className="flex flex-col mb-4 py-2">
       <label htmlFor={label} className='font-semibold mb-3 text-sm'>{capitalizeFirstLetter(label)}:</label>
@@ -26,4 +26,4 @@ const TextInput = ({label, name, value, onInputChange, placeHolder, type='text'}
   )
 }
 
-export default TextInput
+export default ColumnTextInput

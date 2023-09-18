@@ -1,7 +1,11 @@
 import axios from "axios";
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react";
+import { toast, ToastContainer } from 'react-toastify';
+import { injectStyle } from "react-toastify/dist/inject-style";
 import SimpleLoader from "../../../../Components/loaders/SimpleLoader";
+import Cookies from "js-cookie";
+import Header from "../../../../Components/Header";
 
 const callback = () => {
     const router = useRouter();
@@ -17,34 +21,28 @@ const callback = () => {
       
       let access_token = searchParams.get('token');
 
-      // Check if google login or apple login
-      let socialite_url;
       let token;
 
       if (access_token) {
-        socialite_url = `${base_url}/api/auth/google/callback`;
         token = access_token;
       }
 
       if(isMounted) {
-        console.log({token, socialite_url})
-        if (socialite_url && token) {
+        if (token) {
           setIsLoading(true);
 
-          axios({
-            url:socialite_url,
-            method:'get',
-            params: {
-              token:token,
-            },
-            headers: {
-              Authorization: `Bearer ${token}`
+          axios.post(
+            `${base_url}/api/auth/user/token`, {token}, {
+              headers: {
+                Authorization: token
+              }
             }
-          })
+          )
           .then(res=>{
             setIsLoading(false);
-            console.log({res});
-            // router.push('/')
+            Cookies.set('user', JSON.stringify(res.data.data))
+            toast.success('Sign in successful');
+            setTimeout(() => router.push('/'), 3000)
           })
           .catch(err=> {
             setIsLoading(false);
@@ -57,13 +55,21 @@ const callback = () => {
         isMounted = false;
       }
 
-    }, [])
+    }, []);
 
-  return (
-    <div className="w-full min-h-screen flex justify-center align-middle">
+    if(typeof window !== 'undefined') injectStyle();
+
+    return (
+      <div className="w-full min-h-screen flex justify-center align-middle flex flex-col relative">
+        <div className="fixed top-0 left-0 right-0">
+          <Header search={false}/>
+        </div>
+
+        <ToastContainer />
+
         {isLoading && <SimpleLoader />}
-    </div>
-  )
+      </div>
+    );
 }
 
 export default callback
