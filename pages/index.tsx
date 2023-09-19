@@ -212,10 +212,10 @@ export async function getServerSideProps() {
         getTags
       ]);
       
-      const products = productsResult.status === 'fulfilled' ? productsResult.value.data : [];
-      const openOrders = openOrdersResult.status === 'fulfilled' ? openOrdersResult.value.data : [];
-      const categories = categoriesResult.status === 'fulfilled' ? categoriesResult.value.data : [];
-      const tags = tagsResult.status === 'fulfilled' ? tagsResult.value.data : [];      
+      const products = productsResult.status === 'fulfilled' ? productsResult.value?.data : [];
+      const openOrders = openOrdersResult.status === 'fulfilled' ? openOrdersResult.value?.data : [];
+      const categories = categoriesResult.status === 'fulfilled' ? categoriesResult.value?.data : [];
+      const tags = tagsResult.status === 'fulfilled' ? tagsResult.value?.data : [];      
     
       return {
         props: {

@@ -7,10 +7,8 @@ import {GrTransaction, GrCatalog} from 'react-icons/gr'
 import ButtonFull from "../Components/buttons/ButtonFull";
 import Header from "../Components/Header"
 import Loader from "../Components/Loader";
-import { notify } from "../Utils/displayToastMessage";
 import { sendAxiosRequest } from "../Utils/sendAxiosRequest";
 import Image from "next/image";
-import { getGoogleAddressPredictions } from "../Utils/getPredictedAddress";
 import { userDummyData } from "../data/user";
 import { RiHomeSmileLine } from "react-icons/ri";
 import { MdOutlineRateReview, MdStore } from "react-icons/md";
@@ -21,7 +19,7 @@ import { HiOutlineMail, HiOutlinePhone } from "react-icons/hi";
 import { BsPersonSquare } from "react-icons/bs";
 import { capitalizeFirstLetter } from "../Utils/capitalizeFirstLettersOfString";
 import { GoLocation } from "react-icons/go";
-import UpdateAddressModal from "../Components/modals/address/UpdateAddressModal";
+import UpdateAddressModal, { IAddress } from "../Components/modals/address/UpdateAddressModal";
 import NewAddressModal from "../Components/modals/address/NewAddressModal";
 import { ordersDummyData } from "../data/orders";
 import MyTable from "../Components/tables/MyTable";
@@ -29,8 +27,14 @@ import { productsDummyData } from "../data/products";
 import { transactionsDummyData } from "../data/transactions";
 import FilterAndSearchGroup from "../Components/inputs/FilterAndSearchGroup";
 
+interface IProfilePageProps {
+    profile: any;
+    orders: any[];
+    addresses: any[];
+    reviews: any[];
+}
 
-function profile() {
+function profile({profile, orders, addresses, reviews}: IProfilePageProps) {
     const router = useRouter();
     let token: string;
     const [isLoading, setIsLoading] = useState(false);
@@ -38,8 +42,10 @@ function profile() {
     const [currentNav, setCurrentNav] = useState<string>('address');
 
     const [showNewAddressModal, setShowNewAddressModal] = useState(false);
+    const [showEditAddressModal, setShowEditAddressModal] = useState(false);
+    const [selectedAddress, setSelectedAddress] = useState<any>({});
 
-    const [showAddressMore, setShowAddressMore] = useState<boolean[]>(user?.address?.map(() => false));
+    const [showAddressMore, setShowAddressMore] = useState<boolean[]>(addresses?.map(() => false));
 
     const toggleShowAddressMore = (index: number) => {
         const newArr = [...showAddressMore];
@@ -52,7 +58,6 @@ function profile() {
         setShowAddressMore(newArr);
     }
 
-    const [transactions, setTransactions] = useState<any[]>();
     if (typeof window !== "undefined") {
         injectStyle();
         token = localStorage.getItem('token')!;
@@ -66,11 +71,7 @@ function profile() {
         host = 'http://localhost'
     }
 
-    const getPage = (page: string) => {
-        router.push(`/${page}`);
-    }
-
-    const [currentProductPage, setCurrentProductPage] = useState(0);
+    const getPage = (page: string) => router.push(`/${page}`);
 
     const itemsPerPage = 8;
     const productsPages = [];
@@ -78,9 +79,6 @@ function profile() {
     for (let i = 0; i < productsDummyData?.length; i += itemsPerPage) {
         productsPages.push(productsDummyData.slice(i, i + itemsPerPage));
     }
-
-    
-    const [currentTransactionsPage, setCurrentTransactionsPage] = useState(0);
 
     const transactionsPages = [];
 
@@ -100,19 +98,15 @@ function profile() {
                 ) : ( 
                 <div>
 
-                    <UpdateAddressModal
-                        show={false}
-                        setShow={() => false}
-                        address={user.address[0]}
-                        index={1}
-                        getAddressDetails={() => {}}
-                        handleChange={() => {}}
-                        updateAddress={() => {}}
-                    />
+                    {
+                        showEditAddressModal && <UpdateAddressModal
+                            setShow={() => setShowEditAddressModal(!showEditAddressModal)}
+                            address={selectedAddress}
+                        />
+                    }
 
                     {
-                        showNewAddressModal &&
-                        <NewAddressModal 
+                        showNewAddressModal && <NewAddressModal 
                             setShow={() => setShowNewAddressModal(false)}
                         />
                     }
@@ -285,21 +279,25 @@ function profile() {
 
                                 <div className="w-[90%] md:w-[50%] mx-auto mt-10 flex flex-col">
                                     {
-                                        user?.address ? user.address.map((address: any, index: number) => (
+                                        addresses ? addresses.map((address: any, index: number) => (
                                             <div className='flex flex-col py-3 px-4 shadow-lg rounded-md mb-4' key={address.name}>
-                                                <div className="flex flex-row relative mb-2">
+                                                <div className="flex flex-row relative">
                                                     <GoLocation className="text-xl text-gray-500 mr-2" />
                                                     <p className="text-base font-serif">{address.title}</p>
                                                     <div className="flex flex-col">
                                                         <CgMoreO 
                                                             className="text-orange-500 text-xl cursor-pointer absolute right-1 mb-2" 
-                                                            onClick={() => toggleShowAddressMore(index)}
+                                                            onClick={() => {
+                                                                setSelectedAddress(address)
+                                                                toggleShowAddressMore(index)
+                                                            }}
                                                         />
                                                         {
                                                             showAddressMore[index] && (
-                                                                <div className="flex flex-col bg-gray-200 rounded-md py-2 px-3 text-black text-sm text-center absolute right-0 top-6">
+                                                                <div className="flex flex-col bg-gray-200 rounded-md py-2 px-3 text-black text-sm text-center absolute -right-4 top-6">
                                                                     <a 
                                                                         href="#0" 
+                                                                        onClick={() => setShowEditAddressModal(!showEditAddressModal)}
                                                                         className='cursor-pointer hover:text-orange-500 mb-3'
                                                                     >
                                                                         Edit
@@ -315,7 +313,8 @@ function profile() {
                                                         }
                                                     </div>
                                                 </div>
-                                                <p className="">{address?.name}</p>
+                                                <p className="mb-0">{address?.name}</p>
+                                                <p className="mb-0">{address?.address}</p>
                                             </div>
                                         )) : (
                                             <div
@@ -393,7 +392,7 @@ export async function getServerSideProps(context: any) {
 
     try{
         const getMyAddresses = await sendAxiosRequest(
-          `/api/address/me?properties=1`,
+          `/api/address/me`,
           "get",
           {},
           token,
@@ -448,8 +447,14 @@ export async function getServerSideProps(context: any) {
         }
 
     } catch(error: any) {
-        if(error?.response.status === 401) {
-
+        console.log({error})
+        if(error?.response?.status === 401) {
+            return {
+                redirect: {
+                  destination: '/auth/signIn',
+                  permanent: false
+                }
+            }
         }
         return {
             props: {

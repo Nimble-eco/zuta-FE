@@ -169,7 +169,7 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
 
                 <button
                     onClick={() => openOrderTrain()}
-                    className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded w-[60%] md:w-[40%] mx-auto md:!mx-0 lg:!mx-0 mt-3 whitespace-nowrap"
+                    className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded w-[60%] md:w-[40%] !mx-auto md:!mx-0 lg:!mx-0 mt-3 whitespace-nowrap"
                 >
                     Start Order Train
                 </button>
