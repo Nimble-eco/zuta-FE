@@ -11,7 +11,7 @@ const CartComponent = ({ items, onQuantityChange, onRemove }: ICartComponentsPro
   };
 
   return (
-    <div className="w-full bg-white">
+    <div className="w-full bg-white rounded-md">
         <h2 className="font-semibold text-lg text-orange-500 mb-4 border-b-2 border-gray-100 py-4 pl-3">Shopping Cart</h2>
         <p className="text-gray-700 text-lg pl-4">Products</p>
         {items.products?.map((item: any, index: number) => (
@@ -51,7 +51,7 @@ const CartComponent = ({ items, onQuantityChange, onRemove }: ICartComponentsPro
             </div>
         ))}
 
-        <p className="text-gray-700 text-lg pl-4 mt-8">Subscriptions</p>
+        <p className="text-gray-700 text-lg pl-4 mt-8">Order Train</p>
         {items.subscriptions?.map((item: any, index: number) => (
             <div key={item.id} className='flex flex-row relative mb-6 rounded-md px-4 py-3 border-b-2 border-gray-100'>
                 <div className="mr-4 w-[20%]">

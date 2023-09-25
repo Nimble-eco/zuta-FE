@@ -43,7 +43,7 @@ function product({product, similar_products}: IProductPageProps) {
 
     if(typeof window !== 'undefined') {
         injectStyle();
-        user = JSON.parse(Cookies.get('user')!);
+        user = Cookies.get('user') ? JSON.parse(Cookies.get('user')!) : null;
     }
 
     const itemsPerPage = 8;
@@ -59,6 +59,7 @@ function product({product, similar_products}: IProductPageProps) {
     }
 
     const addToCart = async (newProduct:any) => {
+        console.log({newProduct})
         const cart: any = JSON.parse(localStorage.getItem('cart')!) || {products: [], bundles: [], subscriptions: []};
         let newCart = cart;
         let obj = newCart.products.find((item: any, i: number) => {
@@ -69,7 +70,13 @@ function product({product, similar_products}: IProductPageProps) {
           }
         })
         if(!obj) {
-            cart?.products.push({...newProduct, order_count: 1});
+            cart?.products.push({
+                ...newProduct, 
+                product_id: newProduct.id, 
+                order_count: 1,
+                quantity: 1,
+                price: newProduct.product_price
+            });
             localStorage.setItem("cart", JSON.stringify(cart));
         }
 
@@ -79,7 +86,7 @@ function product({product, similar_products}: IProductPageProps) {
                 user_id: user.id
             }, {
                 headers: {
-                    Authorization: `Bearer ${user.access_token}`
+                    Authorization: user.access_token
                 }
             })
             .then((response) => console.log({response}))

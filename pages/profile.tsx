@@ -458,7 +458,7 @@ export async function getServerSideProps(context: any) {
         }
         return {
             props: {
-                address: [],
+                addresses: [],
                 profile: {},
                 orders: []
             }

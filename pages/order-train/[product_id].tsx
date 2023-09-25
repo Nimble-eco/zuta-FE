@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Cookies from 'js-cookie'
 import { toast, ToastContainer } from 'react-toastify';
 import { injectStyle } from "react-toastify/dist/inject-style";
+import { usePaystackPayment } from 'react-paystack';
 import Head from "next/head";
 import Header from "../../Components/Header";
 import MyGallery from "../../Components/sliders/MyGallery";
@@ -10,6 +11,10 @@ import { calculateNextDiscount } from "../../Utils/calculateDiscount";
 import HorizontalSlider from "../../Components/lists/HorizontalSlider";
 import { sendAxiosRequest } from "../../Utils/sendAxiosRequest";
 import axiosInstance from "../../Utils/axiosConfig";
+import SelectAddressModal from "../../Components/modals/address/SelectAddressModal";
+import ButtonGhost from "../../Components/buttons/ButtonGhost";
+import { useRouter } from "next/router";
+import { error } from "console";
 
 interface ICreateOrderTrainPageProps {
     product: {
@@ -32,9 +37,18 @@ interface ICreateOrderTrainPageProps {
 }
 
 const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps) => {
+    const router = useRouter();
     const [showImageGallery, setShowImageGallery] = useState<boolean>(false);
     const nextDiscount = calculateNextDiscount(4, product.product_discount, product.product_price);
     const [quantity, setQuantity] = useState<number | string>(1);
+    const [selectedAddress, setSelectedAddress] = useState<any>({});
+    const [showSelectAddressModal, setShowSelectAddressModal] = useState(false);
+    const [deliveryFee, setDeliveryFee] = useState(1000);
+    const [totalAmount, setTotalAmount] = useState(0);
+    const [isLoading, setIsLoading] = useState(false);
+
+    const [paymentReference, setPaymentReference] = useState('');
+    const pay_stack_key = process.env.NEXT_PUBLIC_PAY_STACK_KEY!;
 
     const toggleImageGallery = () => setShowImageGallery(!showImageGallery);
     const [currentReviewPage, setCurrentReviewPage] = useState(0);
@@ -43,7 +57,7 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
 
     if(typeof window !== 'undefined') {
         injectStyle();
-        user = JSON.parse(Cookies.get('user')!);
+        user = Cookies.get('user') ? JSON.parse(Cookies.get('user')!) : null;
     }
 
     const itemsPerPage = 8;
@@ -53,10 +67,19 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
         reviewPages.push(product?.reviews?.slice(i, i + itemsPerPage));
     }
 
+    const selectAddressAndGetDeliveryCharge = async (address: any) => {
+        // TODO: CALL NIMBLE ENDPOINT AND GET DELIVERY FEE
+        setDeliveryFee(1000)
+
+        setTotalAmount((Number(quantity) * product.product_price) + 1000)
+    }
+
     const openOrderTrain = async () => {
         await axiosInstance.post('/api/open-order/store', {
             product_id: product.id,
-            quantity
+            quantity,
+            address_id: selectedAddress.id,
+            order_delivery_fee: deliveryFee,
         }, {
             headers: {
                 Authorization: user.access_token
@@ -66,6 +89,57 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
             console.log({response})
         })
     }
+
+    const config = {
+        reference: paymentReference,
+        email: user?.email,
+        amount: (totalAmount * 100),
+        publicKey: pay_stack_key,
+    };
+
+    const onSuccess = async () => {
+        await openOrderTrain()
+        .then(() => {
+            toast.success('Payment successful')
+            router.push(`/profile?path=orders`)
+        })
+        .catch(error => {
+            console.log({error})
+            toast.error(error?.response?.message || 'Error try agin later');
+        })
+      
+    };
+    
+      
+    const onClose = () => {
+
+    }
+
+    const initializePayment = usePaystackPayment(config);
+
+    const createPayment = async () => {
+        setIsLoading(true);
+
+        await axiosInstance.post('/api/payment/store', {
+            amount: totalAmount,
+            type: 'open_order'
+        }, {
+            headers: {
+                Authorization: user.access_token
+            }
+        })
+        .then((response) => {
+            setIsLoading(false)
+            console.log({response})
+            setPaymentReference(response.data.data.id);
+        })
+        .catch(error => {
+            console.log({error})
+            setIsLoading(false)
+            toast.error(error.response?.message ?? 'Error try agin later');
+        });
+    }
+
 
   return (
     <div
@@ -85,6 +159,17 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
             setShow={toggleImageGallery}
             slides={product?.product_images}
         />
+
+        {
+            showSelectAddressModal && <SelectAddressModal
+                setShow={() => setShowSelectAddressModal(!showSelectAddressModal)}
+                selectAddress={(address: any) => {
+                    setSelectedAddress(address)
+                    selectAddressAndGetDeliveryCharge(address)
+                    setShowSelectAddressModal(false)
+                }}
+            />
+        }
 
         <div className='w-full h-[50vh] cursor-pointer flex align-middle mt-2' onClick={toggleImageGallery}>
             <SwiperSlider 
@@ -150,14 +235,14 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
                 </div>
             </div>
 
-            <div className="flex flex-col gap-4 lg:px-4 w-full md:w-[40%]">
+            <div className="flex flex-col gap-2 lg:px-4 w-full md:w-[40%] px-4 py-3 border-[1px] border-gray-200 shadow-sm">
                 <p className="text-sm">
-                    When an order train is opened for a product, users will place their orders for the product, 
+                    When an order train is opened for a product, multiple users will place their orders for the product, 
                     those orders accumulate as one order and the price of the product is reduced.<br />
                     The difference between the amount a user pays for an item and the final amount will be refunded back to the user. 
                 </p>
 
-                <div className="flex flex-row gap-4">
+                <div className="flex flex-row gap-2">
                     <p className="">Quantity:</p>
                     <input
                         type="number"
@@ -165,14 +250,42 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
                         onChange={event => setQuantity(Number(event.target.value))}
                         className='outline-none bg-gray-100 border-gray-200 rounded-md w-fit mb-4 py-2 pl-3 text-sm md:mr-4'
                     />
+                    <p>=</p>
+                    <p className="text-green-400">{Number(quantity) * product.product_price}</p>
                 </div>
 
-                <button
-                    onClick={() => openOrderTrain()}
-                    className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded w-[60%] md:w-[40%] !mx-auto md:!mx-0 lg:!mx-0 mt-3 whitespace-nowrap"
-                >
-                    Start Order Train
-                </button>
+                {
+                    deliveryFee && (
+                        <div className="flex flex-row gap-1">
+                            <p className="font-medium">Delivery Fee:</p>
+                            <p className="text-orange-500 font-semibold">{deliveryFee}</p>
+                        </div>
+                    )
+                }
+
+                <div className="flex flex-row gap-2">
+                    {
+                        selectedAddress?.address && (
+                            <div className="h-14 w-fit">
+                                <ButtonGhost
+                                    action="Change address"
+                                    onClick={() => setShowSelectAddressModal(true)}
+                                />
+                            </div>
+                        )
+                    }
+                    <button
+                        onClick={async () => {
+                            if(!selectedAddress?.address) {
+                                setShowSelectAddressModal(true)
+                            }
+                            else createPayment().then(() => initializePayment(onSuccess, onClose))
+                        }}
+                        className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 h-14 rounded w-[60%] md:w-[40%] !mx-auto md:!mx-0 lg:!mx-0 whitespace-nowrap"
+                    >
+                        {selectedAddress?.address ? `Checkout N${totalAmount }` : 'Start Order Train'}
+                    </button>
+                </div>
 
             </div>
             
@@ -237,6 +350,12 @@ export async function getServerSideProps(context: any) {
         }
     }
     catch(err: any) {
-        throw new Error(err.message);
+        console.log({err})
+        return {
+            props: {
+                product: {},
+                similar_products: []
+            }
+        }
     }
 }

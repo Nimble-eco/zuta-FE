@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState } from "react";
-import { HiSearch, HiUser, HiUserAdd ,HiLogout, HiMenu, HiOutlineLogout } from "react-icons/hi";
+import { HiSearch, HiUser, HiUserAdd, HiMenu, HiOutlineLogout } from "react-icons/hi";
 import { MdOutlineShoppingCart } from "react-icons/md";
 import { AiFillCloseCircle } from "react-icons/ai";
 import Cookies from 'js-cookie';
@@ -27,7 +27,7 @@ const Header = ({search = true, onSearch}: INavBarProps) => {
     const [cartCount, setCartCount] = useState(0);
 
     useEffect(() => {
-        const cart = JSON.parse(localStorage.getItem('cart')!) || [];
+        const cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')!) : [];
         setCartCount(cart?.length);
     }, []);
 

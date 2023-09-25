@@ -5,6 +5,9 @@ import Total from "../Components/cart/Total";
 import Header from "../Components/Header";
 import HorizontalSlider from "../Components/lists/HorizontalSlider";
 import { openOrderProductsDummyData } from "../data/openOrderProducts";
+import Cookies from "js-cookie";
+import { cartCheckoutAction } from "../requests/cart/cart.requests";
+import { useRouter } from "next/router";
 
 interface ICartPageProps {
     similar_products: any[];
@@ -13,6 +16,11 @@ interface ICartPageProps {
 const cart = ({similar_products}: ICartPageProps) => {
   const [items, setItems] = useState<any>({});
   const [openOrderProducts, setOpenOrderProducts] = useState<any[]>(openOrderProductsDummyData.splice(0, 4));
+  const router =useRouter();
+  
+  let user: any = {};
+
+  if(typeof window !== 'undefined') user = Cookies.get('user') ? JSON.parse(Cookies.get('user')!) : null;
 
   const handleQuantityChange = (index: number, newQuantity: number) => {
     const updatedItems = [...items];
@@ -54,10 +62,11 @@ const cart = ({similar_products}: ICartPageProps) => {
 //     }
 //   }
 
-  useEffect(() => {
-    let cart = JSON.parse(localStorage.getItem("cart")!);
-    setItems(cart);
-  }, []);
+
+    useEffect(() => {
+        let cart = JSON.parse(localStorage.getItem("cart")!);
+        setItems(cart);
+    }, []);
 
   return (
     <div className="flex flex-col bg-gray-100 relative">
@@ -65,7 +74,8 @@ const cart = ({similar_products}: ICartPageProps) => {
         <div className="flex flex-col bg-white py-4 px-3 h-fit w-[90%] fixed bottom-0 left-[5%] right-[5%] shadow-md z-50 mb-4 lg:hidden">
             <Total items={items} />
             <button
-                className="bg-orange-500 px-4 py-3 text-white rounded"
+                className="bg-orange-500 px-4 py-3 text-white rounded cursor-pointer"
+                onClick={() => router.push('/checkout')}
             >
                 Proceed to Checkout
             </button>
@@ -73,18 +83,19 @@ const cart = ({similar_products}: ICartPageProps) => {
         <div className="w-[95%] flex flex-col lg:flex-row mx-auto mt-12">
             <div className="w-[90%] mx-auto lg:w-[70%] lg:mr-[2%] flex flex-col mb-4">
                 <CartComponent items={items} onQuantityChange={handleQuantityChange} onRemove={handleRemove} />
-                <div className="bg-white h-full"></div>
+                <div className="bg-white h-full rounded-md"></div>
             </div>
             <div className="flex flex-col w-[90%] mx-auto lg:w-[25%]">
-                <div className="hidden lg:flex flex-col bg-white py-4 px-3 h-fit mb-4">
+                <div className="hidden lg:flex flex-col bg-white py-4 px-3 h-fit mb-4 rounded-md">
                     <Total items={items} />
                     <button
-                        className="bg-orange-500 px-4 py-3 text-white rounded"
+                        className="bg-orange-500 px-4 py-3 text-white rounded cursor-pointer"
+                        onClick={() => router.push('/checkout')}
                     >
                         Proceed to Checkout
                     </button>
                 </div>
-                <div className="flex flex-col bg-white pl-2">
+                <div className="flex flex-col bg-white pl-2 rounded-md">
                     <h4 className="font-semibold my-3">Open orders for similar products</h4>
                     {
                         openOrderProducts?.map((product) => (

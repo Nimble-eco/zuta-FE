@@ -11,7 +11,7 @@ interface IMySearchInputProps {
 const MySearchInput = ({name, value, searchInputPlaceHolder, onSearch}: IMySearchInputProps) => {
 
   return (
-    <div className="flex flex-row items-center px-4 py-3 border border-gray-200">
+    <div className="flex flex-row items-center px-4 py-3 border border-gray-200 rounded-[20px]">
         <input 
             type="text" 
             name={name}
