@@ -11,7 +11,7 @@ const LoadingState = () => {
     <div className="w-fit mx-auto">
         <ClipLoader
             cssOverride={override}
-            color="#1B6909"
+            color="#FFA500"
             aria-label="Loading Spinner"
             data-testid="loader"
         />

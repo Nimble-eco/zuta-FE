@@ -3,7 +3,7 @@ import { CircleLoader } from "react-spinners";
 const override = {
     display: "block",
     margin: "20% auto",
-    borderColor: "#ffffff",
+    borderColor: "#FFA500",
 };
 
 const SimpleLoader = () => {
@@ -11,7 +11,7 @@ const SimpleLoader = () => {
     <div className="flex flex-col !px-9 align-middle justify-center">
         <CircleLoader
             cssOverride={override}
-            color="#1B6909"
+            color="#FFA500"
             aria-label="Loading Spinner"
             data-testid="loader"
         />

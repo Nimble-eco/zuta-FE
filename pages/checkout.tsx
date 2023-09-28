@@ -1,6 +1,9 @@
 import axios from "axios";
 import { useRouter } from "next/router";
 import { FC, useEffect, useState } from "react";
+import { toast, ToastContainer } from 'react-toastify';
+import { injectStyle } from "react-toastify/dist/inject-style";
+import { usePaystackPayment, PaystackConsumer } from 'react-paystack';
 import Header from "../Components/Header"
 import { sendAxiosRequest } from "../Utils/sendAxiosRequest";
 import { parse } from "cookie";
@@ -18,13 +21,43 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
     const router = useRouter();
     const [selectedAddress, setSelectedAddress] = useState<any>({});
     const [subTotal, setSubTotal] = useState<number>(0);
+    let total: number = 0;
+
+    let paymentReference: string = '';
+    const pay_stack_key = process.env.NEXT_PUBLIC_PAY_STACK_KEY!;
 
     let userCookie: any = {};
 
     if(typeof window !== 'undefined'){
-        cart = JSON.parse(localStorage.getItem('cart')!);
+        injectStyle();
+        cart = JSON.parse(localStorage.getItem('cart')!) ?? [];
         userCookie = Cookies.get('user') ? JSON.parse(Cookies.get('user')!) : null; 
     }
+
+    const createOrder = async () => {}
+
+    const config = {
+        reference: paymentReference,
+        email: userCookie?.email,
+        amount: total,
+        publicKey: pay_stack_key,
+    };
+
+    const onSuccess = async () => {
+        await createOrder()
+        .then(() => {
+            toast.success('Payment successful')
+            router.push(`/profile?path=orders`)
+        })
+        .catch(error => {
+            console.log({error})
+            toast.error(error?.response?.message || 'Error try agin later');
+        })
+      
+    };
+    
+      
+    const onClose = () => {}
     
     const getAllVendorsAddressFromCart = async () => {
         return cart?.products?.map((item: any) => item.vendor.vendor_address);
@@ -48,20 +81,27 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
         }
     }
 
+    const componentProps = {
+        ...config,
+        text: 'Paystack Button Implementation',
+        onSuccess: onSuccess,
+        onClose: onClose
+    };
+
     // SET GET PREDICTED ADDRESS DETAILS
     const [userAddressDetails, setUserAddressDetails] = useState<any>({});
 
     const checkOut = async () => {
-        const res = await cartCheckoutAction({
-            user_id: userCookie.id,
+        return cartCheckoutAction({
+            user_id: userCookie?.id,
             address_id: selectedAddress.id
+        }).then((res) => {
+            console.log({res})
+            router.push(res.data.data.pay_stack_checkout_url)
         })
-        console.log({res})
-        
-        if(res.status === 200 && typeof window !== 'undefined'){
-            localStorage.removeItem('cart');
-            localStorage.removeItem('total');
-        }
+        .catch(error => {
+            console.log({error})
+        })
     }
 
     // useEffect(() => {
@@ -87,18 +127,19 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
         const open_order_total: number = cart.subscriptions?.reduce((acc: number, item: any) => acc + item.open_order_price * item.order_count, 0);
         const bundles_total: number = cart.bundles?.reduce((acc: number, item: any) => acc + item.product_price * item.order_count, 0);
         setSubTotal(products_total + open_order_total + bundles_total);
-    }, [])
+    }, []);
 
-    console.log({cart, addresses, selectedAddress})
+    console.log({config})
 
 
   return (
     <div className="bg-gray-200 min-h-screen flex flex-col relative">
+        <ToastContainer />
         <Header />
         <div className="flex flex-col bg-white py-4 px-3 h-fit w-[90%] fixed bottom-0 left-[5%] right-[5%] shadow-md z-50 mb-4 lg:hidden">
             <button
                 className="bg-orange-500 px-4 py-3 text-white rounded cursor-pointer"
-                onClick={() => {}}
+                onClick={checkOut}
             >
                 Pay N{(subTotal + deliveryFee)}
             </button>
@@ -197,12 +238,20 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
                 <div className="hidden lg:flex flex-col bg-white py-4 px-3 h-fit mb-4 rounded-md">
                     <h3 className="mb-2 text-center">Proceed to payment</h3>
                     <p className="mb-2">Deliver fee: {deliveryFee}</p>
-                    <button
-                        className="bg-orange-500 px-4 py-3 text-white rounded cursor-pointer"
-                        onClick={() => {}}
-                    >
-                        Pay N{(subTotal + deliveryFee)}
-                    </button>
+                    <button 
+                            onClick={() => checkOut()}
+                            className="bg-orange-500 px-4 py-3 text-white rounded cursor-pointer"
+                        >
+                            Pay N{(subTotal + deliveryFee)}
+                        </button>
+                        {/* <button
+                            className="bg-orange-500 px-4 py-3 text-white rounded cursor-pointer"
+                            onClick={() => {
+                                checkOut()
+                            }}
+                        >
+                            Pay N{(subTotal + deliveryFee)}                        
+                        </button> */}
                 </div>
 
                 <div className="flex flex-col bg-white pl-2 rounded-md gap-3 py-3">
@@ -266,7 +315,7 @@ export async function getServerSideProps(context: any) {
         }
     } catch(error: any) {
         console.log({error})
-        if(error?.response?.status === 401) {
+        if(error?.response?.status === 401 || error?.response?.status == 403) {
             return {
                 redirect: {
                   destination: '/auth/signIn',

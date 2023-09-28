@@ -14,7 +14,6 @@ import axiosInstance from "../../Utils/axiosConfig";
 import SelectAddressModal from "../../Components/modals/address/SelectAddressModal";
 import ButtonGhost from "../../Components/buttons/ButtonGhost";
 import { useRouter } from "next/router";
-import { error } from "console";
 
 interface ICreateOrderTrainPageProps {
     product: {
