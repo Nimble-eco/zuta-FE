@@ -52,15 +52,15 @@ const openOrder = ({product, similar_products}: IOpenOrderProductPageProps) => {
     const addToCart = async (newProduct:any) => {
         const cart: any = JSON.parse(localStorage.getItem('cart')!) || {products: [], bundles: [], subscriptions: []};
         let newCart = cart;
-        let obj = newCart.subscriptions.find((item: any, i: number) => {
+        let obj = newCart.subscriptions?.find((item: any, i: number) => {
           if(item.id === newProduct.id){
-            newCart.subscriptions[i].order_count++;
+            newCart.subscriptions[i].quantity++;
             localStorage.setItem("cart", JSON.stringify(newCart));
             return true;
           }
         })
         if(!obj) {
-            cart?.subscriptions.push({...newProduct, order_count: 1});
+            cart?.subscriptions.push({...newProduct, quantity: 1});
             localStorage.setItem("cart", JSON.stringify(cart));
         }
         console.log({cart})
@@ -73,7 +73,7 @@ const openOrder = ({product, similar_products}: IOpenOrderProductPageProps) => {
                 open_order_products: cart.subscriptions
             }, {
                 headers: {
-                    Authorization: `Bearer ${user.access_token}`
+                    Authorization: user.access_token
                 }
             })
             .then((response) => console.log({response}))

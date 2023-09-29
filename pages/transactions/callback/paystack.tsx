@@ -10,6 +10,7 @@ import ButtonFull from "../../../Components/buttons/ButtonFull";
 import RatingsCard from "../../../Components/cards/RatingsCard";
 import ButtonGhost from "../../../Components/buttons/ButtonGhost";
 import { createAnOrderAction } from "../../../requests/order/order.request";
+import { joinOrderTrainAction } from "../../../requests/orderTrain/orderTrain.request";
 
 const paystack = () => {
     const router = useRouter();
@@ -61,6 +62,17 @@ const paystack = () => {
 
                 transactionData?.order_train?.map(async (product: any) => {
                     console.log({product})
+                    await joinOrderTrainAction({
+                        ...transactionData,
+                        product_id: Number(product.product_id),
+                        quantity: Number(product.quantity),
+                        address_id: Number(transactionData.address_id),
+                        order_sub_amount: Number(transactionData.order_sub_amount),
+                        order_service_fee: Number(transactionData.order_service_fee),
+                        order_delivery_fee: Number(transactionData.order_delivery_fee),
+                        order_paid: transactionData.order_paid === 'true' ? true : false,
+                        order_payment_confirmed: transactionData.order_payment_confirmed === 'true' ? true : false,
+                    })
                 });
 
                 toast.success('Payment verified successfully')
