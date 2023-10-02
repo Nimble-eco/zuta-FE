@@ -6,8 +6,8 @@ import Header from "../Components/Header";
 import HorizontalSlider from "../Components/lists/HorizontalSlider";
 import { openOrderProductsDummyData } from "../data/openOrderProducts";
 import Cookies from "js-cookie";
-import { cartCheckoutAction } from "../requests/cart/cart.requests";
 import { useRouter } from "next/router";
+import { formatAmount } from "../Utils/formatAmount";
 
 interface ICartPageProps {
     similar_products: any[];
@@ -16,16 +16,20 @@ interface ICartPageProps {
 const cart = ({similar_products}: ICartPageProps) => {
   const [items, setItems] = useState<any>({});
   const [openOrderProducts, setOpenOrderProducts] = useState<any[]>(openOrderProductsDummyData.splice(0, 4));
-  const router =useRouter();
+  const router = useRouter();
   
   let user: any = {};
 
-  if(typeof window !== 'undefined') user = Cookies.get('user') ? JSON.parse(Cookies.get('user')!) : null;
+  if(typeof window !== 'undefined') {
+    user = Cookies.get('user') ? JSON.parse(Cookies.get('user')!) : null;
+  }
 
-  const handleQuantityChange = (index: number, newQuantity: number) => {
-    const updatedItems = [...items];
-    updatedItems[index].quantity = newQuantity;
+  const handleQuantityChange = (key: string, index: number, newQuantity: number) => {
+    const updatedItems: any = JSON.parse(localStorage.getItem("cart")!);
+    console.log({updatedItems, items})
+    updatedItems[key][index].quantity = newQuantity;
     setItems(updatedItems);
+    console.log('2', {updatedItems, items})
     localStorage.setItem("cart", JSON.stringify(updatedItems));
   };
 
@@ -67,6 +71,7 @@ const cart = ({similar_products}: ICartPageProps) => {
         let cart = JSON.parse(localStorage.getItem("cart")!);
         setItems(cart);
     }, []);
+    console.log({items})
 
   return (
     <div className="flex flex-col bg-gray-100 relative">
@@ -125,7 +130,7 @@ const cart = ({similar_products}: ICartPageProps) => {
                                         <p 
                                             className='text-orange-300 font-semibold mr-4'
                                         >
-                                            {product.price}
+                                            {formatAmount(product.price)}
                                         </p>
                                         <span>
                                             {product.discount}% Off

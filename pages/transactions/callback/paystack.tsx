@@ -61,7 +61,6 @@ const paystack = () => {
                 });
 
                 transactionData?.order_train?.map(async (product: any) => {
-                    console.log({product})
                     await joinOrderTrainAction({
                         ...transactionData,
                         product_id: Number(product.product_id),
@@ -78,7 +77,7 @@ const paystack = () => {
                 toast.success('Payment verified successfully')
             }
         })
-
+        .finally(() => localStorage.removeItem('cart'));
     }, []);
 
   return (
@@ -90,7 +89,7 @@ const paystack = () => {
             className="w-[95%] flex flex-col lg:flex-row mx-auto mt-12"
         >
             <div className="flex flex-col w-[90%] gap-4 mx-auto lg:w-[65%] lg:mr-[2%] mb-4 min-h-[60vh]">
-                <div className="flex flex-col bg-white rounded-md px-4 py-4 relative min-h-[70%] xl:min-h-[50%]">
+                <div className="flex flex-col bg-white rounded-md px-4 py-4 relative min-h-[70%]">
                     <div className="flex flex-row justify-start gap-4 ">
                         <h2 className="text-xl font-semibold">{paymentStatus === 'success' ? 'Verified' : 'Verifying'}</h2>
                         <div>

@@ -78,12 +78,9 @@ const NewAddressModal = ({setShow}: INewAddressModalProps) => {
                 token,
                 ''
             );
-
-            if(res === 201 ){
-                setIsLoading(false);
-                toast.success('Address Created');
-                router.push('/profile')
-            }
+            setIsLoading(false);
+            toast.success('Address Created');
+            
         } catch(error: any) {
             notify(error?.message || "Error Try later")
         }

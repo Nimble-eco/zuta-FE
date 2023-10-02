@@ -5,6 +5,7 @@ import { ToastContainer, toast} from "react-toastify";
 import { injectStyle } from "react-toastify/dist/inject-style";
 import {GrTransaction, GrCatalog} from 'react-icons/gr'
 import ButtonFull from "../Components/buttons/ButtonFull";
+import { BsArrowRightCircle } from 'react-icons/bs'
 import Header from "../Components/Header"
 import Loader from "../Components/Loader";
 import { sendAxiosRequest } from "../Utils/sendAxiosRequest";
@@ -26,20 +27,25 @@ import MyTable from "../Components/tables/MyTable";
 import { productsDummyData } from "../data/products";
 import { transactionsDummyData } from "../data/transactions";
 import FilterAndSearchGroup from "../Components/inputs/FilterAndSearchGroup";
+import axiosInstance from "../Utils/axiosConfig";
+import { formatAmount } from "../Utils/formatAmount";
 
 interface IProfilePageProps {
     profile: any;
-    orders: any[];
+    orders: any;
+    orderTrains: any[];
     addresses: any[];
     reviews: any[];
 }
 
-function profile({profile, orders, addresses, reviews}: IProfilePageProps) {
+function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePageProps) {
     const router = useRouter();
+    const {path} = router.query;
     let token: string;
     const [isLoading, setIsLoading] = useState(false);
     const [user, setUser] = useState<any>(userDummyData);
-    const [currentNav, setCurrentNav] = useState<string>('address');
+    const [currentNav, setCurrentNav] = useState<string>(path?.toString() ?? 'orders');
+    const [orderType, setOrderType] = useState('simple')
 
     const [showNewAddressModal, setShowNewAddressModal] = useState(false);
     const [showEditAddressModal, setShowEditAddressModal] = useState(false);
@@ -86,6 +92,8 @@ function profile({profile, orders, addresses, reviews}: IProfilePageProps) {
         transactionsPages.push(transactionsDummyData.slice(i, i + itemsPerPage));
     }
 
+    console.log(orders.data)
+
     return (
         <div
             className="min-h-screen bg-gray-100"
@@ -121,7 +129,7 @@ function profile({profile, orders, addresses, reviews}: IProfilePageProps) {
                                 <p>Personal Info</p>
                             </div>
                             <div 
-                                className={`${currentNav === 'profile' && 'bg-orange-400 bg-opacity-25'} flex flex-row cursor-pointer px-4 pt-2 pb-1 rounded-[20px] font-medium`}
+                                className={`${currentNav === 'vendor' && 'bg-orange-400 bg-opacity-25'} flex flex-row cursor-pointer px-4 pt-2 pb-1 rounded-[20px] font-medium`}
                                 onClick={() => getPage('vendor/product/')}
                             >
                                 <MdStore className="text-xl mr-2" />
@@ -219,51 +227,140 @@ function profile({profile, orders, addresses, reviews}: IProfilePageProps) {
 
                         {
                             currentNav === 'orders' && (
-                            <div className="flex flex-col md:flex-row w-[90%] md:w-[80%] mx-auto mt-8">
-                                <div className="flex !flex-row md:!flex-col md:!min-h-fit md:w-fit">
-                                    <div className="px-4 py-3 bg-gray-200 cursor-pointer mb-2">
-                                        <span>Unshipped</span>
+                            <div className="flex flex-col w-[90%] md:w-[80%] mx-auto relative">
+                                <div className="flex flex-row absolute top-1 right-4 bg-gray-300 rounded-md text-sm">
+                                    <div className={`${orderType === 'simple' && 'bg-gray-600 text-white text-base rounded-md'} px-4 py-2 cursor-pointer`} onClick={() => setOrderType('simple')}>
+                                        Simple Order
                                     </div>
-                                    <div className="px-4 py-3 bg-gray-200 cursor-pointer mb-2">
-                                        <span>Shipped</span>
-                                    </div>
-                                    <div className="px-4 py-3 bg-gray-200 cursor-pointer mb-2">
-                                        <span>Pending</span>
-                                    </div>
-                                    <div className="px-4 py-3 bg-gray-200 cursor-pointer mb-2">
-                                        <span>Cancelled</span>
+                                    <div className={`${orderType === 'train' && 'bg-gray-600 text-white text-base rounded-md'} px-4 py-2 cursor-pointer`} onClick={() => setOrderType('train')}>
+                                        Order Train
                                     </div>
                                 </div>
-                                <table className="md:w-full ml-2 text-sm">
-                                    <thead className="">
-                                        <tr className="!w-full">
-                                            <th className='w-[40%]'>Product</th>
-                                            <th className='w-[20%]'>Qty</th>
-                                            <th className='w-[20%]'>Total</th>
-                                            <th className='w-[20%]'>Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className='pt-6 gap-y-10'>
-                                    {
-                                        ordersDummyData.map((order: any) => (
-                                            <tr className="py-6 border-b border-gray-200" key={order.order_id}>
-                                                
-                                                    <td className="">{order?.product_name}</td>
-                                                    <td className="">{order?.quantity}</td>
-                                                    <td className="text-orange-500 ">{order?.total_amount}</td>
-                                                    <td className="">{order?.status}</td>
-                                                    <td className="">
-                                                        <ButtonFull 
-                                                            action="Track"
-                                                            onClick={() => {}}
-                                                        />
-                                                    </td>
-                                                
+                                <div className="flex flex-col md:flex-row w-full mt-16">
+                                    <div className="flex !flex-row md:!flex-col md:!min-h-fit mt-10 md:w-fit">
+                                        <div className="px-4 py-1 bg-gray-200 cursor-pointer mb-2">
+                                            <span>All</span>
+                                        </div>
+                                        <div className="px-4 py-1 bg-gray-200 cursor-pointer mb-2">
+                                            <span>Unshipped</span>
+                                        </div>
+                                        <div className="px-4 py-1 bg-gray-200 cursor-pointer mb-2">
+                                            <span>Shipped</span>
+                                        </div>
+                                        <div className="px-4 py-1 bg-gray-200 cursor-pointer mb-2">
+                                            <span>Pending</span>
+                                        </div>
+                                        <div className="px-4 py-1 bg-gray-200 cursor-pointer mb-2">
+                                            <span>Cancelled</span>
+                                        </div>
+                                    </div>
+                                    <table className="md:w-full ml-2 text-sm h-fit">
+                                        <thead className="bg-gray-200 px-4">
+                                            <tr className="!w-full px-4">
+                                                <th className='w-[40%]'>
+                                                    <p className="my-2 pl-4">
+                                                        Product
+                                                    </p>
+                                                </th>
+                                                <th className='w-[20%]'>
+                                                    <p className="my-2">
+                                                        Qty
+                                                    </p>
+                                                </th>
+                                                <th className='w-[20%]'>
+                                                    <p className="my-2">
+                                                        Total
+                                                    </p>
+                                                </th>
+                                                <th className='w-[20%]'>
+                                                    <p className="my-2">
+                                                        Status
+                                                    </p>
+                                                </th>
+                                                <th className='w-[20%]'>
+                                                    <p className="my-2 pr-4">
+                                                        ...
+                                                    </p>
+                                                </th>
                                             </tr>
-                                        ))
-                                    }
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody className=''>
+                                        {
+                                            orderType === 'simple' ? 
+                                                orders?.data?.length > 0 ? orders?.data?.map((order: any) => (
+                                                    <tr className="border-b border-gray-200" key={order.id}>
+                                                        <td className="">
+                                                            <p className="mb-2 pl-4">{order?.product_name}</p>
+                                                        </td>
+                                                        <td className=""><p>{order?.quantity}</p>
+                                                        </td>
+                                                        <td className="">
+                                                            <p className="mb-2">{formatAmount(order?.order_amount)}</p>
+                                                        </td>
+                                                        <td className="">
+                                                            <p className="mb-2">{order?.status}</p>
+                                                        </td>
+                                                        <td className="">
+                                                            <div className="my-2 pr-4">
+                                                                <BsArrowRightCircle
+                                                                    className="text-xl text-orange-500 cursor-pointer"
+                                                                />
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                )) : (
+                                                    <tr
+                                                        className="flex w-fit mx-auto"
+                                                    >
+                                                        <span
+                                                            className="text-orange-600 text-xl mx-auto text-center animate-bounce"
+                                                        >
+                                                            No orders yet!!
+                                                        </span>
+                                                    </tr>
+                                                ) :
+                                            null
+                                        }
+
+                                        {
+                                            orderType === 'train' ?
+                                                orderTrains?.length > 0 ? orderTrains?.map((order: any) => (
+                                                    <tr className="py-6 border-b border-gray-200" key={order.id}>
+                                                        <td className="">
+                                                            <p className="mb-2 pl-4">{order?.product_name}</p>
+                                                        </td>
+                                                        <td className=""><p>{order?.pivot_quantity}</p>
+                                                        </td>
+                                                        <td className="">
+                                                            <p className="mb-2">{formatAmount(order?.pivot_open_order_price_paid)}</p>
+                                                        </td>
+                                                        <td className="">
+                                                            <p className="mb-2">{order?.status}</p>
+                                                        </td>
+                                                        <td className="">
+                                                            <div className="my-2 pr-4">
+                                                                <BsArrowRightCircle
+                                                                    className="text-xl text-orange-500 cursor-pointer"
+                                                                />
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                )) : (
+                                                    <tr
+                                                        className="flex w-fit mx-auto"
+                                                    >
+                                                        <span
+                                                            className="text-orange-600 text-xl my-10 mx-auto text-center animate-bounce"
+                                                        >
+                                                            No order train has been boarded!!
+                                                        </span>
+                                                    </tr>
+                                                ) :
+                                            null
+                                        }
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         )}
 
@@ -415,6 +512,14 @@ export async function getServerSideProps(context: any) {
             ''
         );
 
+        const getMyOrderTrains = await axiosInstance.get('/api/open-order/me', {
+            headers: {
+                Authorization: token
+            }
+        });
+          
+        console.log('my order trains data =', getMyOrderTrains.data.data.data)
+
         const getMyPendingReviews = await sendAxiosRequest(
             '/api/review/product/me',
             "get",
@@ -423,25 +528,28 @@ export async function getServerSideProps(context: any) {
             ''
         );
 
-        const [myAddress, myProfile, myOrders, myReviews] = await Promise.allSettled([
+        const [myAddress, myProfile, myOrders, myOrderTrains, myReviews] = await Promise.allSettled([
             getMyAddresses,
             getMyProfile,
             getMyOrders,
+            getMyOrderTrains,
             getMyPendingReviews
         ]);
 
         const addresses = myAddress.status === 'fulfilled' ? myAddress.value.data : [];
         const profile = myProfile.status === 'fulfilled' ? myProfile.value.data : [];
         const orders = myOrders.status === 'fulfilled' ? myOrders.value.data : [];
+        const orderTrains = myOrderTrains.status === 'fulfilled' ? myOrderTrains.value.data.data : [];
         const reviews = myReviews.status === 'fulfilled' ? myReviews.value.data : [];
 
-        console.log({addresses, profile, orders, reviews})
+        console.log('order tain data =', orderTrains.data)
 
         return {
             props: {
                 addresses,
                 profile,
                 orders,
+                orderTrains: orderTrains,
                 reviews
             }
         }

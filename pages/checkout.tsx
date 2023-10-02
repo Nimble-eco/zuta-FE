@@ -10,6 +10,9 @@ import { parse } from "cookie";
 import { MdOutlineRadioButtonChecked, MdOutlineRadioButtonUnchecked } from "react-icons/md";
 import { cartCheckoutAction } from "../requests/cart/cart.requests";
 import Cookies from "js-cookie";
+import { formatAmount } from "../Utils/formatAmount";
+import axiosInstance from "../Utils/axiosConfig";
+import NewAddressModal from "../Components/modals/address/NewAddressModal";
 
 interface ICheckoutProps {
     user: any;
@@ -21,10 +24,8 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
     const router = useRouter();
     const [selectedAddress, setSelectedAddress] = useState<any>({});
     const [subTotal, setSubTotal] = useState<number>(0);
-    let total: number = 0;
-
-    let paymentReference: string = '';
-    const pay_stack_key = process.env.NEXT_PUBLIC_PAY_STACK_KEY!;
+    const [isLoading, setIsLoading] = useState(false);
+    const [showAddAddressModal, setShowAddAddressModal] = useState(false);
 
     let userCookie: any = {};
 
@@ -34,30 +35,6 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
         userCookie = Cookies.get('user') ? JSON.parse(Cookies.get('user')!) : null; 
     }
 
-    const createOrder = async () => {}
-
-    const config = {
-        reference: paymentReference,
-        email: userCookie?.email,
-        amount: total,
-        publicKey: pay_stack_key,
-    };
-
-    const onSuccess = async () => {
-        await createOrder()
-        .then(() => {
-            toast.success('Payment successful')
-            router.push(`/profile?path=orders`)
-        })
-        .catch(error => {
-            console.log({error})
-            toast.error(error?.response?.message || 'Error try agin later');
-        })
-      
-    };
-    
-      
-    const onClose = () => {}
     
     const getAllVendorsAddressFromCart = async () => {
         return cart?.products?.map((item: any) => item.vendor.vendor_address);
@@ -81,25 +58,26 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
         }
     }
 
-    const componentProps = {
-        ...config,
-        text: 'Paystack Button Implementation',
-        onSuccess: onSuccess,
-        onClose: onClose
-    };
-
     // SET GET PREDICTED ADDRESS DETAILS
     const [userAddressDetails, setUserAddressDetails] = useState<any>({});
 
     const checkOut = async () => {
+        if(!selectedAddress?.id) {
+            setShowAddAddressModal(true);
+            return;
+        }
+        setIsLoading(true);
+
         return cartCheckoutAction({
             user_id: userCookie?.id,
             address_id: selectedAddress.id
         }).then((res) => {
             console.log({res})
+            setIsLoading(false)
             router.push(res.data.data.pay_stack_checkout_url)
         })
         .catch(error => {
+            setIsLoading(false);
             console.log({error})
         })
     }
@@ -112,36 +90,58 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
         let isMounted = true;
 
         if(isMounted) {
-            addresses.length > 1 ? 
-                addresses.find((address) => {
-                    if(address.address_selected) setSelectedAddress(address);
-                }) :
-            setSelectedAddress(addresses[0])
+            
+            if(addresses.length > 1) {  
+                let defaultAddress = addresses.find((address) => {
+                    if(address.address_selected) return address;
+                })
+                if(defaultAddress) setSelectedAddress(defaultAddress);
+                else setSelectedAddress(addresses[0]);
+            }
+            else setSelectedAddress(addresses[0])
         }
 
         return () => {isMounted = false}
     }, [])
 
     useEffect(() => {
-        const products_total: number = cart.products?.reduce((acc: number, item: any) => acc + item.product_price * item.order_count, 0);
-        const open_order_total: number = cart.subscriptions?.reduce((acc: number, item: any) => acc + item.open_order_price * item.order_count, 0);
+        const products_total: number = cart.products?.reduce((acc: number, item: any) => acc + item.product_price * item.quantity, 0);
+        const open_order_total: number = cart.subscriptions?.reduce((acc: number, item: any) => acc + item.open_order_price * item.quantity, 0);
         const bundles_total: number = cart.bundles?.reduce((acc: number, item: any) => acc + item.product_price * item.order_count, 0);
         setSubTotal(products_total + open_order_total + bundles_total);
     }, []);
 
-    console.log({config})
-
+    useEffect(() => {
+        axiosInstance.post('/api/cart/update', {
+            ...cart,
+            user_id: userCookie?.id
+        }, {
+            headers: {
+                Authorization: userCookie?.access_token
+            }
+        })
+        .then((response) => console.log({response}))
+        .catch(error => {
+            toast.error(error.response?.message || "Error try again later")
+        })
+    }, []);
 
   return (
     <div className="bg-gray-200 min-h-screen flex flex-col relative">
         <ToastContainer />
         <Header />
+
+        {
+            showAddAddressModal && <NewAddressModal
+                setShow={() => setShowAddAddressModal(false)}
+            />
+        }
         <div className="flex flex-col bg-white py-4 px-3 h-fit w-[90%] fixed bottom-0 left-[5%] right-[5%] shadow-md z-50 mb-4 lg:hidden">
             <button
-                className="bg-orange-500 px-4 py-3 text-white rounded cursor-pointer"
+                className="bg-orange-500 px-4 py-3 text-white rounded cursor-pointer text-lg"
                 onClick={checkOut}
             >
-                Pay N{(subTotal + deliveryFee)}
+                {isLoading ? 'Loading...' : `Pay ${formatAmount((subTotal + deliveryFee))}`}
             </button>
         </div>
 
@@ -177,17 +177,18 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
                                     <p
                                         className="text-gray-800 m-0"
                                     >
-                                        N{item.product_price} x
+                                        {formatAmount(item.product_price)} x
                                     </p>
                                     <input
                                         type="number"
                                         className="w-[20%] py-1 px-2 text-center bg-gray-200 rounded-md"
-                                        defaultValue={item.quantity }
+                                        disabled={true}
+                                        defaultValue={item.quantity}
                                     />
                                     <p
                                         className="text-gray-800 py-1 px-2"
                                     >
-                                        = N {item.product_price * (item.quantity )}
+                                        = {formatAmount(item.product_price * (item.quantity))}
                                     </p>
                                 </div>
                             </div>
@@ -215,17 +216,18 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
                                     <p
                                         className="text-gray-800 m-0"
                                     >
-                                        N{item.open_order_price} x
+                                        {formatAmount(item.open_order_price)} x
                                     </p>
                                     <input
                                         type="number"
                                         className="w-[20%] py-1 px-2 text-center bg-gray-200 rounded-md"
-                                        defaultValue={item.order_count }
+                                        defaultValue={item.quantity }
+                                        disabled={true}
                                     />
                                     <p
                                         className="text-gray-800 py-1 px-2"
                                     >
-                                        = N {item.open_order_price * (item.order_count )}
+                                        = {formatAmount(item.open_order_price * (item.quantity ))}
                                     </p>
                                 </div>
                             </div>
@@ -236,22 +238,14 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
 
             <div className="flex flex-col w-[90%] mx-auto lg:w-[25%]">
                 <div className="hidden lg:flex flex-col bg-white py-4 px-3 h-fit mb-4 rounded-md">
-                    <h3 className="mb-2 text-center">Proceed to payment</h3>
-                    <p className="mb-2">Deliver fee: {deliveryFee}</p>
+                    <h3 className="mb-2 text-center text-lg">Proceed to payment</h3>
+                    <p className="mb-2">Deliver fee: {formatAmount(deliveryFee)}</p>
                     <button 
-                            onClick={() => checkOut()}
-                            className="bg-orange-500 px-4 py-3 text-white rounded cursor-pointer"
-                        >
-                            Pay N{(subTotal + deliveryFee)}
-                        </button>
-                        {/* <button
-                            className="bg-orange-500 px-4 py-3 text-white rounded cursor-pointer"
-                            onClick={() => {
-                                checkOut()
-                            }}
-                        >
-                            Pay N{(subTotal + deliveryFee)}                        
-                        </button> */}
+                        onClick={() => checkOut()}
+                        className="bg-orange-500 px-4 py-3 text-white rounded cursor-pointer"
+                    >
+                        {isLoading ? 'Loading...' : `Pay ${formatAmount((subTotal + deliveryFee))}`}
+                    </button>
                 </div>
 
                 <div className="flex flex-col bg-white pl-2 rounded-md gap-3 py-3">
@@ -280,6 +274,7 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
                         )) :
                         <p 
                             className="text-orange-400 cursor-pointer"
+                            onClick={() => setShowAddAddressModal(!showAddAddressModal)}
                         >
                             Add an Address
                         </p>

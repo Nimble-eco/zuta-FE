@@ -59,7 +59,6 @@ function product({product, similar_products}: IProductPageProps) {
     }
 
     const addToCart = async (newProduct:any) => {
-        console.log({newProduct})
         const cart: any = JSON.parse(localStorage.getItem('cart')!) || {products: [], bundles: [], subscriptions: []};
         let newCart = cart;
         let obj = newCart.products.find((item: any, i: number) => {
