@@ -29,6 +29,7 @@ import { transactionsDummyData } from "../data/transactions";
 import FilterAndSearchGroup from "../Components/inputs/FilterAndSearchGroup";
 import axiosInstance from "../Utils/axiosConfig";
 import { formatAmount } from "../Utils/formatAmount";
+import ShowOrderModal from "../Components/modals/orders/ShowOrderModal";
 
 interface IProfilePageProps {
     profile: any;
@@ -52,6 +53,8 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
     const [selectedAddress, setSelectedAddress] = useState<any>({});
 
     const [showAddressMore, setShowAddressMore] = useState<boolean[]>(addresses?.map(() => false));
+    const [showViewOrderModal, setShowViewOrderModal] = useState(false);
+    const [selectedOrder, setSelectedOrder] = useState<any>({});
 
     const toggleShowAddressMore = (index: number) => {
         const newArr = [...showAddressMore];
@@ -116,6 +119,13 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                     {
                         showNewAddressModal && <NewAddressModal 
                             setShow={() => setShowNewAddressModal(false)}
+                        />
+                    }
+
+                    {
+                        showViewOrderModal && <ShowOrderModal
+                            setShow={() => setShowViewOrderModal(false)}
+                            order={selectedOrder}
                         />
                     }
 
@@ -295,7 +305,7 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                                                         <td className=""><p>{order?.quantity}</p>
                                                         </td>
                                                         <td className="">
-                                                            <p className="mb-2">{formatAmount(order?.order_amount)}</p>
+                                                            <p className="mb-2">{formatAmount(order?.product_price_paid)}</p>
                                                         </td>
                                                         <td className="">
                                                             <p className="mb-2">{order?.status}</p>
@@ -304,6 +314,10 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                                                             <div className="my-2 pr-4">
                                                                 <BsArrowRightCircle
                                                                     className="text-xl text-orange-500 cursor-pointer"
+                                                                    onClick={() => {
+                                                                        setSelectedOrder(order);
+                                                                        setShowViewOrderModal(true);
+                                                                    }}
                                                                 />
                                                             </div>
                                                         </td>
@@ -313,7 +327,7 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                                                         className="flex w-fit mx-auto"
                                                     >
                                                         <span
-                                                            className="text-orange-600 text-xl mx-auto text-center animate-bounce"
+                                                            className="text-orange-600 text-xl my-8 mx-auto text-center animate-bounce"
                                                         >
                                                             No orders yet!!
                                                         </span>

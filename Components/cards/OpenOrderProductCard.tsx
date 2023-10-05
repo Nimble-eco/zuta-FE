@@ -4,6 +4,7 @@ import { HiOutlineShoppingCart } from 'react-icons/hi'
 import TimeAgo from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en'
 import RatingsCard from './RatingsCard';
+import { formatAmount } from '../../Utils/formatAmount';
 
 interface IOpenOrderProductCardProps {
     order: {
@@ -63,7 +64,7 @@ const OpenOrderProductCard: FC<IOpenOrderProductCardProps> = ({order}) => {
             
                 <div className='flex flex-row mb-4 align-middle'>
                     <p className='text-base text-green-600 font-semibold mr-2'>
-                        {order?.open_order_price}
+                        {formatAmount(order?.open_order_price)}
                     </p>
                     <p className='text-sm font-thin line-through mr-2 my-auto'>
                         {order.product?.product_price}

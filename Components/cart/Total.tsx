@@ -11,7 +11,7 @@ const Total = ({ items }: ICartTotalProps) => {
 
   return (
     <div className="justify-center text-center text-lg mb-8">
-        <h3>Total: {" "}
+        <h3 className="!text-lg">Total: {" "}
           <span className='text-orange-500'>{formatAmount(total)}</span>
         </h3>
     </div>

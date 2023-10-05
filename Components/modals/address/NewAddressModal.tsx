@@ -80,6 +80,7 @@ const NewAddressModal = ({setShow}: INewAddressModalProps) => {
             );
             setIsLoading(false);
             toast.success('Address Created');
+            setShow();
             
         } catch(error: any) {
             notify(error?.message || "Error Try later")

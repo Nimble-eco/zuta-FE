@@ -1,6 +1,7 @@
 import { useRouter } from 'next/router';
 import { FC } from 'react'
 import RatingsCard from './cards/RatingsCard';
+import { formatAmount } from '../Utils/formatAmount';
 
 interface IProductComponentProps {
     product: {
@@ -46,7 +47,7 @@ const ProductComponent: FC<IProductComponentProps> = ({product}) => {
                     <p 
                         className='text-base text-green-600 font-semibold mr-4'
                     >
-                        {product?.product_price}
+                        {formatAmount(product?.product_price)}
                     </p>
                     <span 
                         className='text-base'

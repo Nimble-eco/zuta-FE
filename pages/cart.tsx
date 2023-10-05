@@ -101,7 +101,7 @@ const cart = ({similar_products}: ICartPageProps) => {
                     </button>
                 </div>
                 <div className="flex flex-col bg-white pl-2 rounded-md">
-                    <h4 className="font-semibold my-3">Open orders for similar products</h4>
+                    <h4 className="font-semibold my-3 text-sm">Open orders for similar products</h4>
                     {
                         openOrderProducts?.map((product) => (
                             <div

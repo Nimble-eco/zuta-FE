@@ -11,6 +11,7 @@ import MyGallery from '../Components/sliders/MyGallery';
 import HorizontalSlider from '../Components/lists/HorizontalSlider';
 import axiosInstance from '../Utils/axiosConfig';
 import router from 'next/router';
+import { formatAmount } from '../Utils/formatAmount';
 
 interface IProductPageProps {
     product: {
@@ -143,7 +144,7 @@ function product({product, similar_products}: IProductPageProps) {
                                         Open Price:
                                     </p>
                                     <span className='font-semibold text-red-600 pulse'>
-                                        {product.openOrders.open_order_price}
+                                        {formatAmount(product.openOrders.open_order_price)}
                                     </span>
                                 </div>
                                 <div 
@@ -153,7 +154,7 @@ function product({product, similar_products}: IProductPageProps) {
                                         Open discount: 
                                     </p>
                                     <span className='font-semibold line-through'>
-                                        {product.openOrders.open_order_discount}
+                                        {formatAmount(product.openOrders.open_order_discount)}
                                     </span>
                                 </div>
                             </div>
@@ -168,7 +169,7 @@ function product({product, similar_products}: IProductPageProps) {
                                 Price:
                             </p>
                             <span className='font-semibold text-green-600'>
-                                {product.product_price}
+                                {formatAmount(product.product_price)}
                             </span>
                         </div>
                         <div 
@@ -178,7 +179,7 @@ function product({product, similar_products}: IProductPageProps) {
                                 Current discount: 
                             </p>
                             <span className='font-semibold line-through'>
-                                {calculateNextDiscount(4, product.product_discount, product.product_price)}
+                                {formatAmount(calculateNextDiscount(4, product.product_discount, product.product_price))}
                             </span>
                         </div>
                     </div>
@@ -193,7 +194,7 @@ function product({product, similar_products}: IProductPageProps) {
 
                 <div className='bg-white shadow-gray-600 shadow-xl rounded-[20px] px-4 py-2 min-w-fit flex flex-col gap-2 absolute top-1 right-4'>
                     <p className='text-black mb-0'>Buy this product at {" "}
-                        <span className='text-orange-600'> N {product.product_price - ((product.product_discount/100) * product.product_price)}</span>
+                        <span className='text-orange-600'>{formatAmount(product.product_price - ((product.product_discount/100) * product.product_price))}</span>
                     </p>
                     <button
                         onClick={() => router.push(`/order-train/${product.id}`)}
@@ -208,7 +209,7 @@ function product({product, similar_products}: IProductPageProps) {
                     similarProductOpenOrder && (
                         <div className='bg-white shadow-gray-600 shadow-xl rounded-[20px] px-4 py-2 min-w-fit flex flex-col gap-2 absolute top-10 right-4'>
                             <p className='text-black mb-0'>A Similar product is selling at {" "}
-                                <span className='text-orange-600'> N {similarProductOpenOrder?.open_order_price}</span>
+                                <span className='text-orange-600'>{formatAmount(similarProductOpenOrder?.open_order_price)}</span>
                             </p>
                             <button
                                 onClick={() => {}}

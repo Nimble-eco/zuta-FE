@@ -249,7 +249,7 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
                 </div>
 
                 <div className="flex flex-col bg-white pl-2 rounded-md gap-3 py-3">
-                    <h4 className="font-semibold my-3">Delivery Address</h4>
+                    <h4 className="font-semibold my-2 text-sm">Delivery Address</h4>
                     {
                         addresses && addresses.length > 0 ? addresses?.map((address) => (
                             <div className="flex flex-col gap-1" key={address.id}>
