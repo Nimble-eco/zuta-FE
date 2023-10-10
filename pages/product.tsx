@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import Header from "../Components/Header"
 import { sendAxiosRequest } from '../Utils/sendAxiosRequest';
 import SwiperSlider from '../Components/sliders/Swiper';
-import { calculateDiscount, calculateNextDiscount } from '../Utils/calculateDiscount';
+import { calculateNextDiscount } from '../Utils/calculateDiscount';
 import MyGallery from '../Components/sliders/MyGallery';
 import HorizontalSlider from '../Components/lists/HorizontalSlider';
 import axiosInstance from '../Utils/axiosConfig';

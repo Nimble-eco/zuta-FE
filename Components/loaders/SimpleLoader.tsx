@@ -1,4 +1,4 @@
-import { CircleLoader } from "react-spinners";
+import { FadeLoader } from "react-spinners";
 
 const override = {
     display: "block",
@@ -9,7 +9,7 @@ const override = {
 const SimpleLoader = () => {
   return (
     <div className="flex flex-col !px-9 align-middle justify-center">
-        <CircleLoader
+        <FadeLoader
             cssOverride={override}
             color="#FFA500"
             aria-label="Loading Spinner"

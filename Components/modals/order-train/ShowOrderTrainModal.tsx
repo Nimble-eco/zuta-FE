@@ -9,15 +9,15 @@ import { formatAmount } from "../../../Utils/formatAmount";
 import ButtonFull from "../../buttons/ButtonFull";
 import RatingsCard from "../../cards/RatingsCard";
 import { useRouter } from "next/router";
-import { cancelAnOrderAction, completeAnOrderAction } from "../../../requests/order/order.request";
+import { unsubscribeOrderTrainAction, updateOrderTrainStatusAction } from "../../../requests/orderTrain/orderTrain.request";
 import { storeProductRatingAction } from "../../../requests/productRating/productRating.request";
 
-interface IShowOrderModalProps {
-    order: any;
+interface IShowOrderTrainModalProps {
+    orderTrain: any;
     setShow: () => void;
 }
 
-const ShowOrderModal = ({order, setShow}: IShowOrderModalProps) => {
+const ShowOrderTrainModal = ({orderTrain, setShow}: IShowOrderTrainModalProps) => {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [rating, setRating] = useState<number>(0);
@@ -27,7 +27,7 @@ const ShowOrderModal = ({order, setShow}: IShowOrderModalProps) => {
 
     const cancelOrder = async () => {
         setIsLoading(true);
-        cancelAnOrderAction({id: order.id})
+        unsubscribeOrderTrainAction(orderTrain.id)
         .then((response) => {
             setIsLoading(false);
             if(response.status === 201) {
@@ -41,9 +41,13 @@ const ShowOrderModal = ({order, setShow}: IShowOrderModalProps) => {
         })
     }
 
+    
     const completeOrder = async () => {
         setIsLoading(true);
-        completeAnOrderAction({id: order.id})
+        updateOrderTrainStatusAction({
+            id: orderTrain.id,
+            status: 'delivered'
+        })
         .then((response) => {
             setIsLoading(false);
             if(response.status === 201) {
@@ -62,7 +66,7 @@ const ShowOrderModal = ({order, setShow}: IShowOrderModalProps) => {
 
         if(rating > 0) {
             return storeProductRatingAction({
-                product_id: order?.product?.id,
+                product_id: orderTrain?.product?.id,
                 score: rating,
                 comment
             })
@@ -76,34 +80,37 @@ const ShowOrderModal = ({order, setShow}: IShowOrderModalProps) => {
         setTimeout(() => router.push('/profile?path=orders'), 3000);
     }
 
+    console.log({orderTrain})
+
   return (
-    <div className="!rounded-md ">
+    <div className="!rounded-md">
         <ToastContainer />
-        <Modal show={true} onHide={setShow} backdrop="static" dialogClassName='modal-90w'>
-            <Modal.Body className='md:!min-w-[40vw] !w-[40vw] relative'>
+        <Modal show={true} onHide={setShow} backdrop="static" dialogClassName='modal-lg'>
+            <Modal.Body className='relative'>
                 <MdOutlineClose className='text-3xl cursor-pointer absolute top-3 right-3' onClick={setShow} />
                 <div className='flex flex-col min-h-[50vh]'>
-                    <div className="flex flex-col w-[95%] mx-auto px-5 py-4 mt-10 relative">
-                        <div className='w-full cursor-pointer max-w-1/3 h-full flex align-middle' onClick={() => router.push(`/product?id=${order?.product?.id}`)}>
+                    <h2 className="text-2xl font-semibold my-4 w-fit ml-[3%] uppercase">Order Train</h2>
+                    <div className="flex flex-col lg:flex-row gap-6 w-[95%] mx-auto py-2 relative">
+                        <div className='w-full lg:w-[50%] cursor-pointer h-full flex align-middle' onClick={() => router.push(`/product?id=${orderTrain?.product?.id}`)}>
                             <SwiperSlider 
-                                slides={order?.product?.product_images}
+                                slides={orderTrain?.product?.product_images}
                             />
                         </div>
-                        <div className="flex flex-col gap-1 mt-4">
-                            <h1 className="text-xl md:text-2xl justify-center mb-0">{order?.product?.product_name}</h1>
-                            <p className="text-gray-600 py-2 mb-0">{order?.product?.product_description}</p>
+                        <div className="w-full lg:w-[50%] flex flex-col gap-1 mt-4 lg:!mt-0">
+                            <h1 className="text-xl md:text-2xl justify-center mb-0">{orderTrain?.product_name}</h1>
+                            <p className="text-gray-600 py-2 mb-0">{orderTrain?.product?.product_description}</p>
                             <div className="flex flex-row gap-8 w-full">
                                 <div 
                                     className='flex flex-row gap-1'
                                 >
                                     <p className="text-gray-600 !mb-0">Price:</p>
-                                    <span className=''>{formatAmount(order?.product_price_paid)}</span>
+                                    <span className=''>{formatAmount(orderTrain?.pivot_open_order_price_paid)}</span>
                                 </div>
                                 <div 
                                     className='flex flex-row gap-1'
                                 >
                                     <p className="text-gray-600 !mb-0"> Quantity:</p>
-                                    <span className=''>{order?.quantity}</span>
+                                    <span className=''>{orderTrain?.pivot_quantity}</span>
                                 </div>
                             </div>
                             <div className="flex flex-col gap-[2px]">
@@ -111,11 +118,11 @@ const ShowOrderModal = ({order, setShow}: IShowOrderModalProps) => {
                                 <div className="flex flex-col lg:flex-row gap-4">
                                     <div className="flex flex-row gap-1">
                                         <p className="text-gray-600">Delivery Fee:</p>
-                                        <p className="text-gray-600">{formatAmount(order?.order_delivery_fee)}</p>
+                                        <p className="text-gray-600">{formatAmount(orderTrain?.pivot_order_delivery_fee)}</p>
                                     </div>
                                     <div className="flex flex-row gap-1">
                                         <p className="text-gray-600">Service Fee:</p>
-                                        <p className="text-gray-600">{order?.order_service_fee}</p>
+                                        <p className="text-gray-600">{orderTrain?.pivot_order_service_fee}</p>
                                     </div>
                                 </div>
                             </div>
@@ -123,53 +130,57 @@ const ShowOrderModal = ({order, setShow}: IShowOrderModalProps) => {
                                 className='flex flex-row gap-4 text-lg'
                             >
                                 <p className="text-gray-600">Total:</p>
-                                <span className='font-semibold'>{formatAmount(order?.order_amount)}</span>
+                                <span className='font-semibold'>{formatAmount(orderTrain?.pivot_order_amount)}</span>
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex flex-col gap-4">
-                        {
-                            order?.status === 'unshipped' && (
-                                <div className="w-fit mx-auto flex flex-col gap-1">
-                                    <div className="w-[50%[ mx-auto h-12">
-                                        <ButtonFull
-                                            action="Cancel Order"
-                                            onClick={cancelOrder}
-                                            loading={isLoading}
-                                        />
-                                    </div>
-                                    <p className="text-xs">Orders can only be cancelled when they have not been shipped</p>
-                                </div>
-                            )
-                        }
-
-                        {
-                            order?.status === 'delivered' && (
-                                <div className="w-[80%] mx-auto flex flex-col gap-2 mb-6">
-                                    <div className="flex flex-row gap-4 align-middle">
-                                        <p className="!mb-0">Rate this product:</p>
-                                        <div className="my-auto">
-                                            <RatingsCard rating={rating} setRatings={setRating}/>
+                    <div className="flex flex-row gap-4">
+                        <div className="flex flex-col gap-4 w-full lg:w-[50%] p-4">
+                            {
+                                orderTrain?.pivot_status === 'unshipped' && (
+                                    <div className="w-fit mx-auto flex flex-col gap-1">
+                                        <div className="w-[50%[ mx-auto h-12">
+                                            <ButtonFull
+                                                action="Cancel Order"
+                                                onClick={cancelOrder}
+                                                loading={isLoading}
+                                            />
                                         </div>
+                                        <p className="text-xs">Orders can only be cancelled when they have not been shipped</p>
                                     </div>
-                                    <textarea 
-                                        name="user-experience"
-                                        className="h-48 rounded-[16px] bg-gray-100 outline-none px-4 py-5"
-                                        placeholder="Leave a review"
-                                        value={comment}
-                                        onChange={(e) => setComment(e.target.value)}
-                                    />
-                                    <div className="w-[50%[ mx-auto h-12">
-                                        <ButtonFull
-                                            action="Rate Product"
-                                            onClick={completeOrder}
+                                )
+                            }
+
+                            {
+                                orderTrain?.pivot_status === 'shipped' && (
+                                    <div className="w-[90%] mx-auto flex flex-col gap-2 mb-6">
+                                        <div className="flex flex-row gap-4 align-middle">
+                                            <p className="!mb-0">Rate this product:</p>
+                                            <div className="my-auto">
+                                                <RatingsCard rating={rating} setRatings={setRating}/>
+                                            </div>
+                                        </div>
+                                        <textarea 
+                                            name="user-experience"
+                                            className="h-48 rounded-[16px] bg-gray-100 outline-none px-4 py-5"
+                                            placeholder="Leave a review"
+                                            value={comment}
+                                            onChange={(e) => setComment(e.target.value)}
                                         />
+                                        <div className="w-[50%] mx-auto lg:!mx-0 h-12">
+                                            <ButtonFull
+                                                action="Rate Product"
+                                                onClick={completeOrder}
+                                            />
+                                        </div>
+                                        
                                     </div>
-                                    
-                                </div>
-                            )
-                        } 
+                                )
+                            } 
+                        </div>
+
+                        <div className="flex flex-col gap-4 w-full lg:w-[50%] p-4"></div>
                     </div>
                     
                 </div>
@@ -179,4 +190,4 @@ const ShowOrderModal = ({order, setShow}: IShowOrderModalProps) => {
   )
 }
 
-export default ShowOrderModal
+export default ShowOrderTrainModal

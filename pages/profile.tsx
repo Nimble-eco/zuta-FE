@@ -7,7 +7,6 @@ import {GrTransaction, GrCatalog} from 'react-icons/gr'
 import ButtonFull from "../Components/buttons/ButtonFull";
 import { BsArrowRightCircle } from 'react-icons/bs'
 import Header from "../Components/Header"
-import Loader from "../Components/Loader";
 import { sendAxiosRequest } from "../Utils/sendAxiosRequest";
 import Image from "next/image";
 import { userDummyData } from "../data/user";
@@ -22,14 +21,14 @@ import { capitalizeFirstLetter } from "../Utils/capitalizeFirstLettersOfString";
 import { GoLocation } from "react-icons/go";
 import UpdateAddressModal, { IAddress } from "../Components/modals/address/UpdateAddressModal";
 import NewAddressModal from "../Components/modals/address/NewAddressModal";
-import { ordersDummyData } from "../data/orders";
-import MyTable from "../Components/tables/MyTable";
 import { productsDummyData } from "../data/products";
-import { transactionsDummyData } from "../data/transactions";
 import FilterAndSearchGroup from "../Components/inputs/FilterAndSearchGroup";
 import axiosInstance from "../Utils/axiosConfig";
 import { formatAmount } from "../Utils/formatAmount";
 import ShowOrderModal from "../Components/modals/orders/ShowOrderModal";
+import { filterOrderAction } from "../requests/order/order.request";
+import SimpleLoader from "../Components/loaders/SimpleLoader";
+import ShowOrderTrainModal from "../Components/modals/order-train/ShowOrderTrainModal";
 
 interface IProfilePageProps {
     profile: any;
@@ -46,7 +45,9 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
     const [isLoading, setIsLoading] = useState(false);
     const [user, setUser] = useState<any>(userDummyData);
     const [currentNav, setCurrentNav] = useState<string>(path?.toString() ?? 'orders');
-    const [orderType, setOrderType] = useState('simple')
+    const [simpleOrdersData, setSimpleOrdersData] = useState(orders);
+    const [orderType, setOrderType] = useState('simple');
+    const [filterOrderStatus, setFilterOrderStatus] = useState('all');
 
     const [showNewAddressModal, setShowNewAddressModal] = useState(false);
     const [showEditAddressModal, setShowEditAddressModal] = useState(false);
@@ -54,6 +55,7 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
 
     const [showAddressMore, setShowAddressMore] = useState<boolean[]>(addresses?.map(() => false));
     const [showViewOrderModal, setShowViewOrderModal] = useState(false);
+    const [showViewOrderTrainModal, setShowViewOrderTrainModal] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState<any>({});
 
     const toggleShowAddressMore = (index: number) => {
@@ -89,13 +91,27 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
         productsPages.push(productsDummyData.slice(i, i + itemsPerPage));
     }
 
-    const transactionsPages = [];
-
-    for (let i = 0; i < transactionsDummyData?.length; i += itemsPerPage) {
-        transactionsPages.push(transactionsDummyData.slice(i, i + itemsPerPage));
+    const filterSimpleOrders = async (status?: string) => {
+        setIsLoading(true);
+        filterOrderAction({
+            user_id: profile.id,
+            status
+        })
+        .then((response) => {
+            if(response.status === 200) {
+                setSimpleOrdersData(response.data?.data)
+            }
+            if(response.status === 204) {
+                setSimpleOrdersData(response.data?.data);
+                toast.error('No orders with this status');
+            }
+        })
+        .catch(error => {
+            console.log({error})
+            toast.error(error.response?.message || 'Error try again later');
+        })
+        .finally(() => setIsLoading(false))
     }
-
-    console.log(orders.data)
 
     return (
         <div
@@ -105,7 +121,7 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
             <ToastContainer />
             {
                 isLoading ? (
-                    <Loader />
+                    <SimpleLoader />
                 ) : ( 
                 <div>
 
@@ -126,6 +142,13 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                         showViewOrderModal && <ShowOrderModal
                             setShow={() => setShowViewOrderModal(false)}
                             order={selectedOrder}
+                        />
+                    }
+
+                    {
+                        showViewOrderTrainModal && <ShowOrderTrainModal
+                            setShow={() => setShowViewOrderTrainModal(false)}
+                            orderTrain={selectedOrder}
                         />
                     }
 
@@ -247,20 +270,47 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                                     </div>
                                 </div>
                                 <div className="flex flex-col md:flex-row w-full mt-16">
-                                    <div className="flex !flex-row md:!flex-col md:!min-h-fit mt-10 md:w-fit">
-                                        <div className="px-4 py-1 bg-gray-200 cursor-pointer mb-2">
+                                    <div className="flex !flex-row md:!flex-col md:!min-h-fit mt-10 md:w-fit text-sm">
+                                        <div 
+                                            className={`px-4 py-1 bg-gray-200 cursor-pointer mb-2 ${filterOrderStatus === 'all' && 'bg-gray-600 text-white'}`}
+                                            onClick={() => {
+                                                setFilterOrderStatus('all');
+                                                filterSimpleOrders();
+                                            }}
+                                        >
                                             <span>All</span>
                                         </div>
-                                        <div className="px-4 py-1 bg-gray-200 cursor-pointer mb-2">
+                                        <div 
+                                            className={`px-4 py-1 bg-gray-200 cursor-pointer mb-2 ${filterOrderStatus === 'completed' && 'bg-gray-600 text-white'}`} 
+                                            onClick={() => {
+                                                setFilterOrderStatus('completed');
+                                                filterSimpleOrders('completed');
+                                            }}
+                                        >
+                                            <span>Completed</span>
+                                        </div>
+                                        <div className={`px-4 py-1 bg-gray-200 cursor-pointer mb-2 ${filterOrderStatus === 'unshipped' && 'bg-gray-600 text-white'}`} onClick={() => {
+                                            setFilterOrderStatus('completed');
+                                            filterSimpleOrders('unshipped');
+                                        }}>
                                             <span>Unshipped</span>
                                         </div>
-                                        <div className="px-4 py-1 bg-gray-200 cursor-pointer mb-2">
+                                        <div className={`px-4 py-1 bg-gray-200 cursor-pointer mb-2 ${filterOrderStatus === 'shipped' && 'bg-gray-600 text-white'}`} onClick={() => {
+                                            setFilterOrderStatus('shipped');
+                                            filterSimpleOrders('shipped');
+                                        }}>
                                             <span>Shipped</span>
                                         </div>
-                                        <div className="px-4 py-1 bg-gray-200 cursor-pointer mb-2">
+                                        <div className={`px-4 py-1 bg-gray-200 cursor-pointer mb-2 ${filterOrderStatus === 'pending' && 'bg-gray-600 text-white'}`} onClick={() => {
+                                            setFilterOrderStatus('pending');
+                                            filterSimpleOrders('pending');
+                                        }}>
                                             <span>Pending</span>
                                         </div>
-                                        <div className="px-4 py-1 bg-gray-200 cursor-pointer mb-2">
+                                        <div className={`px-4 py-1 bg-gray-200 cursor-pointer mb-2 ${filterOrderStatus === 'cancelled' && 'bg-gray-600 text-white'}`} onClick={() => {
+                                            setFilterOrderStatus('cancelled');
+                                            filterSimpleOrders('cancelled')
+                                        }}>
                                             <span>Cancelled</span>
                                         </div>
                                     </div>
@@ -297,7 +347,7 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                                         <tbody className=''>
                                         {
                                             orderType === 'simple' ? 
-                                                orders?.data?.length > 0 ? orders?.data?.map((order: any) => (
+                                                simpleOrdersData?.data?.length > 0 ? simpleOrdersData?.data?.map((order: any) => (
                                                     <tr className="border-b border-gray-200" key={order.id}>
                                                         <td className="">
                                                             <p className="mb-2 pl-4">{order?.product_name}</p>
@@ -349,12 +399,16 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                                                             <p className="mb-2">{formatAmount(order?.pivot_open_order_price_paid)}</p>
                                                         </td>
                                                         <td className="">
-                                                            <p className="mb-2">{order?.status}</p>
+                                                            <p className="mb-2">{order?.pivot_status}</p>
                                                         </td>
                                                         <td className="">
                                                             <div className="my-2 pr-4">
                                                                 <BsArrowRightCircle
                                                                     className="text-xl text-orange-500 cursor-pointer"
+                                                                    onClick={() => {
+                                                                        setSelectedOrder(order);
+                                                                        setShowViewOrderTrainModal(true);
+                                                                    }}
                                                                 />
                                                             </div>
                                                         </td>
@@ -531,8 +585,6 @@ export async function getServerSideProps(context: any) {
                 Authorization: token
             }
         });
-          
-        console.log('my order trains data =', getMyOrderTrains.data.data.data)
 
         const getMyPendingReviews = await sendAxiosRequest(
             '/api/review/product/me',
@@ -557,6 +609,7 @@ export async function getServerSideProps(context: any) {
         const reviews = myReviews.status === 'fulfilled' ? myReviews.value.data : [];
 
         console.log('order tain data =', orderTrains.data)
+        console.log('reviews =', reviews.data)
 
         return {
             props: {

@@ -13,3 +13,8 @@ export interface IJoinOrderTrainProps {
     order_payment_confirmed?: number;
     order_payment_method?: number;
 }
+
+export interface IUpdateOrderTrainStatusProps {
+    id: string;
+    status: 'shipped' | 'unshipped' | 'delivered' | 'completed' | 'closed';
+}

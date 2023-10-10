@@ -14,6 +14,7 @@ import axiosInstance from "../../Utils/axiosConfig";
 import SelectAddressModal from "../../Components/modals/address/SelectAddressModal";
 import ButtonGhost from "../../Components/buttons/ButtonGhost";
 import { useRouter } from "next/router";
+import { formatAmount } from "../../Utils/formatAmount";
 
 interface ICreateOrderTrainPageProps {
     product: {
@@ -195,7 +196,7 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
                             Price:
                         </p>
                         <span className='font-semibold text-green-600'>
-                            N{product.product_price}
+                            {formatAmount(product.product_price)}
                         </span>
                     </div>
                     <div 
@@ -205,7 +206,7 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
                             Current discount: 
                         </p>
                         <span className='font-semibold line-through'>
-                            N{calculateNextDiscount(4, product.product_discount, product.product_price)}
+                            {formatAmount(calculateNextDiscount(4, product.product_discount, product.product_price))}
                         </span>
                     </div>
                 </div>
@@ -218,7 +219,7 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
                             Next Price:
                         </p>
                         <span className='font-semibold text-orange-600 animate-pulse'>
-                            N{(product.product_price - nextDiscount).toFixed(2)}
+                            {formatAmount(product.product_price - nextDiscount)}
                         </span>
                     </div>
                     <div 
@@ -228,7 +229,7 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
                             Next discount: 
                         </p>
                         <span className='font-semibold line-through'>
-                            N{calculateNextDiscount(3, product.product_discount, product.product_price)}
+                            {formatAmount(calculateNextDiscount(3, product.product_discount, product.product_price))}
                         </span>
                     </div>
                 </div>
@@ -250,14 +251,14 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
                         className='outline-none bg-gray-100 border-gray-200 rounded-md w-fit mb-4 py-2 pl-3 text-sm md:mr-4'
                     />
                     <p>=</p>
-                    <p className="text-green-400">{Number(quantity) * product.product_price}</p>
+                    <p className="text-green-400">{formatAmount(Number(quantity) * product.product_price)}</p>
                 </div>
 
                 {
                     deliveryFee && (
                         <div className="flex flex-row gap-1">
                             <p className="font-medium">Delivery Fee:</p>
-                            <p className="text-orange-500 font-semibold">{deliveryFee}</p>
+                            <p className="text-orange-500 font-semibold">{formatAmount(deliveryFee)}</p>
                         </div>
                     )
                 }
