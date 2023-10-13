@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { parse } from 'cookie';
 import { ToastContainer, toast} from "react-toastify";
 import { injectStyle } from "react-toastify/dist/inject-style";
-import {GrTransaction, GrCatalog} from 'react-icons/gr'
+import {GrTransaction} from 'react-icons/gr'
 import ButtonFull from "../Components/buttons/ButtonFull";
 import { BsArrowRightCircle } from 'react-icons/bs'
 import Header from "../Components/Header"
@@ -22,13 +22,15 @@ import { GoLocation } from "react-icons/go";
 import UpdateAddressModal, { IAddress } from "../Components/modals/address/UpdateAddressModal";
 import NewAddressModal from "../Components/modals/address/NewAddressModal";
 import { productsDummyData } from "../data/products";
-import FilterAndSearchGroup from "../Components/inputs/FilterAndSearchGroup";
 import axiosInstance from "../Utils/axiosConfig";
 import { formatAmount } from "../Utils/formatAmount";
 import ShowOrderModal from "../Components/modals/orders/ShowOrderModal";
 import { filterOrderAction } from "../requests/order/order.request";
 import SimpleLoader from "../Components/loaders/SimpleLoader";
 import ShowOrderTrainModal from "../Components/modals/order-train/ShowOrderTrainModal";
+import { filterMyOrderTrainStatusAction, getMyOrderTrainAction } from "../requests/orderTrain/orderTrain.request";
+import { statusType } from "../requests/orderTrain/orderTrain.types";
+import Cookies from "js-cookie";
 
 interface IProfilePageProps {
     profile: any;
@@ -41,11 +43,12 @@ interface IProfilePageProps {
 function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePageProps) {
     const router = useRouter();
     const {path} = router.query;
-    let token: string;
+    
     const [isLoading, setIsLoading] = useState(false);
     const [user, setUser] = useState<any>(userDummyData);
-    const [currentNav, setCurrentNav] = useState<string>(path?.toString() ?? 'orders');
+    const [currentNav, setCurrentNav] = useState<string>(path?.toString() ?? 'profile');
     const [simpleOrdersData, setSimpleOrdersData] = useState(orders);
+    const [orderTrainsData, setOrderTrainsData] = useState(orderTrains);
     const [orderType, setOrderType] = useState('simple');
     const [filterOrderStatus, setFilterOrderStatus] = useState('all');
 
@@ -71,7 +74,6 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
 
     if (typeof window !== "undefined") {
         injectStyle();
-        token = localStorage.getItem('token')!;
     }
 
     let host: string = "";
@@ -112,6 +114,50 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
         })
         .finally(() => setIsLoading(false))
     }
+
+    const filterOrderTrain = async (status?: string) => {
+        setIsLoading(true);
+        if(status === 'all') {
+            getMyOrderTrainAction()
+            .then((response) => {
+                if(response.status === 200) {
+                    setOrderTrainsData(response.data?.data)
+                }
+                if(response.status === 204) {
+                    setOrderTrainsData(response.data?.data);
+                    toast.error('No orders with this status');
+                }
+            })
+            .catch(error => {
+                console.log({error})
+                toast.error(error.response?.message || 'Error try again later');
+            })
+            .finally(() => setIsLoading(false))
+
+        } else {
+         
+            filterMyOrderTrainStatusAction({status: status as statusType})
+            .then((response) => {
+                if(response.status === 200) {
+                    setOrderTrainsData(response.data?.data)
+                }
+                if(response.status === 204) {
+                    setOrderTrainsData(response.data?.data);
+                    toast.error('No orders with this status');
+                }
+            })
+            .catch(error => {
+                console.log({error})
+                toast.error(error.response?.message || 'Error try again later');
+            })
+            .finally(() => setIsLoading(false));
+        }
+    }
+
+    useEffect(() => {
+        Cookies.get('currentNav') ? setCurrentNav(Cookies.get('currentNav')!) : null;
+        Cookies.get('orderType') ? setOrderType(Cookies.get('orderType')!) : null;
+    }, [])
 
     return (
         <div
@@ -156,7 +202,10 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                         <div className="flex flex-row border-b border-gray-300 w-[90%] md:w-[80%] mx-auto justify-evenly pb-3 mb-4">
                             <div 
                                 className={`${currentNav === 'profile' && 'bg-orange-400 bg-opacity-25'} flex flex-row cursor-pointer px-4 pt-2 pb-1 rounded-[20px] font-medium`}
-                                onClick={() => setCurrentNav('profile')}
+                                onClick={() => {
+                                    setCurrentNav('profile');
+                                    Cookies.set('currentNav', 'profile');
+                                }}
                             >
                                 <GiPerson className="text-xl mr-2" />
                                 <p>Personal Info</p>
@@ -170,21 +219,30 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                             </div>
                             <div 
                                 className={`${currentNav === 'orders' && 'bg-orange-400 bg-opacity-25'} flex flex-row cursor-pointer px-4 pt-2 pb-1 rounded-[20px] font-medium`}
-                                onClick={() => setCurrentNav('orders')}
+                                onClick={() => {
+                                    setCurrentNav('orders');
+                                    Cookies.set('currentNav', 'orders');
+                                }}
                             >
                                 <GrTransaction className="text-xl mr-2" />
                                 <p>Orders</p>
                             </div>
                             <div 
                                 className={`${currentNav === 'address' && 'bg-orange-400 bg-opacity-25'} flex flex-row cursor-pointer px-4 pt-2 pb-1 rounded-[20px] font-medium`}
-                                onClick={() => setCurrentNav('address')}
+                                onClick={() => {
+                                    setCurrentNav('address');
+                                    Cookies.set('currentNav', 'address');
+                                }}
                             >
                                 <RiHomeSmileLine className="text-xl mr-2" />
                                 <p>Address</p>
                             </div>
                             <div 
                                 className={`${currentNav === 'reviews' && 'bg-orange-400 bg-opacity-25'} flex flex-row cursor-pointer px-4 pt-2 pb-1 rounded-[20px] font-medium`}
-                                onClick={() => setCurrentNav('reviews')}
+                                onClick={() => {
+                                    setCurrentNav('reviews');
+                                    Cookies.set('currentNav', 'reviews');
+                                }}
                             >
                                 <MdOutlineRateReview className="text-xl mr-2" />
                                 <p>Pending Reviews</p>
@@ -262,10 +320,16 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                             currentNav === 'orders' && (
                             <div className="flex flex-col w-[90%] md:w-[80%] mx-auto relative">
                                 <div className="flex flex-row absolute top-1 right-4 bg-gray-300 rounded-md text-sm">
-                                    <div className={`${orderType === 'simple' && 'bg-gray-600 text-white text-base rounded-md'} px-4 py-2 cursor-pointer`} onClick={() => setOrderType('simple')}>
+                                    <div className={`${orderType === 'simple' && 'bg-gray-600 text-white text-base rounded-md'} px-4 py-2 cursor-pointer`} onClick={() => {
+                                        setOrderType('simple');
+                                        Cookies.set('orderType', 'simple');
+                                    }}>
                                         Simple Order
                                     </div>
-                                    <div className={`${orderType === 'train' && 'bg-gray-600 text-white text-base rounded-md'} px-4 py-2 cursor-pointer`} onClick={() => setOrderType('train')}>
+                                    <div className={`${orderType === 'train' && 'bg-gray-600 text-white text-base rounded-md'} px-4 py-2 cursor-pointer`} onClick={() => {
+                                        setOrderType('train');
+                                        Cookies.set('orderType', 'train');
+                                    }}>
                                         Order Train
                                     </div>
                                 </div>
@@ -275,7 +339,9 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                                             className={`px-4 py-1 bg-gray-200 cursor-pointer mb-2 ${filterOrderStatus === 'all' && 'bg-gray-600 text-white'}`}
                                             onClick={() => {
                                                 setFilterOrderStatus('all');
-                                                filterSimpleOrders();
+                                                orderType === 'simple' ?
+                                                    filterSimpleOrders() :
+                                                    filterOrderTrain('all')
                                             }}
                                         >
                                             <span>All</span>
@@ -284,32 +350,53 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                                             className={`px-4 py-1 bg-gray-200 cursor-pointer mb-2 ${filterOrderStatus === 'completed' && 'bg-gray-600 text-white'}`} 
                                             onClick={() => {
                                                 setFilterOrderStatus('completed');
-                                                filterSimpleOrders('completed');
+                                                orderType === 'simple' ?
+                                                    filterSimpleOrders('completed') :
+                                                    filterOrderTrain('completed')
                                             }}
                                         >
                                             <span>Completed</span>
                                         </div>
+                                        <div 
+                                            className={`px-4 py-1 bg-gray-200 cursor-pointer mb-2 ${filterOrderStatus === 'delivered' && 'bg-gray-600 text-white'}`} 
+                                            onClick={() => {
+                                                setFilterOrderStatus('delivered');
+                                                orderType === 'simple' ?
+                                                    filterSimpleOrders('delivered') :
+                                                    filterOrderTrain('delivered')
+                                            }}
+                                        >
+                                            <span>Delivered</span>
+                                        </div>
                                         <div className={`px-4 py-1 bg-gray-200 cursor-pointer mb-2 ${filterOrderStatus === 'unshipped' && 'bg-gray-600 text-white'}`} onClick={() => {
-                                            setFilterOrderStatus('completed');
-                                            filterSimpleOrders('unshipped');
+                                            setFilterOrderStatus('unshipped');
+                                            orderType === 'simple' ?
+                                                filterSimpleOrders('unshipped') :
+                                                filterOrderTrain('unshipped')
                                         }}>
                                             <span>Unshipped</span>
                                         </div>
                                         <div className={`px-4 py-1 bg-gray-200 cursor-pointer mb-2 ${filterOrderStatus === 'shipped' && 'bg-gray-600 text-white'}`} onClick={() => {
                                             setFilterOrderStatus('shipped');
-                                            filterSimpleOrders('shipped');
+                                            orderType === 'simple' ?
+                                                filterSimpleOrders('shipped') :
+                                                filterOrderTrain('shipped')
                                         }}>
                                             <span>Shipped</span>
                                         </div>
                                         <div className={`px-4 py-1 bg-gray-200 cursor-pointer mb-2 ${filterOrderStatus === 'pending' && 'bg-gray-600 text-white'}`} onClick={() => {
                                             setFilterOrderStatus('pending');
-                                            filterSimpleOrders('pending');
+                                            orderType === 'simple' ?
+                                                filterSimpleOrders('pending') :
+                                                filterOrderTrain('pending')
                                         }}>
                                             <span>Pending</span>
                                         </div>
                                         <div className={`px-4 py-1 bg-gray-200 cursor-pointer mb-2 ${filterOrderStatus === 'cancelled' && 'bg-gray-600 text-white'}`} onClick={() => {
                                             setFilterOrderStatus('cancelled');
-                                            filterSimpleOrders('cancelled')
+                                            orderType === 'simple' ? 
+                                                filterSimpleOrders('cancelled') :
+                                                filterOrderTrain('cancelled')
                                         }}>
                                             <span>Cancelled</span>
                                         </div>
@@ -388,18 +475,18 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
 
                                         {
                                             orderType === 'train' ?
-                                                orderTrains?.length > 0 ? orderTrains?.map((order: any) => (
+                                                orderTrainsData?.length > 0 ? orderTrainsData?.map((order: any) => (
                                                     <tr className="py-6 border-b border-gray-200" key={order.id}>
                                                         <td className="">
                                                             <p className="mb-2 pl-4">{order?.product_name}</p>
                                                         </td>
-                                                        <td className=""><p>{order?.pivot_quantity}</p>
+                                                        <td className=""><p>{order?.pivot_quantity ?? order?.quantity}</p>
                                                         </td>
                                                         <td className="">
-                                                            <p className="mb-2">{formatAmount(order?.pivot_open_order_price_paid)}</p>
+                                                            <p className="mb-2">{formatAmount(order?.pivot_open_order_price_paid ?? order?.open_order_price_paid)}</p>
                                                         </td>
                                                         <td className="">
-                                                            <p className="mb-2">{order?.pivot_status}</p>
+                                                            <p className="mb-2">{order?.pivot_status ?? order?.status}</p>
                                                         </td>
                                                         <td className="">
                                                             <div className="my-2 pr-4">

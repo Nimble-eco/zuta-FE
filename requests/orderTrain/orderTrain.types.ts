@@ -1,3 +1,4 @@
+export type statusType = 'shipped' | 'unshipped' | 'delivered' | 'completed' | 'pending' | 'closed' | 'cancelled';
 
 export interface IJoinOrderTrainProps {
     user_id: string;
@@ -16,5 +17,9 @@ export interface IJoinOrderTrainProps {
 
 export interface IUpdateOrderTrainStatusProps {
     id: string;
-    status: 'shipped' | 'unshipped' | 'delivered' | 'completed' | 'closed';
+    status: statusType;
+}
+
+export interface IFilterMyOrderTrainStatusProps {
+    status?: statusType;
 }

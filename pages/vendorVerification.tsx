@@ -42,7 +42,7 @@ const vendorVerification = () => {
     }
 
     useEffect(() => {
-       getUser();
+    //    getUser();
     }, []);
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -70,11 +70,12 @@ const vendorVerification = () => {
         owner_address: ownerAddress,
         owner_email: '',
         owner_bvn: "",
-        vendor_name: "",
+        business_name: "",
         vendor_address: vendorAddress,
-        vendor_email: "",
+        business_email: "",
         business_tin: "",
-        cac_reg_id: ""
+        cac_reg_id: "",
+
     });
 
 
@@ -89,17 +90,17 @@ const vendorVerification = () => {
     const [nextFormGroup, setNextFormGroup] = useState(false);
     const showNextForm = (e: any) => {
         e.preventDefault();
-        if(vendorVerificationDataState.owner_name == '')return notify("Name is required");
-        else if(vendorVerificationDataState.owner_address.length == 0) notify("Your address is important");
-        else if(vendorVerificationDataState.owner_bvn.length < 11) notify("Input proper BVN");
-        else {
+        // if(vendorVerificationDataState.owner_name == '')return notify("Name is required");
+        // else if(vendorVerificationDataState.owner_address.length == 0) notify("Your address is important");
+        // else if(vendorVerificationDataState.owner_bvn.length < 11) notify("Input proper BVN");
+        // else {
             setNextFormGroup(true);
-        }
+        // }
     }
 
     const handleSubmit = async (e: any) => {
         e.preventDefault();
-        if(vendorVerificationDataState.vendor_name === "") notify("Business name is required");
+        if(vendorVerificationDataState.business_name === "") notify("Business name is required");
         if(vendorVerificationDataState.vendor_address.length === 0) notify("Business address is important");
         else if (vendorVerificationDataState.cac_reg_id === "") notify("CAC ID is required");
         else {
@@ -129,137 +130,152 @@ const vendorVerification = () => {
         className='bg-gray-100 min-h-screen'
     >
         <Header />
-        {
-            authenticated && (
+
+        {isLoading && <Loader />}
+        <div className="flex flex-row w-full">
+            <div className="hidden lg:flex flex-col lg:w-[50%]">
+                <div className="w-[70%] h-[60%] mx-auto my-auto">
+                    <img 
+                        src='/images/undraw_certification.svg'
+                        alt="sell on zuta"
+                        className="w-full h-[80%]"
+                    />
+                    <p className="text-sm mt-4">We use your BVN to verify your identity, your BVN is not stored anywhere on our service</p>
+                </div>
+            </div>
+
             <div
-                className="w-full md:w-[80%] mx-auto mt-10 px-5 bg-white py-5 md:rounded-md"
+                className="w-full lg:w-[50%] px-5 bg-white py-5"
             >
                 <h2
-                    className="text-center text-2xl font-bold font-serif text-orange-500 mt-5 mb-10"
+                    className="text-center text-2xl font-bold font-serif text-orange-500 mt-5 mb-6"
                 >
                     Start Your verification Process
                 </h2>
 
                 <form
-                    className="flex flex-col lg:w-[60%] lg:mx-auto"
+                    className="flex flex-col lg:w-[80%] lg:mx-auto"
                 >
-                    
-                    <div
-                        className="flex flex-col"
-                    >
+                    {
+                        !nextFormGroup && 
+
                         <div
-                            className='flex justify-start py-3 border border-orange-300 mb-10 pl-3'
+                            className="flex flex-col"
                         >
-                            <h2
-                                className='font-mono text-orange-300 text-xl'
+                            <div
+                                className='flex justify-start py-3 border border-orange-300 mb-6 pl-3'
                             >
-                                Personal Information
-                            </h2>
-                        </div>
-                        <div
-                            className="w-full flex flex-col mb-5"
-                        >
-                            <label
-                                className="block text-gray-700 text-sm font-bold mb-2"
-                                htmlFor="owner_name"
-                            >
-                                Owner Name
-                            </label>
-                            <input
-                                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                id="owner_name"
-                                type="text"
-                                name="owner_name"
-                                onChange={(e) => handleChange(e)}
-                                placeholder='Enter your name'
-                                value={vendorVerificationDataState.owner_name || ''}
-                            />
-                        </div>
-                        <div
-                            className="w-full flex flex-col mb-5"
-                        >
-                            <label
-                                className="block text-gray-700 text-sm font-bold mb-2"
-                                htmlFor="owner_address"
-                            >
-                                Address
-                            </label>
-                            <input
-                                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                id="Address"
-                                type="text"
-                                name="owner_address"
-                                onChange={(e) =>  getAddressPredictions(e.target.value)}
-                                placeholder="Enter your address"
-                            />
-                        </div>
-                        {
-                            predictedAddress.length > 0 && predictedAddress.map((address: any, index: any) => (
-                                <div
-                                    className="flex flex-row items-center border-b border-gray-200 py-3"
-                                    key={index}
-                                    onClick={() => getAddressDetails(address.place_id, 'owner')}
+                                <h2
+                                    className='font-mono text-orange-300 text-xl'
                                 >
-                                    <span
-                                        className="text-gray-800 m-0"
-                                    >
-                                        {address.description}
-                                    </span>
-                                    <button
-                                        className="bg-orange-500 text-white px-2 py-1 rounded-md"
-                                    >
-                                        Select
-                                    </button>
-                                </div>
-                            ))
-                        }
-                        <div
-                            className="w-full flex flex-col mb-5"
-                        >
-                            <label
-                                className="block text-gray-700 text-sm font-bold mb-2"
-                                htmlFor="owner_email"
+                                    Personal Information
+                                </h2>
+                            </div>
+                            <div
+                                className="w-full flex flex-col mb-5"
                             >
-                                Email
-                            </label>
-                            <input
-                                type="email"
-                                name="owner_email"
-                                placeholder="Enter your email"
-                                value={user?.email!}
-                                onChange={(e) => handleChange(e)}
-                                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            />
-                        </div>
-                        <div
-                            className="w-full flex flex-col mb-5"
-                        >
-                            <label
-                                className="block text-gray-700 text-sm font-bold mb-2"
-                                htmlFor="owner_bvn"
+                                <label
+                                    className="block text-gray-700 text-sm font-bold mb-2"
+                                    htmlFor="owner_name"
+                                >
+                                    Business Owner Name
+                                </label>
+                                <input
+                                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                    id="owner_name"
+                                    type="text"
+                                    name="owner_name"
+                                    onChange={(e) => handleChange(e)}
+                                    placeholder='Enter your name'
+                                    value={vendorVerificationDataState.owner_name || ''}
+                                />
+                            </div>
+                            <div
+                                className="w-full flex flex-col mb-5"
                             >
-                                Bank verification number
-                            </label>
-                            <input
-                                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                id="BVN"
-                                type="text"
-                                placeholder="Enter your BVN"
-                                name='owner_bvn'
-                                onChange={(e) => handleChange(e)}
-                            />
+                                <label
+                                    className="block text-gray-700 text-sm font-bold mb-2"
+                                    htmlFor="owner_address"
+                                >
+                                    Address
+                                </label>
+                                <input
+                                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                    id="Address"
+                                    type="text"
+                                    name="owner_address"
+                                    onChange={(e) =>  getAddressPredictions(e.target.value)}
+                                    placeholder="Enter your address"
+                                />
+                            </div>
+                            {
+                                predictedAddress.length > 0 && predictedAddress.map((address: any, index: any) => (
+                                    <div
+                                        className="flex flex-row items-center border-b border-gray-200 py-3"
+                                        key={index}
+                                        onClick={() => getAddressDetails(address.place_id, 'owner')}
+                                    >
+                                        <span
+                                            className="text-gray-800 m-0"
+                                        >
+                                            {address.description}
+                                        </span>
+                                        <button
+                                            className="bg-orange-500 text-white px-2 py-1 rounded-md"
+                                        >
+                                            Select
+                                        </button>
+                                    </div>
+                                ))
+                            }
+                            <div
+                                className="w-full flex flex-col mb-5"
+                            >
+                                <label
+                                    className="block text-gray-700 text-sm font-bold mb-2"
+                                    htmlFor="owner_email"
+                                >
+                                    Email
+                                </label>
+                                <input
+                                    type="email"
+                                    name="owner_email"
+                                    placeholder="Enter your email"
+                                    value={user?.email!}
+                                    onChange={(e) => handleChange(e)}
+                                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                />
+                            </div>
+                            <div
+                                className="w-full flex flex-col mb-5"
+                            >
+                                <label
+                                    className="block text-gray-700 text-sm font-bold mb-2"
+                                    htmlFor="owner_bvn"
+                                >
+                                    Bank verification number
+                                </label>
+                                <input
+                                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                    id="BVN"
+                                    type="text"
+                                    placeholder="Enter your BVN"
+                                    name='owner_bvn'
+                                    onChange={(e) => handleChange(e)}
+                                />
+                            </div>
+                            <button
+                                onClick={(e) => showNextForm(e)}
+                                className="hover:bg-orange-700 hover:text-white text-orange-300 font-bold py-2 px-4 w-[30%] ml-[65%] rounded-full mb-10 xs:border-0 sm:!border border-orange-700 focus:outline-none focus:shadow-outline"
+                            >
+                                Continue
+                            </button>
                         </div>
-                        <button
-                            onClick={(e) => showNextForm(e)}
-                            className="hover:bg-orange-700 hover:text-white text-orange-300 font-bold py-2 px-4 w-[30%] ml-[65%] rounded-full mb-10 xs:border-0 sm:!border border-orange-700 focus:outline-none focus:shadow-outline"
-                        >
-                            Continue
-                        </button>
-                    </div>
+                    }
                     
                     { nextFormGroup && (
                         <div className="flex flex-col">
-                            <div className='flex justify-start py-3 border border-orange-700 mb-10 pl-3'>
+                            <div className='flex justify-start py-3 border border-orange-700 mb-6 pl-3'>
                                 <h2 className='font-mono text-orange-300 text-xl'>
                                     Business Information
                                 </h2>
@@ -271,7 +287,7 @@ const vendorVerification = () => {
                                 >
                                     <label
                                         className="block text-gray-700 text-sm font-bold mb-2"
-                                        htmlFor="vendor_name"
+                                        htmlFor="business_name"
                                     >
                                         Business Name
                                     </label>
@@ -280,7 +296,7 @@ const vendorVerification = () => {
                                         id="business_name"
                                         type="text"
                                         placeholder="Enter your business name"
-                                        name="vendor_name"
+                                        name="business_name"
                                         onChange={(e) => handleChange(e)}
                                     />
                                 </div>
@@ -327,7 +343,7 @@ const vendorVerification = () => {
                                 >
                                     <label
                                         className="block text-gray-700 text-sm font-bold mb-2"
-                                        htmlFor="vendor_email"
+                                        htmlFor="business_email"
                                     >
                                         Business Email
                                     </label>
@@ -336,7 +352,7 @@ const vendorVerification = () => {
                                         id="business_email"
                                         type="email"
                                         placeholder="Enter your business email"
-                                        name="vendor_email"
+                                        name="business_email"
                                         onChange={(e) => handleChange(e)}
                                     />
                                 </div>
@@ -390,11 +406,8 @@ const vendorVerification = () => {
                 </form>
                 <ToastContainer />
             </div>
-            )
-        }
-        {
-            isLoading && <Loader />
-        }
+        </div>
+        
     </div>
   )
 }

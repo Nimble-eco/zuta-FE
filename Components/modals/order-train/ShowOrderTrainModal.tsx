@@ -11,6 +11,7 @@ import RatingsCard from "../../cards/RatingsCard";
 import { useRouter } from "next/router";
 import { unsubscribeOrderTrainAction, updateOrderTrainStatusAction } from "../../../requests/orderTrain/orderTrain.request";
 import { storeProductRatingAction } from "../../../requests/productRating/productRating.request";
+import ButtonGhost from "../../buttons/ButtonGhost";
 
 interface IShowOrderTrainModalProps {
     orderTrain: any;
@@ -37,7 +38,11 @@ const ShowOrderTrainModal = ({orderTrain, setShow}: IShowOrderTrainModalProps) =
         .catch((error) => {
             console.log({error})
             setIsLoading(false);
-            toast.error(error.response?.message ?? 'Error try again later');
+            toast.error(error.response?.data?.message ?? 'Error try again later');
+        })
+        .finally(() => {
+            setShow();
+            setTimeout(() => router.push('/profile?path=orders'), 3000);
         })
     }
 
@@ -80,8 +85,6 @@ const ShowOrderTrainModal = ({orderTrain, setShow}: IShowOrderTrainModalProps) =
         setTimeout(() => router.push('/profile?path=orders'), 3000);
     }
 
-    console.log({orderTrain})
-
   return (
     <div className="!rounded-md">
         <ToastContainer />
@@ -96,7 +99,7 @@ const ShowOrderTrainModal = ({orderTrain, setShow}: IShowOrderTrainModalProps) =
                                 slides={orderTrain?.product?.product_images}
                             />
                         </div>
-                        <div className="w-full lg:w-[50%] flex flex-col gap-1 mt-4 lg:!mt-0">
+                        <div className="w-full lg:w-[50%] flex flex-col gap-1 !mt-4 lg:!mt-0">
                             <h1 className="text-xl md:text-2xl justify-center mb-0">{orderTrain?.product_name}</h1>
                             <p className="text-gray-600 py-2 mb-0">{orderTrain?.product?.product_description}</p>
                             <div className="flex flex-row gap-8 w-full">
@@ -104,13 +107,13 @@ const ShowOrderTrainModal = ({orderTrain, setShow}: IShowOrderTrainModalProps) =
                                     className='flex flex-row gap-1'
                                 >
                                     <p className="text-gray-600 !mb-0">Price:</p>
-                                    <span className=''>{formatAmount(orderTrain?.pivot_open_order_price_paid)}</span>
+                                    <span className=''>{formatAmount(orderTrain?.pivot_open_order_price_paid ?? orderTrain?.open_order_price_paid)}</span>
                                 </div>
                                 <div 
                                     className='flex flex-row gap-1'
                                 >
                                     <p className="text-gray-600 !mb-0"> Quantity:</p>
-                                    <span className=''>{orderTrain?.pivot_quantity}</span>
+                                    <span className=''>{orderTrain?.pivot_quantity ?? orderTrain?.quantity}</span>
                                 </div>
                             </div>
                             <div className="flex flex-col gap-[2px]">
@@ -118,11 +121,11 @@ const ShowOrderTrainModal = ({orderTrain, setShow}: IShowOrderTrainModalProps) =
                                 <div className="flex flex-col lg:flex-row gap-4">
                                     <div className="flex flex-row gap-1">
                                         <p className="text-gray-600">Delivery Fee:</p>
-                                        <p className="text-gray-600">{formatAmount(orderTrain?.pivot_order_delivery_fee)}</p>
+                                        <p className="text-gray-600">{formatAmount(orderTrain?.pivot_order_delivery_fee ?? orderTrain?.order_delivery_fee)}</p>
                                     </div>
                                     <div className="flex flex-row gap-1">
                                         <p className="text-gray-600">Service Fee:</p>
-                                        <p className="text-gray-600">{orderTrain?.pivot_order_service_fee}</p>
+                                        <p className="text-gray-600">{formatAmount(orderTrain?.pivot_order_service_fee ?? orderTrain?.order_service_fee)}</p>
                                     </div>
                                 </div>
                             </div>
@@ -130,18 +133,13 @@ const ShowOrderTrainModal = ({orderTrain, setShow}: IShowOrderTrainModalProps) =
                                 className='flex flex-row gap-4 text-lg'
                             >
                                 <p className="text-gray-600">Total:</p>
-                                <span className='font-semibold'>{formatAmount(orderTrain?.pivot_order_amount)}</span>
+                                <span className='font-semibold'>{formatAmount(orderTrain?.pivot_order_amount ?? orderTrain?.order_amount)}</span>
                             </div>
-                        </div>
-                    </div>
-
-                    <div className="flex flex-row gap-4">
-                        <div className="flex flex-col gap-4 w-full lg:w-[50%] p-4">
                             {
-                                orderTrain?.pivot_status === 'unshipped' && (
-                                    <div className="w-fit mx-auto flex flex-col gap-1">
-                                        <div className="w-[50%[ mx-auto h-12">
-                                            <ButtonFull
+                                (orderTrain?.pivot_status ?? orderTrain?.status) === 'unshipped' && (
+                                    <div className="w-fit flex flex-col gap-1">
+                                        <div className="w-[50%] h-12">
+                                            <ButtonGhost
                                                 action="Cancel Order"
                                                 onClick={cancelOrder}
                                                 loading={isLoading}
@@ -151,9 +149,14 @@ const ShowOrderTrainModal = ({orderTrain, setShow}: IShowOrderTrainModalProps) =
                                     </div>
                                 )
                             }
+                        </div>
+                    </div>
+
+                    <div className="flex flex-row gap-4">
+                        <div className="flex flex-col gap-4 w-full lg:w-[50%] p-4">
 
                             {
-                                orderTrain?.pivot_status === 'shipped' && (
+                                (orderTrain?.pivot_status ?? orderTrain?.status) === 'shipped' && (
                                     <div className="w-[90%] mx-auto flex flex-col gap-2 mb-6">
                                         <div className="flex flex-row gap-4 align-middle">
                                             <p className="!mb-0">Rate this product:</p>
