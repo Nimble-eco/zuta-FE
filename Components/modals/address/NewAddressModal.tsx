@@ -7,7 +7,6 @@ import { ToastContainer, toast } from 'react-toastify';
 import { injectStyle } from 'react-toastify/dist/inject-style';
 import { notify } from "../../../Utils/displayToastMessage";
 import { getAddressDetailsFromGoogleAPI } from "../../../Utils/getAddressDetailsFromGoogle";
-import { getGoogleAddressPredictions } from "../../../Utils/getPredictedAddress";
 import { sendAxiosRequest } from "../../../Utils/sendAxiosRequest";
 import ButtonFull from "../../buttons/ButtonFull";
 import Cookies from "js-cookie";
@@ -42,14 +41,6 @@ const NewAddressModal = ({setShow}: INewAddressModalProps) => {
 
     // AUTOCOMPLETE USER ADDRESS WITH GOOGLE API
     const [predictedAddress, setPredictedAddress] = useState<string[]>([]);
-
-    const getAddressPredictions =async (input: string) => {
-        setUserAddress({...userAddress, name: input})
-        if(input.length <= 3) return;
-        const predictedAddresses = await getGoogleAddressPredictions(input);
-        console.log('predicted address =', predictedAddresses);
-        if(predictedAddresses && predictedAddresses.length > 0) setPredictedAddress(predictedAddresses);
-    }
 
     // SET ADDRESS DETAILS
     const getAddressDetails = async (placeId :string) => {
