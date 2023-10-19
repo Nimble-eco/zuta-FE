@@ -21,7 +21,7 @@ const VerificationSuccessModal = ({setShow}: IVerificationSuccessModalProps) => 
                         Application Submitted
                         <IoIosCheckmarkCircleOutline className='text-3xl ml-3 text-green-500' />
                     </h2>
-                    <p className='text-opacity-25 font-semibold'>Use your owner email as email and business name as the password to login to view your profile while you await verification from management</p>
+                    <p className='text-opacity-25 font-semibold'>Use your owner email as email and business email as the password to login to view your profile while you await verification from management</p>
                     <div className='w-[80%] mx-auto h-14'>
                         <ButtonFull
                             action='Login'

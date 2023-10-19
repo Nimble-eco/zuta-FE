@@ -22,7 +22,7 @@ export const sendAxiosRequest =async (path: string, method: string, data: any, t
             'Access-Control-Allow-Headers': 'Content-Type, Authorization, Content-Length, X-Requested-With',
         }
     });
-    console.log(response.data);
-    if(response.data.status >= 400 && response.data.status <= 403) router.push('/signIn');
-    return response.data;
+    console.log(response?.data);
+    if(response?.data?.status >= 400 && response?.data?.status <= 403) router.push('/signIn');
+    return response?.data;
 }

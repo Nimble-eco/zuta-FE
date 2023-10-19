@@ -15,7 +15,7 @@ const MySearchInput = ({name, value, searchInputPlaceHolder, onSearch}: IMySearc
         <input 
             type="text" 
             name={name}
-            value={value || ""}
+            value={value}
             onChange={(e) => onSearch(e.target.value)}
             placeholder={searchInputPlaceHolder}
             className="flex-grow focus:outline-none bg-transparent w-[80%] text-sm pl-5 text-gray-600" 
