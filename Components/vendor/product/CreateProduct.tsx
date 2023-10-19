@@ -9,6 +9,7 @@ import { searchProductCategoriesAction } from '../../../requests/productCategori
 import SimpleLoader from '../../loaders/SimpleLoader'
 import DropdownItem from '../../inputs/DropdownItem'
 import SelectedListItemCard from '../../cards/SelectedListItemCard'
+import { searchProductTagsAction } from '../../../requests/productTags/productTags.request'
 
 const CreateProduct = () => {
     const [productCategories, setProductCategories] = useState<any[]>([]);
@@ -74,7 +75,7 @@ const CreateProduct = () => {
         if(searchString.length <3) return;
 
         setLoadingSearch(true);
-        await searchProductCategoriesAction(searchString)
+        await searchProductTagsAction(searchString)
         .then((response) => {
             if(response.status === 200) {
                 setProductTags(response.data?.data?.data ?? []);
@@ -92,6 +93,12 @@ const CreateProduct = () => {
         arr.push(category);
         setNewProduct({...newProduct, product_tags: arr});
         setShowProductCategoriesDropdown(false);
+    }
+
+    const removeTag = (title: string) => {
+        const arr = newProduct.product_tags?.filter((tag: string) => tag !== title);
+        setNewProduct({...newProduct, product_tags: arr});
+        setShowProductTagsDropdown(false);
     }
 
     console.log({newProduct})
@@ -272,7 +279,7 @@ const CreateProduct = () => {
                         newProduct.product_tags && newProduct.product_tags?.map((tag: string) => (
                             <SelectedListItemCard 
                                 title={tag}
-                                onClick={() => {}}
+                                onClick={removeTag}
                             />
                         ))
                     } 
