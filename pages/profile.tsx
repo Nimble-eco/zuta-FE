@@ -31,6 +31,7 @@ import ShowOrderTrainModal from "../Components/modals/order-train/ShowOrderTrain
 import { filterMyOrderTrainStatusAction, getMyOrderTrainAction } from "../requests/orderTrain/orderTrain.request";
 import { statusType } from "../requests/orderTrain/orderTrain.types";
 import Cookies from "js-cookie";
+import { getMyVendorAction } from "../requests/vendor/vendor.request";
 
 interface IProfilePageProps {
     profile: any;
@@ -681,12 +682,20 @@ export async function getServerSideProps(context: any) {
             ''
         );
 
-        const [myAddress, myProfile, myOrders, myOrderTrains, myReviews] = await Promise.allSettled([
+        const getMyVendorAccount = await axiosInstance.get('/api/vendor/me', {
+            headers: {
+                Authorization: token
+            }
+        });
+        console.log({getMyVendorAccount})
+
+        const [myAddress, myProfile, myOrders, myOrderTrains, myReviews, myVendorAccount] = await Promise.allSettled([
             getMyAddresses,
             getMyProfile,
             getMyOrders,
             getMyOrderTrains,
-            getMyPendingReviews
+            getMyPendingReviews,
+            getMyVendorAccount
         ]);
 
         const addresses = myAddress.status === 'fulfilled' ? myAddress.value.data : [];
@@ -694,9 +703,9 @@ export async function getServerSideProps(context: any) {
         const orders = myOrders.status === 'fulfilled' ? myOrders.value.data : [];
         const orderTrains = myOrderTrains.status === 'fulfilled' ? myOrderTrains.value.data.data : [];
         const reviews = myReviews.status === 'fulfilled' ? myReviews.value.data : [];
+        const myVendor = myVendorAccount.status === 'fulfilled' ? myVendorAccount.value.data : [];
 
-        console.log('order tain data =', orderTrains.data)
-        console.log('reviews =', reviews.data)
+        console.log('vendor =', myVendor.data)
 
         return {
             props: {
@@ -704,7 +713,8 @@ export async function getServerSideProps(context: any) {
                 profile,
                 orders,
                 orderTrains: orderTrains,
-                reviews
+                reviews,
+                vendor: myVendor
             }
         }
 
@@ -722,7 +732,10 @@ export async function getServerSideProps(context: any) {
             props: {
                 addresses: [],
                 profile: {},
-                orders: []
+                orders: [],
+                orderTrains: [],
+                reviews: [],
+                vendor: {}
             }
         }
     }

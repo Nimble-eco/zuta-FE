@@ -10,7 +10,7 @@ const ButtonGhost: FC<IButtonGhostProps> = ({action, onClick, loading}) => {
   return (
     <button
       onClick={onClick}
-      className=" hover:bg-orange-500 hover:text-white border-2 border-orange-500 text-orange-500 font-bold py-2 px-4 rounded-md min-w-fit whitespace-nowrap h-full"
+      className=" hover:bg-orange-500 hover:text-white border-2 border-orange-500 text-orange-500 font-bold py-2 px-4 rounded-full min-w-fit whitespace-nowrap h-full"
     >
       {loading ? 'Loading...' : action}
     </button>  

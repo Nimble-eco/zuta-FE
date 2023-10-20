@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import ButtonFull from "../../buttons/ButtonFull"
 import ImagePicker from "../../inputs/ImagePicker"
 import MyDropDownInput from "../../inputs/MyDropDownInput"
@@ -10,13 +10,20 @@ import SimpleLoader from '../../loaders/SimpleLoader'
 import DropdownItem from '../../inputs/DropdownItem'
 import SelectedListItemCard from '../../cards/SelectedListItemCard'
 import { searchProductTagsAction } from '../../../requests/productTags/productTags.request'
+import { convertToBase64 } from '../../../Utils/convertImageToBase64'
+import { createProductAction } from '../../../requests/products/products.request'
+import { toast } from 'react-toastify'
+import { useRouter } from 'next/router'
 
 const CreateProduct = () => {
+    const router = useRouter();
     const [productCategories, setProductCategories] = useState<any[]>([]);
     const [productTags, setProductTags] = useState<any[]>([]);
     const [loadingSearch, setLoadingSearch] = useState(false);
     const [showProductCategoriesDropdown, setShowProductCategoriesDropdown] = useState(false);
     const [showProductTagsDropdown, setShowProductTagsDropdown] = useState(false);
+    const showProductCatDropdownRef = useRef<HTMLInputElement>(null);
+    const showProductTagDropdownRef = useRef<HTMLInputElement>(null);
 
     const [newProduct, setNewProduct] = useState<any>({
         product_name: '',
@@ -92,7 +99,7 @@ const CreateProduct = () => {
         const arr = newProduct.product_tags;
         arr.push(category);
         setNewProduct({...newProduct, product_tags: arr});
-        setShowProductCategoriesDropdown(false);
+        setShowProductTagsDropdown(false);
     }
 
     const removeTag = (title: string) => {
@@ -100,6 +107,46 @@ const CreateProduct = () => {
         setNewProduct({...newProduct, product_tags: arr});
         setShowProductTagsDropdown(false);
     }
+
+    const selectImage = async (e: any) => {
+        let base64_image = await convertToBase64(e.target.files[0]);
+        let arr = newProduct.base64_images;
+        arr.push(base64_image);
+        setNewProduct({...newProduct, base64_images: arr});
+    }
+
+    const createProduct = async () => {
+        const vendorId = localStorage.getItem('vendor_id');
+        await createProductAction({
+            ...newProduct,
+            vendor_id: vendorId
+        })
+        .then((response) => {
+            console.log({response})
+            if(response.status === 201) {
+                toast.success('Product created successfully');
+                router.push('/vendor/products')
+            }
+        })
+    }
+    
+    useEffect(() => {
+        let isMounted = true;
+
+        const handleClickOutside = (event: any) => {
+            if(isMounted) {
+                if (showProductCatDropdownRef.current && !showProductCatDropdownRef.current!.contains(event.target)) setShowProductCategoriesDropdown(false);
+                if (showProductTagDropdownRef.current && !showProductTagDropdownRef.current!.contains(event.target)) setShowProductTagsDropdown(false);
+            }
+        }
+    
+        document.addEventListener('mousedown', handleClickOutside);
+    
+       return () => {
+          document.removeEventListener('mousedown', handleClickOutside);
+          isMounted = false;
+        };
+    }, []);
 
     console.log({newProduct})
 
@@ -199,8 +246,8 @@ const CreateProduct = () => {
         </div>
 
         <div className="flex flex-col md:grid md:grid-cols-2 gap-4 justify-between">
-            <div className="w-full flex flex-col gap-3 relative">
-                <p className="text-sm font-semibold">Category</p>
+            <div className="w-full flex flex-col relative">
+                <p className="text-sm font-semibold mb-2">Category</p>
                 <MySearchInput 
                     searchInputPlaceHolder="Select a category"
                     name='searchCategories'
@@ -209,7 +256,7 @@ const CreateProduct = () => {
                 />
                 {
                     showProductCategoriesDropdown && (
-                        <div className='flex flex-col bg-white shadow-2xl w-full gap-3 absolute top-20 px-4 py-2 rounded-md h-48 overflow-y-scroll'>
+                        <div className='flex flex-col bg-white shadow-2xl w-full gap-3 absolute top-20 px-4 py-2 rounded-md h-52 overflow-y-scroll z-30' ref={showProductCatDropdownRef}>
                             {
                                 loadingSearch ? 
                                 <div className='flex justify-center align-middle'>
@@ -231,7 +278,7 @@ const CreateProduct = () => {
                     )
                 }
 
-                <div className='flex flex-row flex-wrap gap-3'>
+                <div className='flex flex-row flex-wrap mt-2 gap-3'>
                     {
                         newProduct.product_categories && newProduct.product_categories?.map((category: string) => (
                             <SelectedListItemCard 
@@ -242,8 +289,8 @@ const CreateProduct = () => {
                     } 
                 </div>
             </div>
-            <div className="w-full flex flex-col">
-                <p className="text-sm font-semibold gap-3">Tags</p>
+            <div className="w-full flex flex-col relative">
+                <p className="text-sm font-semibold mb-2">Tags</p>
                 <MySearchInput 
                     searchInputPlaceHolder="Select some tags"
                     name='searchTags'
@@ -252,7 +299,7 @@ const CreateProduct = () => {
                 />
                 {
                     showProductTagsDropdown && (
-                        <div className='flex flex-col bg-white shadow-2xl w-full gap-3 absolute top-20 px-4 py-2 rounded-md h-48 overflow-y-scroll'>
+                        <div className='flex flex-col bg-white shadow-2xl w-full gap-3 absolute top-20 px-4 py-2 rounded-md h-48 overflow-y-scroll z-30'  ref={showProductTagDropdownRef}>
                             {
                                 loadingSearch ? 
                                 <div className='flex justify-center align-middle'>
@@ -274,7 +321,7 @@ const CreateProduct = () => {
                     )
                 }
 
-                <div className='flex flex-row flex-wrap gap-3'>
+                <div className='flex flex-row flex-wrap mt-2 gap-3'>
                     {
                         newProduct.product_tags && newProduct.product_tags?.map((tag: string) => (
                             <SelectedListItemCard 
@@ -290,7 +337,8 @@ const CreateProduct = () => {
         <div className="my-4">
             <ImagePicker 
                 label="Product Image"
-                onSelect={() => {}}
+                onSelect={selectImage}
+                files={newProduct.base64_images}
             />
         </div>
     </div>
