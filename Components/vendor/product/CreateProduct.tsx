@@ -17,6 +17,7 @@ import { useRouter } from 'next/router'
 
 const CreateProduct = () => {
     const router = useRouter();
+    const [isLoading, setIsLoading] = useState(false);
     const [productCategories, setProductCategories] = useState<any[]>([]);
     const [productTags, setProductTags] = useState<any[]>([]);
     const [loadingSearch, setLoadingSearch] = useState(false);
@@ -116,6 +117,8 @@ const CreateProduct = () => {
     }
 
     const createProduct = async () => {
+
+        setIsLoading(true);
         const vendorId = localStorage.getItem('vendor_id');
         await createProductAction({
             ...newProduct,
@@ -128,6 +131,11 @@ const CreateProduct = () => {
                 router.push('/vendor/products')
             }
         })
+        .catch(error => {
+            console.log({error})
+            toast.error(error.response?.data?.message ?? 'Error try agin later');
+        })
+        .finally(() => setIsLoading(false));
     }
     
     useEffect(() => {
@@ -157,7 +165,8 @@ const CreateProduct = () => {
             <div className="w-fit absolute right-1 bottom-2">
                 <ButtonFull 
                     action="Create Product"
-                    onClick={() => {}}
+                    loading={isLoading}
+                    onClick={createProduct}
                 />
             </div>
         </div>
