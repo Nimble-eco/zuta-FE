@@ -1,3 +1,6 @@
+import { useRouter } from "next/router";
+import { getDateAndTimeFromISODate } from "../../../Utils/convertIsoDateToDateString";
+import { formatAmount } from "../../../Utils/formatAmount";
 import ButtonFull from "../../buttons/ButtonFull";
 import ButtonGhost from "../../buttons/ButtonGhost";
 import TextCard from "../../texts/TextCard";
@@ -5,20 +8,20 @@ import TextCard from "../../texts/TextCard";
 interface ISingleProductProps {
     product: {
         id: string,
-        name: string,
-        description: string,
-        price: number,
-        discount?: number,
+        product_name: string,
+        product_description: string,
+        product_price: number,
+        product_discount?: number,
         rating?: number,
-        stock: number,
+        quantity: number,
         potential_price?: number,
         potential_discount?: number,
-        product_category: string[],
+        product_categories: string[],
         product_tags: string[],
         flag: number,
         featured_status?: string,
         position: number,
-        images: string[],
+        product_images: string[],
         status: string,
         created_at: string,
         featured?: any
@@ -26,16 +29,18 @@ interface ISingleProductProps {
 }
 
 export const SingleProduct = ({product} : ISingleProductProps) => {
+    const router = useRouter();
+    console.log({product})
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col w-full md:w-[80%] absolute right-0 md:left-[21%] rounded-md px-4">
             <div className='flex flex-col bg-white'>
                 <div className="flex flex-row justify-between border-b border-gray-200 py-2 px-4">
-                    <h2 className="text-lg font-semibold align-center">{product.name}</h2>
+                    <h2 className="text-lg font-semibold align-center">{product.product_name}</h2>
                     <div className="flex flex-row ">
                         <div className="hidden md:flex">
                             <ButtonGhost
                                 action="Edit Product"
-                                onClick={() => {}}
+                                onClick={() => router.push(`/editProductPage?id=${product.id}`)}
                             />
                         </div>
                         <div className="ml-3">
@@ -53,15 +58,15 @@ export const SingleProduct = ({product} : ISingleProductProps) => {
                                 <TextCard label='Product ID' value={product.id} />
                             </div>
                             <div className='w-[30%] md:w-auto md:mr-none'>
-                                <TextCard label='Price' value={product.price} />
+                                <TextCard label='Price' value={formatAmount(product.product_price)} />
                             </div>
                         </div>
                         <div className="flex flex-row lg:w-[50%]">
                             <div className='w-[60%] mr-[3%] md:mr-none'>
-                                <TextCard label='Stock' value={product.stock} />
+                                <TextCard label='Stock' value={product.quantity} />
                             </div>
                             <div className='w-[30%] md:w-auto md:mr-none'>
-                                <TextCard label='Flag' value={product.flag} />
+                                <TextCard label='Flag' value={product.flag ?? 0} />
                             </div>
                         </div>
                     </div>
@@ -69,7 +74,7 @@ export const SingleProduct = ({product} : ISingleProductProps) => {
                     <div className='flex flex-col lg:flex-row'>
                         <div className="flex flex-row lg:w-[50%]">
                             <div className='w-[60%] mr-[3%] md:mr-none'>
-                                <TextCard label='Created On' value={product.created_at} />
+                                <TextCard label='Created On' value={getDateAndTimeFromISODate(product.created_at)} />
                             </div>
                             <div className='w-[30%] md:mr-none'>
                                 <TextCard label='Status' value={product.status} />
@@ -77,7 +82,7 @@ export const SingleProduct = ({product} : ISingleProductProps) => {
                         </div>
                         <div className="flex flex-row lg:w-[50%]">
                             <div className='w-[60%] mr-[3%] md:mr-none'>
-                                { product.discount &&  <TextCard label='Discount' value={product.discount} /> }
+                                { product.product_discount &&  <TextCard label='Discount %' value={product.product_discount} /> }
                             </div>
                             <div className='w-[30%] md:mr-none'>
                                 { product.potential_price &&  <TextCard label='Potential price' value={product.potential_price} /> }
@@ -90,7 +95,7 @@ export const SingleProduct = ({product} : ISingleProductProps) => {
             <div className="flex flex-col px-4 mt-8 bg-white py-6">
                 <h3 className="font-semibold text-left border-b border-gray-200 mb-4">Product Description</h3>
                 <div className="">
-                    <p className="text-gray-700">{product.description}</p>
+                    <p className="text-gray-700">{product.product_description}</p>
                 </div>
             </div>
 
@@ -102,7 +107,9 @@ export const SingleProduct = ({product} : ISingleProductProps) => {
                             Category
                         </p>
                         <p className="text-base text-black font-semibold">
-                            {product.product_category}
+                            {product.product_categories.map((category) => (
+                                <p className="text-base text-black font-semibold" key={category}>{category }, &nbsp;</p>
+                            ))}
                         </p>
                     </div>
                 </div>
@@ -129,18 +136,18 @@ export const SingleProduct = ({product} : ISingleProductProps) => {
                     <div className="absolute right-2 bottom-1">
                         {product.featured_status && product.featured_status === 'active' ? (
                             <ButtonFull
-                                action='Feature product'
+                                action='Stop product'
                                 onClick={() => {}}
                             />
                             ) : (
                             <ButtonGhost
-                                action='Stop Feature'
+                                action='Feature Product'
                                 onClick={() => {}}
                             />
                         )}
                     </div>
                 </div>
-                { product?.featured &&
+                { product?.featured ?
                     <div className="flex flex-col md:flex-row">
                         <div className="flex flex-row md:w-[50%] lg:w-auto">
                             <div className="w-[60%] lg:w-auto">
@@ -159,7 +166,11 @@ export const SingleProduct = ({product} : ISingleProductProps) => {
                                 <TextCard label="Time left" value={product.featured.time_left} />
                             </div>
                         </div>
-                    </div>
+                    </div> : (
+                        <>
+                            <p className="flex py-8 mx-auto text-center">Feature your product to reach more customers</p>
+                        </>
+                    )
                 }
             </div>
 
@@ -167,9 +178,9 @@ export const SingleProduct = ({product} : ISingleProductProps) => {
                 <h4 className="font-semibold text-left pb-3 mb-4 border-b border-gray-200 pl-3">Product Images</h4>
                 <div className="grid grid-cols-3 gap-2 lg:flex lg:flex-row px-4">
                     {
-                        product?.images?.map((image) => (
+                        product?.product_images?.map((image) => (
                             <div>
-                                <img src={image} alt='Product' className="h-32 mr-6" />
+                                <img src={image} alt='Product' className="h-36 w-32 mr-6 rounded-md" />
                             </div>
                         ))
                     }

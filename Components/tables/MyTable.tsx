@@ -3,10 +3,11 @@ import { MdArrowForward } from "react-icons/md";
 interface IMyTableProps {
     headings: string[];
     content: any[];
-    onRowButtonClick: () => void;
+    onRowButtonClick: (item: any) => void;
 }
 
 const MyTable = ({headings, content, onRowButtonClick}: IMyTableProps) => {
+   
   return (
     <div className="p-4">
         <table className="w-full text-base">
@@ -27,29 +28,32 @@ const MyTable = ({headings, content, onRowButtonClick}: IMyTableProps) => {
             </thead>
             <tbody className="mt-10">
                 {
-                    content.map((item, index) => (
+                    content?.map((item, index) => (
                         <tr 
                             key={item.id || index}
                             className="border-b border-gray-200 cursor-pointer justify-evenly"
-                            onClick={onRowButtonClick}
+                            // onClick={onRowButtonClick}
                         >
                             {headings.map((heading) => (
                                 <td 
                                     key={`${heading}-${item.id}`}
                                 >
-                                    { heading.toLocaleLowerCase() === 'image' ? (
+                                    { heading.toLocaleLowerCase().includes('image') ? (
                                         <img 
                                             src={item[heading] as string} 
                                             alt='product image' 
-                                            className="w-12 rounded-full my-2 align-middle"
+                                            className="w-16 h-16 rounded-full my-2 align-middle"
                                         />
                                     ) : (
-                                        <p className='align-middle pb-3'>{item[heading]}</p>
+                                        <p className='align-middle my-auto'>{item[heading]}</p>
                                     )}
                                 </td>
                             ))}
                             <td>
-                                <MdArrowForward className="text-2xl text-gray-600 cursor-pointer hover:!text-orange-500" onClick={onRowButtonClick} />
+                                <MdArrowForward className="text-2xl text-gray-600 cursor-pointer hover:!text-orange-500" onClick={(e: any) => {
+                                    e.preventDefault();
+                                    onRowButtonClick(item)
+                                }}/>
                             </td>
                         </tr>
                     ))

@@ -200,7 +200,7 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                     }
 
                     <div className="flex flex-col text-gray-700 bg-white rounded-md py-6 mb-10 min-h-screen">
-                        <div className="flex flex-row border-b border-gray-300 w-[90%] md:w-[80%] mx-auto justify-evenly pb-3 mb-4">
+                        <div className="flex flex-row border-b border-gray-300 w-[90%] md:w-[80%] mx-auto whitespace-nowrap justify-evenly pb-3 mb-4">
                             <div 
                                 className={`${currentNav === 'profile' && 'bg-orange-400 bg-opacity-25'} flex flex-row cursor-pointer px-4 pt-2 pb-1 rounded-[20px] font-medium`}
                                 onClick={() => {
@@ -687,7 +687,6 @@ export async function getServerSideProps(context: any) {
                 Authorization: token
             }
         });
-        console.log({getMyVendorAccount})
 
         const [myAddress, myProfile, myOrders, myOrderTrains, myReviews, myVendorAccount] = await Promise.allSettled([
             getMyAddresses,
@@ -704,8 +703,6 @@ export async function getServerSideProps(context: any) {
         const orderTrains = myOrderTrains.status === 'fulfilled' ? myOrderTrains.value.data.data : [];
         const reviews = myReviews.status === 'fulfilled' ? myReviews.value.data : [];
         const myVendor = myVendorAccount.status === 'fulfilled' ? myVendorAccount.value.data : [];
-
-        console.log('vendor =', myVendor.data)
 
         return {
             props: {

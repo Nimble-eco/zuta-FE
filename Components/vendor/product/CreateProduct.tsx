@@ -12,8 +12,10 @@ import SelectedListItemCard from '../../cards/SelectedListItemCard'
 import { searchProductTagsAction } from '../../../requests/productTags/productTags.request'
 import { convertToBase64 } from '../../../Utils/convertImageToBase64'
 import { createProductAction } from '../../../requests/products/products.request'
-import { toast } from 'react-toastify'
+import { ToastContainer, toast } from 'react-toastify'
+import { injectStyle } from "react-toastify/dist/inject-style";
 import { useRouter } from 'next/router'
+import Cookies from 'js-cookie'
 
 const CreateProduct = () => {
     const router = useRouter();
@@ -25,6 +27,12 @@ const CreateProduct = () => {
     const [showProductTagsDropdown, setShowProductTagsDropdown] = useState(false);
     const showProductCatDropdownRef = useRef<HTMLInputElement>(null);
     const showProductTagDropdownRef = useRef<HTMLInputElement>(null);
+    let vendorId: string = '';
+
+    if(typeof window !== 'undefined') {
+        injectStyle();
+        vendorId = JSON.parse(Cookies.get('user')!).vendor;
+    }
 
     const [newProduct, setNewProduct] = useState<any>({
         product_name: '',
@@ -119,16 +127,15 @@ const CreateProduct = () => {
     const createProduct = async () => {
 
         setIsLoading(true);
-        const vendorId = localStorage.getItem('vendor_id');
         await createProductAction({
             ...newProduct,
             vendor_id: vendorId
         })
         .then((response) => {
-            console.log({response})
             if(response.status === 201) {
+                setIsLoading(false);
                 toast.success('Product created successfully');
-                router.push('/vendor/products')
+                router.push('/vendor/product')
             }
         })
         .catch(error => {
@@ -160,6 +167,7 @@ const CreateProduct = () => {
 
   return (
     <div className="flex flex-col w-[80%] absolute right-0 left-[23%]">
+        <ToastContainer />
         <div className="flex flex-row relative px-2 py-4 mb-3 border-b border-gray-200">
             <h2 className="text-lg font-bold">Product Details</h2>
             <div className="w-fit absolute right-1 bottom-2">

@@ -4,14 +4,19 @@ import ButtonFull from "../../../Components/buttons/ButtonFull";
 import FilterAndSearchGroup from "../../../Components/inputs/FilterAndSearchGroup";
 import MyTable from "../../../Components/tables/MyTable";
 import VendorSideNavPanel from "../../../Components/vendor/layout/VendorSideNavPanel"
-import { productsDummyData } from "../../../data/products";
 import FilterContainer from "../../../Components/modals/containers/FilterContainer";
 import TextInput from "../../../Components/inputs/ColumnTextInput";
 import MyNumberInput from "../../../Components/inputs/MyNumberInput";
 import MyDropDownInput from "../../../Components/inputs/MyDropDownInput";
 import { categoriesDummyData } from "../../../data/categories";
+import { parse } from "cookie";
+import axiosInstance from "../../../Utils/axiosConfig";
 
-const index = () => {
+interface IProductsIndexPageProps {
+    products: any;
+}
+
+const index = ({products}: IProductsIndexPageProps) => {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [filterByDetails, setFilterByDetails] = useState({
@@ -22,6 +27,7 @@ const index = () => {
         category: '',
         tags: ''
     });
+    const [productsData, setProductsData] = useState(products); 
 
     const handleFilterByDetailsChange = (e: any) => {
         setFilterByDetails((prevState) => ({
@@ -47,9 +53,11 @@ const index = () => {
     const itemsPerPage = 8;
     const productsPages = [];
 
-    for (let i = 0; i < productsDummyData?.length; i += itemsPerPage) {
-        productsPages.push(productsDummyData.slice(i, i + itemsPerPage));
+    for (let i = 0; i < products?.data?.length; i += itemsPerPage) {
+        productsPages.push(products?.data?.slice(i, i + itemsPerPage));
     }
+
+    console.log({products})
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -141,9 +149,12 @@ const index = () => {
                 {/* PRODUCTS TABLE */}
                 <div className="flex flex-col pb-8 bg-white">
                     <MyTable
-                        headings={['image', 'name', 'price', 'discount']}
-                        content={productsPages[currentProductPage]} 
-                        onRowButtonClick={() => router.push('product/singleProductPage')}
+                        headings={['product_image', 'product_name', 'product_price', 'product_discount', 'quantity']}
+                        content={productsData?.data?.map((product: any) => ({
+                            ...product,
+                            product_image: product.product_images[0]
+                        }))} 
+                        onRowButtonClick={(product: any) => router.push(`product/singleProductPage?id=${product.id}`)}
                     />
                     <div className='flex flex-row justify-end text-sm w-[80%] mx-auto'>
                         <button disabled={currentProductPage === 0} onClick={() => setCurrentProductPage(currentProductPage - 1)} className='mr-3 cursor-pointer'>Previous</button>
@@ -157,3 +168,39 @@ const index = () => {
 }
 
 export default index
+
+
+export async function getServerSideProps(context: any) {
+    const cookies = parse(context.req.headers.cookie || ''); 
+    const user = JSON.parse(cookies.user || 'null');
+    const token = user?.access_token;
+
+    try {
+        const getMyProducts = await axiosInstance.get('/api/product/me', {
+            headers: {
+                Authorization: token,
+                team: user?.vendor
+            }
+        });
+
+        return {
+            props: {
+                products: getMyProducts.data?.data ?? []
+            }
+        }
+    } catch(error: any) {
+        console.log({error})
+        if(error?.response?.status === 401) {
+            return {
+                redirect: {
+                  destination: '/auth/signIn',
+                  permanent: false
+                }
+            }
+        }
+
+        return {
+            props: {products: []}
+        }
+    }
+}
