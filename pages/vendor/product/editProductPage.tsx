@@ -6,10 +6,9 @@ import axiosInstance from "../../../Utils/axiosConfig";
 
 interface IEditProductPageProps {
     product: any;
-    categories: any[];
 }
 
-const editProductPage = ({product, categories}: IEditProductPageProps) => {
+const editProductPage = ({product}: IEditProductPageProps) => {
   return (
     <div className="min-h-screen bg-white flex flex-col">
         <div className="flex flex-row w-[95%] mx-auto mt-8 relative mb-10">
@@ -37,13 +36,13 @@ export async function getServerSideProps(context: any) {
             }
         });
         const product = getMyProduct.data?.data;
+        console.log({product})
 
       const categories = categoriesDummyData;
         
         return {
             props: {
-                product, 
-                categories
+                product
             }
         }
     } catch (error: any) {

@@ -1,18 +1,24 @@
 import { BsFileImage } from "react-icons/bs";
 import { HiOutlinePlusCircle } from "react-icons/hi";
+import TextButton from "../buttons/TextButton";
+import { RiCloseCircleLine } from "react-icons/ri";
 
 interface ImagePickerProps {
   label: string;
   onSelect: (e: any) => void;
   files: any[];
+  onRemove?: (e: any) => void;
 }
 
-const ImagePicker = ({label, onSelect, files}: ImagePickerProps) => {
+const ImagePicker = ({label, onSelect, files, onRemove}: ImagePickerProps) => {
   return (
     <div className='flex flex-col'>
-      <p className='text-sm font-semibold text-left pl-4 py-3 border-b border-gray-200 mb-4'>
-        {label}
-      </p>
+      <div className="flex flex-row relative py-2 mb-4 border-b border-gray-200">
+        <h4 className="font-semibold text-left pb-3 pl-3">{label}</h4>
+        <div className=" hidden md:flex w-fit absolute right-2 bottom-1">
+          <TextButton action="Upload image" onClick={onSelect} />
+        </div>
+      </div>
       {
         !files || files?.length === 0 ? (
           <div className='flex flex-col bg-orange-50 rounded-md border-dashed justify-center text-center py-10 cursor-pointer'>
@@ -24,13 +30,20 @@ const ImagePicker = ({label, onSelect, files}: ImagePickerProps) => {
            
           </div>
         ) : (
-          <div className="flex flex-row flex-wrap gap-4">
+          <div className="flex flex-row flex-wrap overflow-y-auto gap-4">
             {
-              files?.map((file) => (
+              files?.map((file, index) => (
                 <div className="flex flex-col relative">
+                  {
+                    onRemove && <RiCloseCircleLine 
+                      className="text-xl absolute top-1 right-1 text-orange-500 cursor-pointer"
+                      onClick={() => onRemove(index)}
+                    />
+                  }
                   <img
                     className="h-40 w-36 rounded-md"
                     src={file}
+                    key={index}
                   />
                 </div>
               ))
@@ -41,6 +54,9 @@ const ImagePicker = ({label, onSelect, files}: ImagePickerProps) => {
                 <input type="file" onChange={onSelect} className="hidden" />
               </label>
               <HiOutlinePlusCircle className="text-2xl text-center mx-auto text-orange-500 text-opacity-60" />
+            </div>
+            <div className="flex md:hidden w-fit mx-auto mt-8">
+              <TextButton action="Upload image" onClick={onSelect} />
             </div>
           </div>
         )

@@ -10,7 +10,7 @@ const MyTable = ({headings, content, onRowButtonClick}: IMyTableProps) => {
    
   return (
     <div className="p-4">
-        <table className="w-full text-base">
+        <table className="w-full min-w-fit overflow-x-auto text-base">
             <thead>
                 <tr className="justify-evenly text-sm text-left">
                     {

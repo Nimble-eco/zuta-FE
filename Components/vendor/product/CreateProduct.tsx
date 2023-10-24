@@ -163,8 +163,6 @@ const CreateProduct = () => {
         };
     }, []);
 
-    console.log({newProduct})
-
   return (
     <div className="flex flex-col w-[80%] absolute right-0 left-[23%]">
         <ToastContainer />

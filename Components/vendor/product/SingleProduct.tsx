@@ -1,13 +1,20 @@
 import { useRouter } from "next/router";
+import Cookies from 'js-cookie';
+import { ToastContainer, toast } from 'react-toastify'
+import { injectStyle } from "react-toastify/dist/inject-style";
 import { getDateAndTimeFromISODate } from "../../../Utils/convertIsoDateToDateString";
 import { formatAmount } from "../../../Utils/formatAmount";
 import ButtonFull from "../../buttons/ButtonFull";
 import ButtonGhost from "../../buttons/ButtonGhost";
 import TextCard from "../../texts/TextCard";
+import {useState} from 'react'
+import { deleteProductByVendorAction, updateProductVendorApprovedAction, updateProductVendorUnApprovedAction } from "../../../requests/products/products.request";
+import SliderInput from "../../inputs/SliderInput";
+import DeleteProductModal from "../../modals/vendor/product/DeletProductModal";
 
 interface ISingleProductProps {
     product: {
-        id: string,
+        id: number,
         product_name: string,
         product_description: string,
         product_price: number,
@@ -25,28 +32,103 @@ interface ISingleProductProps {
         status: string,
         created_at: string,
         featured?: any
+        vendor_approved: boolean;
+        management_approved: boolean;
     }
 }
 
 export const SingleProduct = ({product} : ISingleProductProps) => {
     const router = useRouter();
-    console.log({product})
+    const [isLoading, setIsLoading] = useState(false);
+    const [isApproving, setIsApproving] = useState(false);
+    let vendorId: string = '';
+    const [vendorApprovedStatus, setVendorApprovedStatus] = useState(product?.vendor_approved);
+    const [showDeleteProductModal, setShowDeleteProductModal] = useState(false);
+
+    if(typeof window !== 'undefined') {
+        injectStyle();
+        vendorId = JSON.parse(Cookies.get('user')!).vendor;
+    }
+
+    const approveProduct = async () => {
+        setIsApproving(true)
+
+        await updateProductVendorApprovedAction(product.id, vendorId)
+        .then((response) => {
+            if(response.status === 202) {
+                setVendorApprovedStatus(!vendorApprovedStatus);
+                toast.success('Product status updated');
+            }
+        
+        })
+        .catch(error => {
+            console.log({error});
+            toast.error(error?.response?.data?.message || 'Error try again later');
+        })
+        .finally(() => setIsApproving(false));
+    }
+
+    const unApproveProduct = async () => {
+        setIsApproving(true)
+
+        await updateProductVendorUnApprovedAction(product.id, vendorId)
+        .then((response) => {
+            if(response.status === 202) {
+                setVendorApprovedStatus(!vendorApprovedStatus);
+                toast.success('Product status updated');
+            }
+        })
+        .catch(error => {
+            console.log({error});
+            toast.error(error?.response?.data?.message || 'Error try again later');
+        })
+        .finally(() => setIsApproving(false));
+    }
+
+    const deleteAProduct = async () => {
+        setIsLoading(true)
+
+        await deleteProductByVendorAction(product.id, vendorId)
+        .then((response) => {
+            if(response.status === 202) {
+                toast.success('Product deleted');
+                setShowDeleteProductModal(false);
+                router.push('/vendor/product');
+            }
+        })
+        .catch(error => {
+            console.log({error});
+            toast.error(error?.response?.data?.message || 'Error try again later');
+        })
+        .finally(() => setIsLoading(false));
+    }
+ 
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col w-full md:w-[80%] absolute right-0 md:left-[21%] rounded-md px-4">
+            <ToastContainer />
+            {
+                showDeleteProductModal && (
+                    <DeleteProductModal
+                        setShow={() => setShowDeleteProductModal(!showDeleteProductModal)}
+                        loading={isLoading}
+                        onDelete={deleteAProduct}
+                    />
+                )
+            }
             <div className='flex flex-col bg-white'>
                 <div className="flex flex-row justify-between border-b border-gray-200 py-2 px-4">
-                    <h2 className="text-lg font-semibold align-center">{product.product_name}</h2>
+                    <h2 className="text-xl font-semibold align-center align-baseline my-auto">{product.product_name}</h2>
                     <div className="flex flex-row ">
                         <div className="hidden md:flex">
                             <ButtonGhost
-                                action="Edit Product"
-                                onClick={() => router.push(`/editProductPage?id=${product.id}`)}
+                                action="Delete Product"
+                                onClick={() => setShowDeleteProductModal(!showDeleteProductModal)}
                             />
                         </div>
                         <div className="ml-3">
                             <ButtonFull
-                                action="Publish"
-                                onClick={() => {}}
+                                action="Edit Product"
+                                onClick={() => router.push(`editProductPage?id=${product.id}`)}
                             />
                         </div>
                     </div>
@@ -77,15 +159,39 @@ export const SingleProduct = ({product} : ISingleProductProps) => {
                                 <TextCard label='Created On' value={getDateAndTimeFromISODate(product.created_at)} />
                             </div>
                             <div className='w-[30%] md:mr-none'>
-                                <TextCard label='Status' value={product.status} />
+                                <div className='w-[60%] mr-[3%] md:mr-none'>
+                                    <TextCard label='Discount %' value={product.product_discount ?? 0} /> 
+                                </div>
+                                
                             </div>
                         </div>
                         <div className="flex flex-row lg:w-[50%]">
-                            <div className='w-[60%] mr-[3%] md:mr-none'>
-                                { product.product_discount &&  <TextCard label='Discount %' value={product.product_discount} /> }
+                            <div className='w-[60%] whitespace-nowrap mr-[3%] md:mr-none'>
+                                { product.management_approved &&  <TextCard label='Management Approved' value={product.management_approved ? 'Approved' : 'Unapproved'} /> }
                             </div>
-                            <div className='w-[30%] md:mr-none'>
-                                { product.potential_price &&  <TextCard label='Potential price' value={product.potential_price} /> }
+                           
+                            <div className="flex flex-col w-[30%] py-3 px-5 gap-2">
+                                {
+                                    vendorApprovedStatus ?
+                                    <>
+                                        <p className="text-sm text-gray-600 whitespace-nowrap">Hide Product</p> 
+                                        {isApproving && <p className="text-orange-500">Updating...</p>}
+                                        <SliderInput
+                                            name="vendor_approved"
+                                            value={vendorApprovedStatus}
+                                            handleChange={unApproveProduct}
+                                        />
+                                    </> : 
+                                    <>
+                                        <p className="text-sm text-gray-600 whitespace-nowrap">Publish Product</p> 
+                                        {isApproving && <p className="text-orange-500">Updating...</p>}
+                                        <SliderInput
+                                            name="vendor_approved"
+                                            value={vendorApprovedStatus}
+                                            handleChange={approveProduct}
+                                        />
+                                    </> 
+                                }
                             </div>
                         </div>
                     </div>
@@ -93,7 +199,7 @@ export const SingleProduct = ({product} : ISingleProductProps) => {
             </div>
 
             <div className="flex flex-col px-4 mt-8 bg-white py-6">
-                <h3 className="font-semibold text-left border-b border-gray-200 mb-4">Product Description</h3>
+                <h3 className="font-semibold text-left border-b border-gray-200 mb-4 !text-lg">Product Description</h3>
                 <div className="">
                     <p className="text-gray-700">{product.product_description}</p>
                 </div>
@@ -101,28 +207,28 @@ export const SingleProduct = ({product} : ISingleProductProps) => {
 
             <div className="flex flex-col md:flex-row mt-8 justify-between">
                 <div className="flex flex-col bg-white px-4 py-3 w-full md:w-[48%] mb-6 md:mb-0">
-                    <h4 className="font-semibold border-b border-gray-200 pb-3 mb-4">Product Category</h4>
+                    <h4 className="font-semibold border-b border-gray-200 pb-3 mb-4 !text-lg">Product Category</h4>
                     <div className="flex flex-col py-3">
                         <p className="text-sm text-gray-600">
                             Category
                         </p>
-                        <p className="text-base text-black font-semibold">
-                            {product.product_categories.map((category) => (
-                                <p className="text-base text-black font-semibold" key={category}>{category }, &nbsp;</p>
+                        <p className="text-base flex flex-row flex-wrap gap-2 text-black font-semibold">
+                            {product?.product_categories?.map((category) => (
+                                <p className="text-base text-black" key={category}>{category }, &nbsp;</p>
                             ))}
                         </p>
                     </div>
                 </div>
 
                 <div className="flex flex-col bg-white px-4 py-3 w-full md:w-[48%]">
-                    <h4 className="font-semibold border-b border-gray-200 pb-3 mb-4">Product Tags</h4>
+                    <h4 className="font-semibold border-b border-gray-200 pb-3 mb-4 !text-lg">Product Tags</h4>
                     <div className="flex flex-col py-3">
                         <p className="text-sm text-gray-600">
                             Tags
                         </p>
-                        <div className="flex flex-row">
-                            {product.product_tags.map((tag) => (
-                                <p className="text-base text-black font-semibold" key={tag}>{tag }, &nbsp;</p>
+                        <div className="flex flex-row flex-wrap gap-2">
+                            {product?.product_tags?.map((tag) => (
+                                <p className="text-base text-black" key={tag}>{tag }, &nbsp;</p>
                             ))}
                         </div>
                        
@@ -132,7 +238,7 @@ export const SingleProduct = ({product} : ISingleProductProps) => {
             
             <div className="flex flex-col bg-white py-4 mt-8">
                 <div className="flex flex-row justify-between pb-3 mb-4 border-b border-gray-100 px-4 relative">
-                    <h3 className="font-semibold">Feature Details</h3>
+                    <h3 className="font-semibold !text-lg">Feature Details</h3>
                     <div className="absolute right-2 bottom-1">
                         {product.featured_status && product.featured_status === 'active' ? (
                             <ButtonFull

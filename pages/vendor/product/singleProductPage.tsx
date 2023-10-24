@@ -1,4 +1,3 @@
-
 import { parse } from 'cookie';
 import VendorSideNavPanel from '../../../Components/vendor/layout/VendorSideNavPanel'
 import { SingleProduct } from '../../../Components/vendor/product/SingleProduct'
