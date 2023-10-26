@@ -37,3 +37,23 @@ export const filterOrderAction = async (payload: IFilterOrderActionProps) => {
         }
     })
 }
+
+export const filterOrdersByVendorAction = async (payload: IFilterOrderActionProps) => {
+    const user = JSON.parse(Cookies.get('user')!);
+    return axiosInstance.post('/api/order/filter/index', payload, {
+        headers: {
+            Authorization: user.access_token,
+            team: payload.vendor_id!
+        }
+    });
+}
+
+export const searchOrdersByVendorAction = async (search: string, vendor_id: string) => {
+    const user = JSON.parse(Cookies.get('user')!);
+    return axiosInstance.post('/api/order/search/index', {search}, {
+        headers: {
+            Authorization: user.access_token,
+            team: vendor_id
+        }
+    })
+}

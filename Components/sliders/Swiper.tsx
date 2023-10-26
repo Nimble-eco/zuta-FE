@@ -1,7 +1,5 @@
-// Import Swiper React components
 import SwiperCore, { Autoplay, Pagination } from "swiper";
 import { Swiper, SwiperSlide } from 'swiper/react';
-// Import Swiper styles
 import 'swiper/css';
 
 interface ISwiperProps {
@@ -17,15 +15,15 @@ const SwiperSlider = ({slides}: ISwiperProps) => {
       grabCursor={true}
       slidesPerView={2}
       autoplay
-      className='max-h-full h-full'
+      className='max-h-full h-full w-[50vw]'
     >
       {
         slides?.map((slide, index) => (
           <SwiperSlide
             key={index}
-            className='rounded-md h-full'
+            className='rounded-md h-[40vh] bg-gray-400'
           >
-            <img src={slide} alt='image' className='w-full h-full rounded-md object-cover object-center'/>
+            <img src={slide} alt='image' className='w-full h-[30vh] rounded-md object-cover object-center bg-gray-400'/>
           </SwiperSlide>
         ))
       }

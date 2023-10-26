@@ -4,7 +4,7 @@ import { capitalizeFirstLetter } from '../../Utils/capitalizeFirstLettersOfStrin
 interface ITextInputProps {
     label: string;
     name?: string;
-    value: string | string[];
+    value: string | string[] | number;
     onInputChange: (e: any) => void;
     placeHolder?: string;
     type?: string;
@@ -12,7 +12,7 @@ interface ITextInputProps {
 
 const ColumnTextInput = ({label, name, value, onInputChange, placeHolder, type='text'}: ITextInputProps) => {
   return (
-    <div className="flex flex-col mb-4 py-2">
+    <div className="flex flex-col mb-4">
       <label htmlFor={label} className='font-semibold mb-3 text-sm'>{capitalizeFirstLetter(label)}:</label>
       <input
         type={type}

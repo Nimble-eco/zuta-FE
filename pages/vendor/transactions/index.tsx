@@ -11,10 +11,19 @@ import FilterContainer from "../../../Components/modals/containers/FilterContain
 import TextInput from "../../../Components/inputs/ColumnTextInput";
 import MyNumberInput from "../../../Components/inputs/MyNumberInput";
 import MyDropDownInput from "../../../Components/inputs/MyDropDownInput";
+import { parse } from "cookie";
+import axiosInstance from "../../../Utils/axiosConfig";
 
-const index = () => {
+interface IOrdersIndexPageProps {
+    orders: any;
+    orderTrains: any;
+}
+
+const index = ({orders, orderTrains}: IOrdersIndexPageProps) => {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [ordersData, setOrdersData] = useState(orders);
+    const [orderTrainsData, setOrderTrainsData] = useState(orderTrains);
     const [filterByDetails, setFilterByDetails] = useState({
         product_name: '',
         product_price: 0,
@@ -59,7 +68,7 @@ const index = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-         {
+        {
             showFilterInput && <FilterContainer 
                 show={showFilterInput}
                 setShow={() => setShowFilterInput(!showFilterInput)}
@@ -146,7 +155,7 @@ const index = () => {
                 ]}
             />
         }
-        <div className="flex flex-row w-[90%] mx-auto mt-8 relative mb-10">
+        <div className="flex flex-row w-[95%] mx-auto mt-8 relative mb-10">
             <VendorSideNavPanel />
             <div className="flex flex-col w-[80%] absolute right-0 left-[21%]">
                 <h2 className="text-2xl font-bold text-slate-700 mb-4">Transactions</h2>
@@ -199,3 +208,57 @@ const index = () => {
 }
 
 export default index
+
+export async function getServerSideProps(context: any) {
+    const cookies = parse(context.req.headers.cookie || ''); 
+    const user = JSON.parse(cookies.user || 'null');
+    const token = user?.access_token;
+
+    try {
+        const getMyOrders = await axiosInstance.get('/api/order/me', {
+            headers: {
+                Authorization: token,
+                team: user?.vendor
+            }
+        });
+
+        const getMyOrderTrains = await axiosInstance.get('/api/open-order/me', {
+            headers: {
+                Authorization: token,
+                team: user?.vendor
+            }
+        });
+
+        const [myOrdersResult, myOrderTrainsResult] = await Promise.allSettled([
+            getMyOrders,
+            getMyOrderTrains
+        ]);
+
+        const myOrders = myOrdersResult.status === 'fulfilled' ? myOrdersResult?.value?.data : [];
+        const myOrderTrains = myOrderTrainsResult.status === 'fulfilled' ? myOrderTrainsResult?.value?.data : [];
+        console.log({myOrders, myOrderTrains})
+        return {
+            props: {
+                orders: myOrders.data ?? [],
+                orderTrain: myOrderTrains.data ?? []
+            }
+        }
+    } catch(error: any) {
+        console.log({error})
+        if(error?.response?.status === 401) {
+            return {
+                redirect: {
+                  destination: '/auth/signIn',
+                  permanent: false
+                }
+            }
+        }
+
+        return {
+            props: {
+                orders: [],
+                orderTrains: []
+            }
+        }
+    }
+}

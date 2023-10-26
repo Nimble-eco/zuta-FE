@@ -14,9 +14,10 @@ import { useRouter } from "next/router";
 
 interface INewAddressModalProps {
     setShow: () => void;
+    redirect?: () => void;
 }
 
-const NewAddressModal = ({setShow}: INewAddressModalProps) => {
+const NewAddressModal = ({setShow, redirect}: INewAddressModalProps) => {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [userAddress, setUserAddress] = useState<any>({
@@ -72,6 +73,7 @@ const NewAddressModal = ({setShow}: INewAddressModalProps) => {
             setIsLoading(false);
             toast.success('Address Created');
             setShow();
+            if(redirect) redirect();
             
         } catch(error: any) {
             notify(error?.message || "Error Try later")

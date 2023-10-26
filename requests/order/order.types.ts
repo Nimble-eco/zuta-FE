@@ -20,7 +20,8 @@ export interface ICancelOrderActionProps {
 
 export interface IFilterOrderActionProps {
     user_id?: string,
-    product_string?: string;
+    vendor_id?: string,
+    product_name?: string;
     product_id?: number;
     quantity?: number;
     address_id?: number;
@@ -29,9 +30,10 @@ export interface IFilterOrderActionProps {
     order_service_fee?: number;
     order_insurance_fee?: number;
     order_delivery_fee?: number;
-    order_paid?: number;
+    order_paid?: string;
     order_payment_confirmed?: number;
     order_payment_method?: number;
     recipient_address?: string;
     status?: string;
+    pagination?: number;
 }

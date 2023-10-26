@@ -134,6 +134,7 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
         {
             showAddAddressModal && <NewAddressModal
                 setShow={() => setShowAddAddressModal(false)}
+                redirect={() => router.push('/checkout')}
             />
         }
         <div className="flex flex-col bg-white py-4 px-3 h-fit w-[90%] fixed bottom-0 left-[5%] right-[5%] shadow-md z-50 mb-4 lg:hidden">

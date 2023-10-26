@@ -40,7 +40,7 @@ const paystack = () => {
         .then((response) => {
             console.log({response})
             setIsLoading(false)
-            if(response.data.message.toLowerCase() === 'payment successful') {
+            if(response.data?.message?.toLowerCase() === 'payment successful') {
                 const status = response.data.message.toLowerCase() === 'payment successful' ? 'success' : 'unsuccessful';
                 setPaymentStatus(status);
 
@@ -88,8 +88,8 @@ const paystack = () => {
         <div 
             className="w-[95%] flex flex-col lg:flex-row mx-auto mt-12"
         >
-            <div className="flex flex-col w-[90%] gap-4 mx-auto lg:w-[65%] lg:mr-[2%] mb-4 min-h-[60vh]">
-                <div className="flex flex-col bg-white rounded-md px-4 py-4 relative min-h-[70%]">
+            <div className="flex flex-col w-[90%] gap-4 mx-auto lg:w-[65%] lg:mr-[2%] mb-4 min-h-fit">
+                <div className="flex flex-col bg-white rounded-md px-4 py-4 relative min-h-[75%]">
                     <div className="flex flex-row justify-start gap-4 ">
                         <h2 className="text-xl font-semibold">{paymentStatus === 'success' ? 'Verified' : 'Verifying'}</h2>
                         <div>
@@ -118,10 +118,10 @@ const paystack = () => {
                     <div className="flex flex-col gap-4 absolute bottom-7 left-4 right-4">
                         <textarea 
                             name="user-experience"
-                            className="h-48 rounded-[16px] bg-gray-100 outline-none px-4 py-5"
+                            className="h-48 rounded-[16px] bg-gray-100 outline-none mt-10 px-4 py-5"
                             placeholder="Tell us about your experience"
                         />
-                        <div className="flex justify-end">
+                        <div className="flex w-[40%] justify-end">
                             <ButtonGhost
                                 action="Submit"
                                 onClick={() => {}}

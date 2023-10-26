@@ -1,3 +1,4 @@
+import { capitalizeFirstLetter } from "../../Utils/capitalizeFirstLettersOfString";
 import { formatAmount } from "../../Utils/formatAmount";
 
 interface ICartComponentsProps {
@@ -23,7 +24,7 @@ const CartComponent = ({ items, onQuantityChange, onRemove }: ICartComponentsPro
                 </div>
                 <div className="flex flex-col w-[80%]">
                     <div className="flex flex-row gap-6 w-full mb-4">
-                        <p className="text-base">{item.product_name}</p>
+                        <p className="text-base">{capitalizeFirstLetter(item.product_name)}</p>
                         <p className="text-green-600">{formatAmount(item.product_price)}</p>
                     </div>
                     <div className="flex flex-col">
@@ -61,7 +62,7 @@ const CartComponent = ({ items, onQuantityChange, onRemove }: ICartComponentsPro
                 </div>
                 <div className="flex flex-col w-[80%]">
                     <div className="flex flex-row gap-6 w-full mb-4">
-                        <p className="text-base">{item.product.product_name}</p>
+                        <p className="text-base">{capitalizeFirstLetter(item.product.product_name)}</p>
                         <p className="text-green-600">{formatAmount(item.open_order_price)}</p>
                     </div>
                     <div className="flex flex-col">
@@ -99,7 +100,7 @@ const CartComponent = ({ items, onQuantityChange, onRemove }: ICartComponentsPro
                 </div>
                 <div className="flex flex-col w-[80%]">
                     <div className="flex flex-row gap-6 w-full mb-4">
-                        <p className="text-base">{item.product_name}</p>
+                        <p className="text-base">{capitalizeFirstLetter(item.product_name)}</p>
                         <p className="text-green-600">{formatAmount(item.product_price)}</p>
                     </div>
                     <div className="flex flex-col">

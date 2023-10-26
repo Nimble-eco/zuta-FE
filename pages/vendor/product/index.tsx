@@ -14,7 +14,6 @@ import { formatAmount } from "../../../Utils/formatAmount";
 import { sendAxiosRequest } from "../../../Utils/sendAxiosRequest";
 import { filterProductsByVendorAction, searchProductsByVendorAction } from "../../../requests/products/products.request";
 import Cookies from "js-cookie";
-import DeleteProductModal from "../../../Components/modals/vendor/product/DeletProductModal";
 
 interface IProductsIndexPageProps {
     products: any;
@@ -152,9 +151,6 @@ const index = ({products, categories, tags}: IProductsIndexPageProps) => {
         }
     }
 
-    console.log({productsData})
-    
-
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
         <ToastContainer />
@@ -267,7 +263,6 @@ const index = ({products, categories, tags}: IProductsIndexPageProps) => {
 }
 
 export default index
-
 
 export async function getServerSideProps(context: any) {
     const cookies = parse(context.req.headers.cookie || ''); 

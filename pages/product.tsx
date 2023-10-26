@@ -12,6 +12,7 @@ import HorizontalSlider from '../Components/lists/HorizontalSlider';
 import axiosInstance from '../Utils/axiosConfig';
 import router from 'next/router';
 import { formatAmount } from '../Utils/formatAmount';
+import { capitalizeFirstLetter } from '../Utils/capitalizeFirstLettersOfString';
 
 interface IProductPageProps {
     product: {
@@ -99,6 +100,7 @@ function product({product, similar_products}: IProductPageProps) {
     useEffect(() => {
         if(similar_products.length > 0) getSimilarProductOpenOrder();
     }, []);
+    console.log({product})
 
     return (
         <div
@@ -129,7 +131,7 @@ function product({product, similar_products}: IProductPageProps) {
                 </div>
                 <div className="w-[95%] md:w-[35%] md:!mx-0 lg:!mx-0 flex flex-col mt-10 md:mt-0">
                     <h1 className="text-xl md:text-2xl justify-center mb-0">
-                        {product.product_name}
+                        {capitalizeFirstLetter(product.product_name)}
                     </h1>
                     <p className="text-gray-600 py-2 mb-0">
                         {product.product_description}
@@ -282,6 +284,7 @@ export async function getServerSideProps(context: any) {
         }
     }
     catch(err: any) {
+        console.log({err})
         throw new Error(err.message);
     }
 }

@@ -1,5 +1,7 @@
 import { HiChat, HiChatAlt, HiOutlineChatAlt2 } from "react-icons/hi";
 import RatingsCard from "../../cards/RatingsCard";
+import { formatAmount } from "../../../Utils/formatAmount";
+import { getDateAndTimeFromISODate } from "../../../Utils/convertIsoDateToDateString";
 
 interface ISingleTransactionProps {
   transaction: {
@@ -8,10 +10,11 @@ interface ISingleTransactionProps {
     product_id: string;
     product_name: string;
     product_discount: number;
-    order_id: string;
+    id: string;
     quantity: number;
-    total_amount: number;
-    service_fee: number;
+    product_price_paid: number;
+    order_sub_amount: number;
+    order_service_fee: number;
     created_at: string;
     vendor_name: string;
     vendor_id: string;
@@ -20,37 +23,41 @@ interface ISingleTransactionProps {
     paid: boolean;
     payment_confirmed: boolean;
     payment_method: string;
-    customer_email: string;
-    customer_name: string;
+    recipient_state: string;
+    recipient_city: string;
     shipped_date?: string;
   },
-  reviews: {name: string, message: string, rating: number}[];
+  reviews: {
+    user: any, 
+    comment: string, 
+    score: number
+  }[];
 }
 
 const SingleTransaction = ({transaction, reviews}: ISingleTransactionProps) => {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col w-full md:w-[80%] absolute right-0 md:left-[21%] rounded-md px-4 text-sm">
-      <div className="flex flex-col lg:flex-row">
-        <div className="flex flex-col py-3 px-4 bg-white w-full mb-4 lg:mb-0 lg:w-[45%] mx-auto lg:mr-[5%] pb-6">
-          <h4 className="font-semibold text-base text-left pb-2 border-b border-gray-100 mb-4">Transaction Details</h4>
+      <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4">
+        <div className="flex flex-col py-3 px-4 bg-white w-full mb-4 lg:mb-0 mx-auto pb-6">
+          <h4 className="font-semibold text-base text-left pb-2 border-b border-gray-100 mb-4">Order Details</h4>
           <div className="flex flex-row w-full pb-3">
             <div className="w-[50%] flex flex-col">
               <h5 className="text-gray-400">Order date</h5>
-              <span className="font-semibold text-base">{new Date(transaction.created_at).toDateString()}</span>
+              <span className="font-semibold text-base">{getDateAndTimeFromISODate(transaction.created_at)}</span>
             </div>
             <div className="w-[50%] flex flex-col">
               <h5 className="text-gray-400">Order ID</h5>
-              <span className="font-semibold text-base">{transaction.order_id}</span>
+              <span className="font-semibold text-base">{transaction.id}</span>
             </div>
           </div>
           <div className="flex flex-row w-full pb-3">
             <div className="w-[50%] flex flex-col">
               <h5 className="text-gray-400">Order amount</h5>
-              <span className="font-semibold text-base">{transaction.total_price}</span>
+              <span className="font-semibold text-base">{transaction.order_sub_amount}</span>
             </div>
             <div className="w-[50%] flex flex-col">
               <h5 className="text-gray-400">Service Fee</h5>
-              <span className="font-semibold text-base">{transaction.service_fee}</span>
+              <span className="font-semibold text-base">{transaction.order_service_fee}</span>
             </div>
           </div>
           <div className="flex flex-row w-full pb-3">
@@ -59,8 +66,8 @@ const SingleTransaction = ({transaction, reviews}: ISingleTransactionProps) => {
               <span className="font-semibold text-base">{transaction.status}</span>
             </div>
             <div className="w-[50%] flex flex-col">
-              <h5 className="text-gray-400">Total Amount</h5>
-              <span className="font-semibold text-base">{transaction.total_amount}</span>
+              <h5 className="text-gray-400">Product Price</h5>
+              <span className="font-semibold text-base">{transaction.product_price_paid}</span>
             </div>
           </div>
           <div className="flex flex-row w-full pb-3">
@@ -74,7 +81,7 @@ const SingleTransaction = ({transaction, reviews}: ISingleTransactionProps) => {
             </div>
           </div>
         </div>
-        <div className="bg-white flex flex-col px-3 py-4 lg:w-[45%] mx-auto w-full mb-4 lg:mb-0">
+        <div className="bg-white flex flex-col px-3 py-4 mx-auto w-full mb-4 lg:mb-0">
           <h4 className="font-semibold text-base text-left pb-2 border-b border-gray-100 mb-4">Product Details</h4>
           <div className="flex flex-row w-full pb-3">
             <div className="w-[50%] flex flex-col">
@@ -89,7 +96,7 @@ const SingleTransaction = ({transaction, reviews}: ISingleTransactionProps) => {
           <div className="flex flex-row w-full pb-3">
             <div className="w-[50%] flex flex-col">
               <h5 className="text-gray-400">Price</h5>
-              <span className="font-semibold text-base">{transaction.price}</span>
+              <span className="font-semibold text-base">{formatAmount(transaction.price)}</span>
             </div>
             <div className="w-[50%] flex flex-col">
               <h5 className="text-gray-400">Discount</h5>
@@ -99,12 +106,12 @@ const SingleTransaction = ({transaction, reviews}: ISingleTransactionProps) => {
           <h4 className="font-semibold text-base text-left pb-2 border-b border-gray-100 mt-8 mb-4">Customer Details</h4>
           <div className="flex flex-col md:flex-row w-full pb-3">
             <div className="w-full mb-3 md:mb-0 md:w-[50%] flex flex-col">
-              <h5 className="text-gray-400">Customer Name</h5>
-              <span className="font-semibold text-base">{transaction.customer_name}</span>
+              <h5 className="text-gray-400">Customer City</h5>
+              <span className="font-semibold text-base">{transaction.recipient_city}</span>
             </div>
             <div className="w-full md:w-[50%] flex flex-col">
-              <h5 className="text-gray-400">Email</h5>
-              <span className="font-semibold text-base max-w-full">{transaction.customer_email}</span>
+              <h5 className="text-gray-400">State</h5>
+              <span className="font-semibold text-base max-w-full">{transaction.recipient_state}</span>
             </div>
           </div>
         </div>
@@ -115,10 +122,10 @@ const SingleTransaction = ({transaction, reviews}: ISingleTransactionProps) => {
         { reviews && reviews.map((review) => (
           <div className="flex flex-col pb-3 border-b border-gray-100 mb-3">
             <div className="flex flex-row">
-              <h3 className="font-semibold mr-4">{review.name}</h3>
-              <RatingsCard rating={review.rating} />
+              <h3 className="font-semibold mr-4">{review.user?.name}</h3>
+              <RatingsCard rating={review.score} />
             </div>
-            {review.message && <p className="text-gay-500 text-sm">{review.message}</p>}
+            {review.comment && <p className="text-gay-500 text-sm">{review.comment}</p>}
           </div>
         ))}
 

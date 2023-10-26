@@ -20,15 +20,15 @@ const FilterContainer: React.FC<FilterComponentProps> = ({ show, setShow, childr
             <Modal show={show} onHide={setShow} backdrop="static" dialogClassName='modal-90w'>
                 <Modal.Body className='md:!min-w-[40vw] !w-[40vw] flex flex-col min-h-[40vh] relative'>
                     <RiCloseCircleLine className='text-3xl text-orange-500 cursor-pointer absolute top-3 right-3' onClick={setShow} />
-                    <form className="flex flex-col w-[90%] md:w-[80%] mx-auto my-6 gap-3">
+                    <div className="flex flex-col w-[90%] md:w-[80%] mx-auto my-6 !gap-4">
                         {
                             children?.map((component, index) => (
-                                <div key={index}>
+                                <div key={index} className='!mb-6'>
                                     {component}
                                 </div>
                             ))
                         }
-                        <div className='w-fit mx-auto my-3'>
+                        <div className='w-fit mx-auto mb-3'>
                             <ButtonFull
                                 action='Filter'
                                 loading={isLoading}
@@ -38,7 +38,7 @@ const FilterContainer: React.FC<FilterComponentProps> = ({ show, setShow, childr
                                 }}
                             />
                         </div>
-                    </form>
+                    </div>
                 </Modal.Body>
             </Modal>
         </div>

@@ -1,4 +1,5 @@
 import { MdArrowForward } from "react-icons/md";
+import { capitalizeFirstLetter } from "../../Utils/capitalizeFirstLettersOfString";
 
 interface IMyTableProps {
     headings: string[];
@@ -45,7 +46,7 @@ const MyTable = ({headings, content, onRowButtonClick}: IMyTableProps) => {
                                             className="w-16 h-16 rounded-full my-2 align-middle"
                                         />
                                     ) : (
-                                        <p className='align-middle my-auto'>{item[heading]}</p>
+                                        <p className='align-middle my-auto py-3'>{capitalizeFirstLetter(item[heading])}</p>
                                     )}
                                 </td>
                             ))}
