@@ -57,3 +57,23 @@ export const searchOrdersByVendorAction = async (search: string, vendor_id: stri
         }
     })
 }
+
+export const closeOrderByVendorAction = async (id: string, vendor_id: string) => {
+    const user = JSON.parse(Cookies.get('user')!);
+    return axiosInstance.post('/api/order/close', {id}, {
+        headers: {
+            Authorization: user.access_token,
+            team: vendor_id
+        }
+    })
+}
+
+export const markOrderAsReadyByVendorAction = async (id: string, vendor_id: string) => {
+    const user = JSON.parse(Cookies.get('user')!);
+    return axiosInstance.post('/api/order/ready', {id}, {
+        headers: {
+            Authorization: user.access_token,
+            team: vendor_id
+        }
+    })
+}

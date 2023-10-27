@@ -1,7 +1,15 @@
+import { ToastContainer, toast } from 'react-toastify'
+import { injectStyle } from "react-toastify/dist/inject-style";
 import { HiChat, HiChatAlt, HiOutlineChatAlt2 } from "react-icons/hi";
 import RatingsCard from "../../cards/RatingsCard";
 import { formatAmount } from "../../../Utils/formatAmount";
 import { getDateAndTimeFromISODate } from "../../../Utils/convertIsoDateToDateString";
+import { capitalizeFirstLetter } from "../../../Utils/capitalizeFirstLettersOfString";
+import ButtonGhost from "../../buttons/ButtonGhost";
+import ButtonFull from "../../buttons/ButtonFull";
+import { useState } from "react";
+import { closeOrderByVendorAction, markOrderAsReadyByVendorAction } from "../../../requests/order/order.request";
+import { useRouter } from 'next/router';
 
 interface ISingleTransactionProps {
   transaction: {
@@ -16,16 +24,18 @@ interface ISingleTransactionProps {
     order_sub_amount: number;
     order_service_fee: number;
     created_at: string;
+    createdAt?: string;
     vendor_name: string;
     vendor_id: string;
     vendor_address_id: string;
     status: string;
     paid: boolean;
     payment_confirmed: boolean;
-    payment_method: string;
+    order_payment_method: string;
     recipient_state: string;
     recipient_city: string;
     shipped_date?: string;
+    product: any
   },
   reviews: {
     user: any, 
@@ -35,15 +45,83 @@ interface ISingleTransactionProps {
 }
 
 const SingleTransaction = ({transaction, reviews}: ISingleTransactionProps) => {
+  const router = useRouter();
+  console.log({transaction})
+  const [isLoading, setIsLoading] = useState(false);
+
+  if(typeof window !== 'undefined') {
+    injectStyle();
+  }
+
+  const closeOrderByVendor = async () => {
+    setIsLoading(true)
+
+    await closeOrderByVendorAction(transaction.id, transaction.vendor_id)
+    .then((response) => {
+      if(response.status === 202) {
+        toast.success('Order status updated');
+        router.push(`/vendor/transactions/orders/show?id=${transaction.id}`);
+      }
+    })
+    .catch(error => {
+      console.log({error});
+      toast.error(error?.response?.data?.message || 'Error try again later');
+    })
+    .finally(() => setIsLoading(false));
+  }
+
+  const readyOrderByVendor = async () => {
+    setIsLoading(true)
+
+    await markOrderAsReadyByVendorAction(transaction.id, transaction.vendor_id)
+    .then((response) => {
+      if(response.status === 202) {
+        toast.success('Order status updated');
+        router.push(`/vendor/transactions/orders/show?id=${transaction.id}`);
+      }
+    })
+    .catch(error => {
+      console.log({error});
+      toast.error(error?.response?.data?.message || 'Error try again later');
+    })
+    .finally(() => setIsLoading(false));
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col w-full md:w-[80%] absolute right-0 md:left-[21%] rounded-md px-4 text-sm">
+      <ToastContainer />
       <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4">
-        <div className="flex flex-col py-3 px-4 bg-white w-full mb-4 lg:mb-0 mx-auto pb-6">
-          <h4 className="font-semibold text-base text-left pb-2 border-b border-gray-100 mb-4">Order Details</h4>
+        <div className="flex flex-col px-4 bg-white w-full mb-4 lg:mb-0 mx-auto pb-6">
+          <div className="flex flex-row justify-between py-2 border-b border-gray-100 mb-4">
+            <h4 className="font-semibold text-base text-left my-auto">Order Details</h4>
+            <div className="flex flex-row gap-2">
+              {
+                transaction.status === 'unshipped' &&
+                <div className="h-10">
+                  <ButtonGhost
+                    action="Cancel Order"
+                    loading={isLoading}
+                    onClick={closeOrderByVendor}
+                  />
+                </div>
+              }
+
+              {
+                transaction.status === 'unshipped' &&
+                <div className="h-10">
+                  <ButtonFull
+                    action="Ready for delivery"
+                    loading={isLoading}
+                    onClick={readyOrderByVendor}
+                  />
+                </div>
+              }
+            </div>
+          </div>
           <div className="flex flex-row w-full pb-3">
             <div className="w-[50%] flex flex-col">
               <h5 className="text-gray-400">Order date</h5>
-              <span className="font-semibold text-base">{getDateAndTimeFromISODate(transaction.created_at)}</span>
+              <span className="font-semibold text-base">{getDateAndTimeFromISODate(transaction.created_at ?? transaction.createdAt)}</span>
             </div>
             <div className="w-[50%] flex flex-col">
               <h5 className="text-gray-400">Order ID</h5>
@@ -53,11 +131,11 @@ const SingleTransaction = ({transaction, reviews}: ISingleTransactionProps) => {
           <div className="flex flex-row w-full pb-3">
             <div className="w-[50%] flex flex-col">
               <h5 className="text-gray-400">Order amount</h5>
-              <span className="font-semibold text-base">{transaction.order_sub_amount}</span>
+              <span className="font-semibold text-base">{formatAmount(transaction.order_sub_amount)}</span>
             </div>
             <div className="w-[50%] flex flex-col">
               <h5 className="text-gray-400">Service Fee</h5>
-              <span className="font-semibold text-base">{transaction.order_service_fee}</span>
+              <span className="font-semibold text-base">{formatAmount(transaction.order_service_fee)}</span>
             </div>
           </div>
           <div className="flex flex-row w-full pb-3">
@@ -67,7 +145,7 @@ const SingleTransaction = ({transaction, reviews}: ISingleTransactionProps) => {
             </div>
             <div className="w-[50%] flex flex-col">
               <h5 className="text-gray-400">Product Price</h5>
-              <span className="font-semibold text-base">{transaction.product_price_paid}</span>
+              <span className="font-semibold text-base">{formatAmount(transaction.product_price_paid)}</span>
             </div>
           </div>
           <div className="flex flex-row w-full pb-3">
@@ -77,7 +155,7 @@ const SingleTransaction = ({transaction, reviews}: ISingleTransactionProps) => {
             </div>
             <div className="w-[50%] flex flex-col">
               <h5 className="text-gray-400">Payment Method</h5>
-              <span className="font-semibold text-base">{transaction.payment_method}</span>
+              <span className="font-semibold text-base">{transaction.order_payment_method}</span>
             </div>
           </div>
         </div>
@@ -86,7 +164,7 @@ const SingleTransaction = ({transaction, reviews}: ISingleTransactionProps) => {
           <div className="flex flex-row w-full pb-3">
             <div className="w-[50%] flex flex-col">
               <h5 className="text-gray-400">Name</h5>
-              <span className="font-semibold text-base">{transaction.product_name}</span>
+              <span className="font-semibold text-base">{capitalizeFirstLetter(transaction.product_name)}</span>
             </div>
             <div className="w-[50%] flex flex-col">
               <h5 className="text-gray-400">Quantity</h5>
@@ -96,11 +174,11 @@ const SingleTransaction = ({transaction, reviews}: ISingleTransactionProps) => {
           <div className="flex flex-row w-full pb-3">
             <div className="w-[50%] flex flex-col">
               <h5 className="text-gray-400">Price</h5>
-              <span className="font-semibold text-base">{formatAmount(transaction.price)}</span>
+              <span className="font-semibold text-base">{formatAmount(transaction.product?.product_price)}</span>
             </div>
             <div className="w-[50%] flex flex-col">
               <h5 className="text-gray-400">Discount</h5>
-              <span className="font-semibold text-base">{transaction.product_discount}</span>
+              <span className="font-semibold text-base">{transaction.product?.product_discount}</span>
             </div>
           </div>
           <h4 className="font-semibold text-base text-left pb-2 border-b border-gray-100 mt-8 mb-4">Customer Details</h4>
@@ -119,7 +197,7 @@ const SingleTransaction = ({transaction, reviews}: ISingleTransactionProps) => {
 
       <div className="flex flex-col mt-10 bg-white px-4 py-3">
         <h2 className="text-gray-700 text-base text-center my-4 font-semibold">Reviews</h2>
-        { reviews && reviews.map((review) => (
+        { reviews && reviews?.map((review) => (
           <div className="flex flex-col pb-3 border-b border-gray-100 mb-3">
             <div className="flex flex-row">
               <h3 className="font-semibold mr-4">{review.user?.name}</h3>

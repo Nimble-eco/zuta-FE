@@ -34,7 +34,6 @@ export async function getServerSideProps(context: any) {
               team: user?.vendor
             }
         });
-        console.log({getMyOrder})
 
         const order = getMyOrder.data?.data
 
