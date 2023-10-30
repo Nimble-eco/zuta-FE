@@ -11,6 +11,7 @@ import {useState} from 'react'
 import { deleteProductByVendorAction, updateProductVendorApprovedAction, updateProductVendorUnApprovedAction } from "../../../requests/products/products.request";
 import SliderInput from "../../inputs/SliderInput";
 import DeleteProductModal from "../../modals/vendor/product/DeletProductModal";
+import { activateProductShowcaseAction } from "../../../requests/showcase/showcase.request";
 
 interface ISingleProductProps {
     product: {
@@ -44,7 +45,7 @@ export const SingleProduct = ({product} : ISingleProductProps) => {
     let vendorId: string = '';
     const [vendorApprovedStatus, setVendorApprovedStatus] = useState(product?.vendor_approved);
     const [showDeleteProductModal, setShowDeleteProductModal] = useState(false);
-
+    console.log({product})
     if(typeof window !== 'undefined') {
         injectStyle();
         vendorId = JSON.parse(Cookies.get('user')!).vendor;
@@ -99,6 +100,21 @@ export const SingleProduct = ({product} : ISingleProductProps) => {
         .catch(error => {
             console.log({error});
             toast.error(error?.response?.data?.message || 'Error try again later');
+        })
+        .finally(() => setIsLoading(false));
+    }
+
+    const activateProductFeature = async () => {
+
+        setIsLoading(true);
+        await activateProductShowcaseAction(product.featured?.id, vendorId)
+        .then((response) => {
+            if(response.status === 201) {
+                router.push(response.data.data.pay_stack_checkout_url);
+            }
+        })
+        .catch(error => {
+            toast.error(error?.response?.data?.message || 'Error! Try again later');
         })
         .finally(() => setIsLoading(false));
     }
@@ -240,15 +256,22 @@ export const SingleProduct = ({product} : ISingleProductProps) => {
                 <div className="flex flex-row justify-between pb-3 mb-4 border-b border-gray-100 px-4 relative">
                     <h3 className="font-semibold !text-lg">Feature Details</h3>
                     <div className="absolute right-2 bottom-1">
-                        {product.featured_status && product.featured_status === 'active' ? (
+                        {product.featured?.status && product.featured?.status === 'active' ? (
                             <ButtonFull
                                 action='Stop product'
                                 onClick={() => {}}
                             />
+                            ) :
+                            product.featured?.status === 'inactive' ? (
+                                <ButtonFull
+                                    action='Activate'
+                                    loading={isLoading}
+                                    onClick={activateProductFeature}
+                                />
                             ) : (
                             <ButtonGhost
                                 action='Feature Product'
-                                onClick={() => {}}
+                                onClick={() => router.push(`/vendor/showcase/store?product_id=${product.id}`)}
                             />
                         )}
                     </div>
@@ -257,7 +280,7 @@ export const SingleProduct = ({product} : ISingleProductProps) => {
                     <div className="flex flex-col md:flex-row">
                         <div className="flex flex-row md:w-[50%] lg:w-auto">
                             <div className="w-[60%] lg:w-auto">
-                                <TextCard label="Cost" value={product.featured.cost} />
+                                <TextCard label="Cost" value={product.featured.featured_amount} />
                             </div>
                             <div className="w-[40%] lg:w-auto">
                                 <TextCard label="Status" value={product.featured.status} />

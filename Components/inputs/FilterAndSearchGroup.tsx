@@ -21,13 +21,13 @@ const FilterAndSearchGroup = ({searchInputPlaceHolder, onSearch, onFilterButtonC
             <MdOutlineFilterList className="text-xl mr-2" />
             <p className="text-slate-600 my-auto">Filter</p>
         </div>
-        <div className="flex flex-row justify-between px-4 py-3">
+        <div className="flex flex-row py-3 w-full">
             <input 
                 type="text" 
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 placeholder={searchInputPlaceHolder}
-                className="flex-grow focus:outline-none bg-transparent w-[80%] text-sm pl-5 text-gray-600" 
+                className="flex-grow focus:outline-none bg-transparent w-full text-sm pl-5 text-gray-600" 
             />
             <button 
                 type="submit" 

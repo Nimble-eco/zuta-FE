@@ -1,5 +1,5 @@
 import Cookies from "js-cookie";
-import { IFilterMyOrderTrainStatusProps, IJoinOrderTrainProps, IUpdateOrderTrainStatusProps } from "./orderTrain.types";
+import { IFilterMyOrderTrainStatusProps, IFilterOrderTrainActionProps, IJoinOrderTrainProps, IUpdateOrderTrainStatusProps } from "./orderTrain.types";
 import axiosInstance from "../../Utils/axiosConfig";
 
 export const joinOrderTrainAction = async (payload: IJoinOrderTrainProps) => {
@@ -45,4 +45,45 @@ export const getMyOrderTrainAction = async () => {
             Authorization: user.access_token
         }
     });
+}
+
+export const filterOrderTrainByVendorAction = async (payload: IFilterOrderTrainActionProps) => {
+    const user = JSON.parse(Cookies.get('user')!);
+    return axiosInstance.post('/api/open-order/filter/index', payload, {
+        headers: {
+            Authorization: user.access_token,
+            team: payload.vendor_id!
+        }
+    });
+}
+
+export const searchOrderTrainByVendorAction = async (search: string, vendor_id: string) => {
+    const user = JSON.parse(Cookies.get('user')!);
+    return axiosInstance.post('/api/open-order/search/index', {search}, {
+        headers: {
+            Authorization: user.access_token,
+            team: vendor_id
+        }
+    })
+}
+
+
+export const closeOpenOrderByVendorAction = async (id: string, vendor_id: string) => {
+    const user = JSON.parse(Cookies.get('user')!);
+    return axiosInstance.post('/api/open-order/close', {id}, {
+        headers: {
+            Authorization: user.access_token,
+            team: vendor_id
+        }
+    })
+}
+
+export const markOpenOrderAsReadyByVendorAction = async (id: string, vendor_id: string) => {
+    const user = JSON.parse(Cookies.get('user')!);
+    return axiosInstance.post('/api/open-order/ready', {id}, {
+        headers: {
+            Authorization: user.access_token,
+            team: vendor_id
+        }
+    })
 }

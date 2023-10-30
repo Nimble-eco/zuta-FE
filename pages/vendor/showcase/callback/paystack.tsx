@@ -1,16 +1,15 @@
+import { useRouter } from "next/router";
 import {useEffect, useState } from "react";
 import Cookies from "js-cookie";
-import Header from "../../../Components/Header"
 import { toast, ToastContainer } from 'react-toastify';
 import { injectStyle } from "react-toastify/dist/inject-style";
-import axiosInstance from "../../../Utils/axiosConfig";
-import { useRouter } from "next/router";
+import axiosInstance from "../../../../Utils/axiosConfig";
+import ButtonFull from "../../../../Components/buttons/ButtonFull";
 import { PulseLoader } from "react-spinners";
-import ButtonFull from "../../../Components/buttons/ButtonFull";
-import RatingsCard from "../../../Components/cards/RatingsCard";
-import ButtonGhost from "../../../Components/buttons/ButtonGhost";
-import { createAnOrderAction } from "../../../requests/order/order.request";
-import { joinOrderTrainAction } from "../../../requests/orderTrain/orderTrain.request";
+import Header from "../../../../Components/Header";
+import ButtonGhost from "../../../../Components/buttons/ButtonGhost";
+import RatingsCard from "../../../../Components/cards/RatingsCard";
+
 
 const paystack = () => {
     const router = useRouter();
@@ -42,37 +41,6 @@ const paystack = () => {
             if(response.data?.message?.toLowerCase() === 'payment successful') {
                 const status = response.data.message.toLowerCase() === 'payment successful' ? 'success' : 'unsuccessful';
                 setPaymentStatus(status);
-
-                const transactionData: any = response.data.data.metadata;
-
-                transactionData?.products?.map(async (product: any) => {
-                    await createAnOrderAction({
-                        ...transactionData,
-                        product_id: Number(product.product_id),
-                        quantity: Number(product.quantity),
-                        address_id: Number(transactionData.address_id),
-                        order_sub_amount: Number(transactionData.order_sub_amount),
-                        order_service_fee: Number(transactionData.order_service_fee),
-                        order_delivery_fee: Number(transactionData.order_delivery_fee),
-                        order_paid: transactionData.order_paid === 'true' ? true : false,
-                        order_payment_confirmed: transactionData.order_payment_confirmed === 'true' ? true : false,
-                    })
-                });
-
-                transactionData?.order_train?.map(async (product: any) => {
-                    await joinOrderTrainAction({
-                        ...transactionData,
-                        product_id: Number(product.product_id),
-                        quantity: Number(product.quantity),
-                        address_id: Number(transactionData.address_id),
-                        order_sub_amount: Number(transactionData.order_sub_amount),
-                        order_service_fee: Number(transactionData.order_service_fee),
-                        order_delivery_fee: Number(transactionData.order_delivery_fee),
-                        order_paid: transactionData.order_paid === 'true' ? true : false,
-                        order_payment_confirmed: transactionData.order_payment_confirmed === 'true' ? true : false,
-                    })
-                });
-
                 toast.success('Payment verified successfully')
             }
         })
@@ -85,10 +53,10 @@ const paystack = () => {
         <Header />
 
         <div 
-            className="w-[95%] flex flex-col lg:flex-row mx-auto mt-12"
+            className="w-[95%] flex flex-col lg:flex-row gap-4 mx-auto mt-12"
         >
             <div className="flex flex-col w-[90%] gap-4 mx-auto lg:w-[65%] lg:mr-[2%] mb-4 min-h-fit">
-                <div className="flex flex-col bg-white rounded-md px-4 py-4 relative min-h-[75%]">
+                <div className="flex flex-col bg-white rounded-md px-4 !py-4 relative min-h-[75%]">
                     <div className="flex flex-row justify-start gap-4 ">
                         <h2 className="text-xl font-semibold">{paymentStatus === 'success' ? 'Verified' : 'Verifying'}</h2>
                         <div>
@@ -102,25 +70,25 @@ const paystack = () => {
 
                     {
                         paymentStatus === 'success' ? (
-                            <div className="flex flex-col gap-2 justify-center align-middle">
+                            <div className="flex flex-row justify-between align-middle">
                                 <p className="text-left text-green-600">Payment successful</p>
-                                <div className="h-14 w-[30%]">
+                                <div className="h-10 w-[20%]">
                                     <ButtonFull
-                                        action="View order"
-                                        onClick={() => router.push('/profile?path=orders')}
+                                        action="View Showcase"
+                                        onClick={() => router.push('/vendor/showcase')}
                                     />
                                 </div>
                             </div>
                         ) : null
                     }
 
-                    <div className="flex flex-col gap-4 absolute bottom-7 left-4 right-4">
+                    <div className="flex flex-col gap-4 w-[98%] mx-auto mb-4">
                         <textarea 
                             name="user-experience"
-                            className="h-48 rounded-[16px] bg-gray-100 outline-none mt-10 px-4 py-5"
+                            className="h-48 rounded-[16px] bg-gray-100 w-full outline-none mt-10 px-4 py-5"
                             placeholder="Tell us about your experience"
                         />
-                        <div className="flex w-[40%] justify-end">
+                        <div className="flex w-[20%] ml-[80%] h-10 !mb-4 justify-end">
                             <ButtonGhost
                                 action="Submit"
                                 onClick={() => {}}

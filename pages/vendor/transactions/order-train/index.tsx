@@ -13,9 +13,9 @@ import { parse } from "cookie";
 import axiosInstance from "../../../../Utils/axiosConfig";
 import PaginationBar from "../../../../Components/navigation/PaginationBar";
 import ColumnTextInput from "../../../../Components/inputs/ColumnTextInput";
-import { filterOrdersByVendorAction, searchOrdersByVendorAction } from "../../../../requests/order/order.request";
 import Cookies from "js-cookie";
 import { formatAmount } from "../../../../Utils/formatAmount";
+import { filterOrderTrainByVendorAction, searchOrderTrainByVendorAction } from "../../../../requests/orderTrain/orderTrain.request";
 
 interface IOrdersIndexPageProps {
     orders: any;
@@ -32,7 +32,7 @@ const index = ({orders}: IOrdersIndexPageProps) => {
         product_id: 0,
         order_id: '',
         order_amount: 0,
-        order_sub_amount: 0,
+        open_order_price: 0,
         start_date: '',
         end_date: '',
         status: '',
@@ -57,12 +57,12 @@ const index = ({orders}: IOrdersIndexPageProps) => {
     const filterOrderTransactionsPage = async () => {
         setLoading(true);
 
-        await filterOrdersByVendorAction({
+        await filterOrderTrainByVendorAction({
             vendor_id: vendorId,
             product_name: filterByDetails.product_name ? filterByDetails.product_name : undefined,
             product_id: filterByDetails.product_id ? filterByDetails.product_id : undefined,
             quantity: filterByDetails.quantity ? filterByDetails?.quantity : undefined,
-            order_sub_amount: filterByDetails.order_sub_amount ? filterByDetails?.order_sub_amount : undefined,
+            order_sub_amount: filterByDetails.open_order_price ? filterByDetails?.open_order_price : undefined,
             status: filterByDetails.status ? filterByDetails.status : undefined,
             order_paid: filterByDetails.order_paid ? filterByDetails.order_paid : undefined,
         })
@@ -89,7 +89,7 @@ const index = ({orders}: IOrdersIndexPageProps) => {
     const searchOrders = async (value: string) => {
         setLoading(true);
 
-        await searchOrdersByVendorAction(value, vendorId)
+        await searchOrderTrainByVendorAction(value, vendorId)
         .then((response) => {
             if(response.status === 200) {
                 toast.success('Action successful');
@@ -113,7 +113,7 @@ const index = ({orders}: IOrdersIndexPageProps) => {
     const paginateData = async (paginator: any, direction: 'prev' | 'next') => {
         if(direction === 'prev' && paginator?.previous_page_url) {
             setLoading(true);
-            await filterOrdersByVendorAction({vendor_id: vendorId, pagination: paginator?.current_page - 1})
+            await filterOrderTrainByVendorAction({vendor_id: vendorId, pagination: paginator?.current_page - 1})
             .then((response: any) => {
                 if(response.status === 200) {
                     toast.success('Action successful');
@@ -136,7 +136,7 @@ const index = ({orders}: IOrdersIndexPageProps) => {
 
         if(direction === 'next' && paginator?.next_page_url) {
             setLoading(true);
-            await filterOrdersByVendorAction({vendor_id: vendorId, pagination: paginator?.current_page + 1})
+            await filterOrderTrainByVendorAction({vendor_id: vendorId, pagination: paginator?.current_page + 1})
             .then((response: any) => {
                 if(response.status === 200) {
                     toast.success('Action successful');
@@ -160,6 +160,8 @@ const index = ({orders}: IOrdersIndexPageProps) => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
+        <ToastContainer />
+
         {
             showFilterInput && <FilterContainer 
                 show={showFilterInput}
@@ -191,9 +193,9 @@ const index = ({orders}: IOrdersIndexPageProps) => {
                         />
 
                         <MyNumberInput 
-                            label="TOTAL AMOUNT"
-                            name="order_sub_amount"
-                            value={filterByDetails?.order_sub_amount}
+                            label="PRICE"
+                            name="open_order_price"
+                            value={filterByDetails?.open_order_price}
                             onInputChange={handleFilterByDetailsChange}
                         />
 
@@ -203,8 +205,8 @@ const index = ({orders}: IOrdersIndexPageProps) => {
                             name="status"
                             options={[
                                 {name: 'completed'}, 
-                                {name: 'delivered'}, 
-                                {name: 'pending'}, 
+                                {name: 'open'}, 
+                                {name: 'closed'}, 
                                 {name: 'cancelled'}, 
                                 {name: 'rejected'}]}
                             value={filterByDetails.status}
@@ -229,8 +231,8 @@ const index = ({orders}: IOrdersIndexPageProps) => {
         <div className="flex flex-row w-[95%] mx-auto mt-8 relative mb-10">
             <VendorSideNavPanel />
             <div className="flex flex-col w-[80%] absolute right-0 left-[21%]">
-                <h2 className="text-2xl font-bold text-slate-700 mb-4">Standard Orders</h2>
-                <div className="flex flex-row text-sm font-semibold !text-gray-400 px-4 py-5 bg-white">
+                <h2 className="text-2xl font-bold text-slate-700 mb-4">Order Train</h2>
+                <div className="flex flex-row text-sm font-semibold !text-gray-400 px-4 pt-5 bg-white">
                     <a href="#0" className="hover:!text-orange-500 mr-3">
                         Completed
                     </a>
@@ -251,6 +253,7 @@ const index = ({orders}: IOrdersIndexPageProps) => {
                             searchInputPlaceHolder="Search name, price, category"
                             onSearch={searchOrders}
                             onFilterButtonClick={() => setShowFilterInput(!showFilterInput)}
+                            isSearching={loading}
                         />
                     </div>
                     <div className="w-fit">
@@ -263,13 +266,15 @@ const index = ({orders}: IOrdersIndexPageProps) => {
                 {/* PRODUCTS TABLE */}
                 <div className="flex flex-col pb-8 bg-white text-gray-700">
                     <MyTable
-                        headings={['product_name', 'quantity', 'order_amount', 'order_paid', 'status']}
+                        headings={['product_name', 'price', 'quantity', 'subscribers', 'order_paid', 'status']}
                         content={ordersData?.data?.map((order: any) => ({
                             ...order,
-                            order_amount: formatAmount(order.order_amount),
+                            price: formatAmount(order.open_order_price),
+                            quantity: order.order_count,
+                            subscribers: order.subscribers_count,
                             order_paid: order.order_paid ? 'Paid' : 'not paid'
                         }))} 
-                        onRowButtonClick={(order: any) => router.push('orders/show?id='+ order.id)}
+                        onRowButtonClick={(order: any) => router.push('order-train/show?id='+ order.id)}
                     />
                     <PaginationBar 
                         paginator={ordersData?.meta}
@@ -290,7 +295,7 @@ export async function getServerSideProps(context: any) {
     const token = user?.access_token;
 
     try {
-        const getMyOrders = await axiosInstance.get('/api/order/me', {
+        const getMyOpenOrders = await axiosInstance.post('/api/open-order/filter/index', {vendor_id: user?.vendor}, {
             headers: {
                 Authorization: token,
                 team: user?.vendor
@@ -298,7 +303,7 @@ export async function getServerSideProps(context: any) {
         });
 
         const [myOrdersResult] = await Promise.allSettled([
-            getMyOrders
+            getMyOpenOrders
         ]);
 
         const myOrders = myOrdersResult.status === 'fulfilled' ? myOrdersResult?.value?.data : [];

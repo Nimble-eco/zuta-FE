@@ -1,15 +1,15 @@
 import { ToastContainer, toast } from 'react-toastify'
 import { injectStyle } from "react-toastify/dist/inject-style";
 import { HiOutlineChatAlt2 } from "react-icons/hi";
-import RatingsCard from "../../cards/RatingsCard";
-import { formatAmount } from "../../../Utils/formatAmount";
-import { getDateAndTimeFromISODate } from "../../../Utils/convertIsoDateToDateString";
-import { capitalizeFirstLetter } from "../../../Utils/capitalizeFirstLettersOfString";
-import ButtonGhost from "../../buttons/ButtonGhost";
-import ButtonFull from "../../buttons/ButtonFull";
 import { useState } from "react";
-import { closeOrderByVendorAction, markOrderAsReadyByVendorAction } from "../../../requests/order/order.request";
 import { useRouter } from 'next/router';
+import RatingsCard from '../../../cards/RatingsCard';
+import { capitalizeFirstLetter } from '../../../../Utils/capitalizeFirstLettersOfString';
+import { formatAmount } from '../../../../Utils/formatAmount';
+import { getDateAndTimeFromISODate } from '../../../../Utils/convertIsoDateToDateString';
+import ButtonFull from '../../../buttons/ButtonFull';
+import ButtonGhost from '../../../buttons/ButtonGhost';
+import { closeOpenOrderByVendorAction, markOpenOrderAsReadyByVendorAction } from '../../../../requests/orderTrain/orderTrain.request';
 
 interface ISingleTransactionProps {
   transaction: {
@@ -20,9 +20,9 @@ interface ISingleTransactionProps {
     product_discount: number;
     id: string;
     quantity: number;
-    product_price_paid: number;
-    order_sub_amount: number;
-    order_service_fee: number;
+    orderCount: number;
+    open_order_price: number;
+    next_price: number;
     created_at: string;
     createdAt?: string;
     vendor_name: string;
@@ -31,11 +31,12 @@ interface ISingleTransactionProps {
     status: string;
     paid: boolean;
     payment_confirmed: boolean;
-    order_payment_method: string;
+    subscribersCount: string;
     recipient_state: string;
     recipient_city: string;
     shipped_date?: string;
-    product: any
+    product: any;
+    subscribersList: any[];
   },
   reviews: {
     user: any, 
@@ -44,7 +45,7 @@ interface ISingleTransactionProps {
   }[];
 }
 
-const SingleTransaction = ({transaction, reviews}: ISingleTransactionProps) => {
+const SingleOpenOrderTransaction = ({transaction, reviews}: ISingleTransactionProps) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -55,11 +56,11 @@ const SingleTransaction = ({transaction, reviews}: ISingleTransactionProps) => {
   const closeOrderByVendor = async () => {
     setIsLoading(true)
 
-    await closeOrderByVendorAction(transaction.id, transaction.vendor_id)
+    await closeOpenOrderByVendorAction(transaction.id, transaction.vendor_id)
     .then((response) => {
       if(response.status === 202) {
         toast.success('Order status updated');
-        router.push(`/vendor/transactions/orders/show?id=${transaction.id}`);
+        router.push(`/vendor/transactions/order-train/show?id=${transaction.id}`);
       }
     })
     .catch(error => {
@@ -72,11 +73,11 @@ const SingleTransaction = ({transaction, reviews}: ISingleTransactionProps) => {
   const readyOrderByVendor = async () => {
     setIsLoading(true)
 
-    await markOrderAsReadyByVendorAction(transaction.id, transaction.vendor_id)
+    await markOpenOrderAsReadyByVendorAction(transaction.id, transaction.vendor_id)
     .then((response) => {
       if(response.status === 202) {
         toast.success('Order status updated');
-        router.push(`/vendor/transactions/orders/show?id=${transaction.id}`);
+        router.push(`/vendor/transactions/order-train/show?id=${transaction.id}`);
       }
     })
     .catch(error => {
@@ -89,13 +90,13 @@ const SingleTransaction = ({transaction, reviews}: ISingleTransactionProps) => {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col w-full md:w-[80%] absolute right-0 md:left-[21%] rounded-md px-4 text-sm">
       <ToastContainer />
-      <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4">
+      <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 !text-base">
         <div className="flex flex-col px-4 bg-white w-full mb-4 lg:mb-0 mx-auto pb-6">
           <div className="flex flex-row justify-between py-2 border-b border-gray-100 mb-4">
             <h4 className="font-semibold text-base text-left my-auto">Order Details</h4>
             <div className="flex flex-row gap-2">
               {
-                transaction.status === 'unshipped' &&
+                transaction.status === 'open' &&
                 <div className="h-10">
                   <ButtonGhost
                     action="Cancel Order"
@@ -106,7 +107,7 @@ const SingleTransaction = ({transaction, reviews}: ISingleTransactionProps) => {
               }
 
               {
-                transaction.status === 'unshipped' &&
+                transaction.status === 'open' &&
                 <div className="h-10">
                   <ButtonFull
                     action="Ready for delivery"
@@ -119,42 +120,42 @@ const SingleTransaction = ({transaction, reviews}: ISingleTransactionProps) => {
           </div>
           <div className="flex flex-row w-full pb-3">
             <div className="w-[50%] flex flex-col">
-              <h5 className="!text-base text-gray-400">Order date</h5>
+              <h5 className="text-gray-400">Order date</h5>
               <span className="font-semibold text-base">{getDateAndTimeFromISODate(transaction.created_at ?? transaction.createdAt)}</span>
             </div>
             <div className="w-[50%] flex flex-col">
-              <h5 className="!text-base text-gray-400">Order ID</h5>
+              <h5 className="text-gray-400 !text-base">Order ID</h5>
               <span className="font-semibold text-base">{transaction.id}</span>
             </div>
           </div>
           <div className="flex flex-row w-full pb-3">
             <div className="w-[50%] flex flex-col">
-              <h5 className="!text-base text-gray-400">Order amount</h5>
-              <span className="font-semibold text-base">{formatAmount(transaction.order_sub_amount)}</span>
+              <h5 className="text-gray-400 !text-base">Product Order Price</h5>
+              <span className="font-semibold text-base">{formatAmount(transaction.open_order_price)}</span>
             </div>
             <div className="w-[50%] flex flex-col">
-              <h5 className="!text-base text-gray-400">Service Fee</h5>
-              <span className="font-semibold text-base">{formatAmount(transaction.order_service_fee)}</span>
+              <h5 className="text-gray-400 !text-base">Next Price</h5>
+              <span className="font-semibold text-base">{formatAmount(transaction.next_price)}</span>
             </div>
           </div>
           <div className="flex flex-row w-full pb-3">
             <div className="w-[50%] flex flex-col">
-              <h5 className="!text-base text-gray-400">Order Status</h5>
+              <h5 className="text-gray-400 !text-base">Order Status</h5>
               <span className="font-semibold text-base">{transaction.status}</span>
             </div>
             <div className="w-[50%] flex flex-col">
-              <h5 className="!text-base text-gray-400">Product Price</h5>
-              <span className="font-semibold text-base">{formatAmount(transaction.product_price_paid)}</span>
+              <h5 className="text-gray-400 !text-base">Order Count</h5>
+              <span className="font-semibold text-base">{transaction.orderCount}</span>
             </div>
           </div>
           <div className="flex flex-row w-full pb-3">
             <div className="w-[50%] flex flex-col">
-              <h5 className="!text-base text-gray-400">Payment Status</h5>
+              <h5 className="text-gray-400 !text-base">Payment Status</h5>
               <span className="font-semibold text-base">{transaction.paid ? 'Paid': 'False'}</span>
             </div>
             <div className="w-[50%] flex flex-col">
-              <h5 className="!text-base text-gray-400">Payment Method</h5>
-              <span className="font-semibold text-base">{transaction.order_payment_method}</span>
+              <h5 className="text-gray-400">Subscribers</h5>
+              <span className="font-semibold text-base">{transaction.subscribersCount}</span>
             </div>
           </div>
         </div>
@@ -162,61 +163,69 @@ const SingleTransaction = ({transaction, reviews}: ISingleTransactionProps) => {
           <h4 className="font-semibold text-base text-left pb-2 border-b border-gray-100 mb-4">Product Details</h4>
           <div className="flex flex-row w-full pb-3">
             <div className="w-[50%] flex flex-col">
-              <h5 className="!text-base text-gray-400">Name</h5>
+              <h5 className="text-gray-400 !text-base">Name</h5>
               <span className="font-semibold text-base">{capitalizeFirstLetter(transaction.product_name)}</span>
             </div>
             <div className="w-[50%] flex flex-col">
-              <h5 className="!text-base text-gray-400">Quantity</h5>
-              <span className="font-semibold text-base">{transaction.quantity}</span>
+              <h5 className="text-gray- !text-base">Quantity</h5>
+              <span className="font-semibold text-base">{transaction.product?.quantity}</span>
             </div>
           </div>
           <div className="flex flex-row w-full pb-3">
             <div className="w-[50%] flex flex-col">
-              <h5 className="!text-base text-gray-400">Price</h5>
+              <h5 className="text-gray-400 !text-base">Price</h5>
               <span className="font-semibold text-base">{formatAmount(transaction.product?.product_price)}</span>
             </div>
             <div className="w-[50%] flex flex-col">
-              <h5 className="!text-base text-gray-400">Discount</h5>
+              <h5 className="text-gray-400 !text-base">Discount</h5>
               <span className="font-semibold text-base">{transaction.product?.product_discount}</span>
-            </div>
-          </div>
-          <h4 className="font-semibold text-base text-left pb-2 border-b border-gray-100 mt-8 mb-4">Customer Details</h4>
-          <div className="flex flex-col md:flex-row w-full pb-3">
-            <div className="w-full mb-3 md:mb-0 md:w-[50%] flex flex-col">
-              <h5 className="!text-base text-gray-400">Customer City</h5>
-              <span className="font-semibold text-base">{transaction.recipient_city}</span>
-            </div>
-            <div className="w-full md:w-[50%] flex flex-col">
-              <h5 className="!text-base text-gray-400">State</h5>
-              <span className="font-semibold text-base max-w-full">{transaction.recipient_state}</span>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="flex flex-col mt-10 bg-white px-4 py-3">
-        <h2 className="text-gray-700 text-base text-center my-4 font-semibold">Reviews</h2>
-        { reviews && reviews?.map((review) => (
-          <div className="flex flex-col pb-3 border-b border-gray-100 mb-3">
-            <div className="flex flex-row">
-              <h3 className="font-semibold mr-4">{review.user?.name}</h3>
-              <RatingsCard rating={review.score} />
-            </div>
-            {review.comment && <p className="text-gay-500 text-sm">{review.comment}</p>}
-          </div>
-        ))}
+      <div className='flex flex-col gap-3 md:grid md:grid-cols-2'>
 
-        {
-          !reviews || reviews.length === 0 && (
-            <div className="flex flex-col justify-center text-center items-center mt-10">
-              <HiOutlineChatAlt2 className="text-3xl text-orange-500 text-center" />
-              <p className="font-semibold mt-4 text-slate-700">No Reviews Yet</p>
+        <div className="flex flex-col mt-10 bg-white px-4 py-3">
+          <h2 className="text-gray-700 text-base my-4 font-semibold">Subscribers</h2>
+          { transaction && transaction.subscribersList?.map((subscriber, index) => (
+            <div className="flex flex-col pb-3 border-b border-gray-100 mb-3" key={index}>
+              <div className="flex flex-row">
+                <h3 className="mr-4">{capitalizeFirstLetter(subscriber.name)}</h3>
+                <p className="">
+                  <span className='opacity-40 mr-1 font-semibold'>Qty: </span>
+                  {subscriber.quantity}
+                </p>
+              </div>
+              {subscriber.created_at && <p className="text-gay-500 text-opacity-20">{subscriber.created_at}</p>}
             </div>
-          )
-        }
+          ))}
+        </div>
+
+        <div className="flex flex-col mt-10 bg-white px-4 py-3">
+          <h2 className="text-gray-700 text-base my-4 font-semibold">Reviews</h2>
+          { reviews && reviews?.map((review, index) => (
+            <div className="flex flex-col pb-3 border-b border-gray-100 mb-3" key={index}>
+              <div className="flex flex-row">
+                <h3 className="font-semibold mr-4">{review.user?.name}</h3>
+                <RatingsCard rating={review.score} />
+              </div>
+              {review.comment && <p className="text-gay-500 text-sm">{review.comment}</p>}
+            </div>
+          ))}
+
+          {
+            !reviews || reviews.length === 0 && (
+              <div className="flex flex-col justify-center text-center items-center mt-10">
+                <HiOutlineChatAlt2 className="text-3xl text-orange-500 text-center" />
+                <p className="font-semibold mt-4 text-slate-700">No Reviews Yet</p>
+              </div>
+            )
+          }
+        </div>
       </div>
     </div>
   )
 }
 
-export default SingleTransaction
+export default SingleOpenOrderTransaction

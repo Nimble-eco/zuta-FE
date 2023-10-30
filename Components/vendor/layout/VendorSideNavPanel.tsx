@@ -3,7 +3,7 @@ import { useState } from "react"
 
 const VendorSideNavPanel = () => {
     const router = useRouter();
-    const activeStyle = "bg-[#1B6909] rounded-tl-[20px] rounded-bl-[20px] text-white py-3";
+    const activeStyle = "bg-orange-600 rounded-tr-[20px] rounded-br-[20px] text-white py-3 mr-2 hover:!text-white";
     const [showDropdown, setShowDropdown] = useState({
         transactions: false
     });
@@ -22,50 +22,50 @@ const VendorSideNavPanel = () => {
     }
 
   return (
-    <div className='hidden md:flex flex-col bg-white px-10 py-4 w-[18%] mr-[2%] fixed left-0 top-0 bottom-0 overflow-auto'>
+    <div className='hidden md:flex flex-col bg-white py-4 w-[18%] mr-[2%] fixed left-0 top-0 bottom-0 overflow-auto gap-6 text-center'>
         <div className="mb-12 mt-8 text-orange-500 text-xl font-serif">Zuta</div>
         <a 
             href="/vendor/product"
-            className="text-black hover:!text-orange-500 cursor-pointer mb-6"
+            className={`text-black hover:!text-orange-500 cursor-pointer ${router.pathname.includes('product') && activeStyle}`}
         >
             Products
         </a>
         <a 
             href="#0"
             onClick={() => toggleDropdown('transactions')}
-            className={`text-black hover:!text-orange-500 cursor-pointer mb-6 ${router.pathname.includes('transactions') && activeStyle}`}
+            className={`text-black hover:!text-orange-500 cursor-pointer ${router.pathname.includes('transactions') && activeStyle}`}
         >
             Transactions
         </a>
         {
             (showDropdown.transactions || router.pathname.includes('transactions')) && (
-                <div className="flex flex-col gap-3 text-[#495046] pl-4 ml-10 border-l border-[#A4A7A2]">
-                    <a href={"/vendor/transactions/orders"} className={` ${router.pathname === '/orders' ? 'font-semibold' : 'opacity-50'} no-underline text-[#495046] cursor-pointer flex flex-row  relative`}>
-                        <div className={`w-4 h-4 rounded-full my-auto bg-[#1B6909] absolute -left-6 top-1 ${router.pathname === '/orders' ? 'flex' : 'hidden' } `} />
+                <div className="flex flex-col gap-2 text-[#495046] pl-4 mx-auto">
+                    <a href={"/vendor/transactions/orders"} className={` ${router.pathname.includes('/orders') ? 'font-semibold' : 'opacity-50'} no-underline text-[#495046] cursor-pointer flex flex-row  relative`}>
+                        <div className={`w-3 h-3 rounded-full my-auto bg-orange-600 absolute -left-5 top-2 ${router.pathname.includes('/orders') ? 'flex' : 'hidden' } `} />
                         Orders
                     </a>
                     <a href="/vendor/transactions/order-train" className={` ${router.pathname.includes('/order-train') ? 'font-semibold' : 'opacity-50'} no-underline text-[#495046] cursor-pointer flex flex-row  relative`}>
-                        <div className={`w-4 h-4 rounded-full my-auto bg-[#1B6909] absolute -left-6 top-1 ${router.pathname === '/order-train' ? 'flex' : 'hidden' } `} />
-                        List
+                        <div className={`w-3 h-3 rounded-full my-auto bg-orange-600 absolute -left-5 top-2 ${router.pathname.includes('/order-train') ? 'flex' : 'hidden' } `} />
+                        Order Train
                     </a>
                 </div>
             )
         }
         <a 
-            href="/vendor/feature"
-            className="text-black hover:!text-orange-500 cursor-pointer mb-6"
+            href="/vendor/showcase"
+            className={`text-black hover:!text-orange-500 cursor-pointer ${router.pathname.includes('showcase') && activeStyle}`}
         >
-            Feature
+            Showcase
         </a>
         <a 
             href="/vendor/setting"
-            className="text-black hover:!text-orange-500 cursor-pointer mb-6"
+            className="text-black hover:!text-orange-500 cursor-pointer"
         >
             Settings
         </a>
         <a 
             href="/vendor/feedback"
-            className="text-black hover:!text-orange-500 cursor-pointer mb-6"
+            className="text-black hover:!text-orange-500 cursor-pointer"
         >
             Feedback
         </a>

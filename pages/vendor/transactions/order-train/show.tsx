@@ -1,7 +1,7 @@
 import { parse } from "cookie";
 import VendorSideNavPanel from "../../../../Components/vendor/layout/VendorSideNavPanel";
-import SingleTransaction from "../../../../Components/vendor/transaction/SingleTransaction";
 import axiosInstance from "../../../../Utils/axiosConfig";
+import SingleOpenOrderTransaction from "../../../../Components/vendor/transaction/orderTrain/SingleTransaction";
 
 interface IShowTransactionPageProps {
     order: any;
@@ -12,7 +12,7 @@ const show = ({order}: IShowTransactionPageProps) => {
     <div className="min-h-screen bg-gray-100 flex flex-col overflow-auto">
         <div className="flex flex-row w-[95%] mx-auto mt-8 relative mb-10">
             <VendorSideNavPanel />
-            <SingleTransaction transaction={order} reviews={order.reviews}/>
+            <SingleOpenOrderTransaction transaction={order} reviews={order.reviews}/>
         </div>
     </div>
   )
@@ -27,7 +27,7 @@ export async function getServerSideProps(context: any) {
     const token = user?.access_token;
 
     try {
-        const getMyOrder = await axiosInstance.get('/api/order/show?id=' + id, {
+        const getMyOrder = await axiosInstance.get('/api/open-order/show?id=' + id, {
             headers: {
               Authorization: token,
               team: user?.vendor
