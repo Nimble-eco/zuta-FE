@@ -11,7 +11,7 @@ export const convertISODate = (isoDateString: string) => {
 }
 
 export const getDateAndTimeFromISODate = (isoDateString: string) => {
-    const date = new Date(isoDateString);
+    const date = new Date(isoDateString!);
     const day = date.getDate();
 
     const month = date.getMonth();

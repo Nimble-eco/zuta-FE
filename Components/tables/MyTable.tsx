@@ -17,7 +17,7 @@ const MyTable = ({headings, content, onRowButtonClick}: IMyTableProps) => {
                     {
                         headings?.map((heading: string) => (
                             <th key={heading}>
-                                <p className="mb-3">{heading.includes("_") ?
+                                <p className="mb-3 mx-2">{heading.includes("_") ?
                                     heading.split("_").join(" ").toLocaleUpperCase() : 
                                     heading.toLocaleUpperCase()
                                 }
@@ -46,7 +46,7 @@ const MyTable = ({headings, content, onRowButtonClick}: IMyTableProps) => {
                                             className="w-16 h-16 rounded-full my-2 align-middle"
                                         />
                                     ) : (
-                                        <p className='align-middle my-auto py-3'>{capitalizeFirstLetter(item[heading])}</p>
+                                        <p className='align-middle my-auto mx-2 py-3'>{capitalizeFirstLetter(item[heading])}</p>
                                     )}
                                 </td>
                             ))}

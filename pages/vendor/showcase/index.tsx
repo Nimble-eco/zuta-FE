@@ -41,7 +41,6 @@ const index = ({featured_products}: IProductShowcaseIndexPageProps) => {
             [e.target.name] : e.target.value
         }))
     }
-    console.log({featuredProducts})
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -103,11 +102,11 @@ const index = ({featured_products}: IProductShowcaseIndexPageProps) => {
                         content={featuredProducts?.data?.map((featuredProduct: any) => ({
                             ...featuredProduct,
                             paid: featuredProduct.featured_paid_true ? 'Paid' : 'Not Paid',
-                            payment_confirmed: featuredProduct.featured_payment_confirmed ? 'Confirmed' : 'Unconfirmed',
+                            featured_payment_confirmed: featuredProduct.featured_payment_confirmed ? 'Confirmed' : 'Unconfirmed',
                             start_date: getDateAndTimeFromISODate(featuredProduct.featured_start_date),
                             end_date: getDateAndTimeFromISODate(featuredProduct.featured_end_date),
                         }))} 
-                        onRowButtonClick={(order: any) => router.push('order-train/show?id='+ order.id)}
+                        onRowButtonClick={(order: any) => router.push('showcase/show?id='+ order.id)}
                     />
                     <PaginationBar 
                         paginator={featuredProducts?.meta}

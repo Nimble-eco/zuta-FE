@@ -45,7 +45,7 @@ export const SingleProduct = ({product} : ISingleProductProps) => {
     let vendorId: string = '';
     const [vendorApprovedStatus, setVendorApprovedStatus] = useState(product?.vendor_approved);
     const [showDeleteProductModal, setShowDeleteProductModal] = useState(false);
-    console.log({product})
+   
     if(typeof window !== 'undefined') {
         injectStyle();
         vendorId = JSON.parse(Cookies.get('user')!).vendor;

@@ -21,3 +21,13 @@ export const activateProductShowcaseAction = async (featured_id: number, vendorI
         }
     });
 }
+
+export const deactivateProductShowcaseAction = async (featured_id: number, vendorId: string) => {
+    const user = JSON.parse(Cookies.get('user')!);
+    return axiosInstance.post('/api/featured/product/deactivate', {id: featured_id}, {
+        headers: {
+            Authorization: user.access_token,
+            team: vendorId
+        }
+    });
+}
