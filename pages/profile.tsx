@@ -308,10 +308,12 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                                                 placeHolder='Enter your Phone number'
                                             />
                                         </form>
-                                        <ButtonFull 
-                                            action="Save changes"
-                                            onClick={() => {}}
-                                        />
+                                        <div className="h-14 w-[60%] mx-auto">
+                                            <ButtonFull 
+                                                action="Save changes"
+                                                onClick={() => {}}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             )

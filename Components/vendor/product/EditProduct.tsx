@@ -16,6 +16,7 @@ import { updateProductAction } from '../../../requests/products/products.request
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/router';
 import { convertToBase64 } from '../../../Utils/convertImageToBase64';
+import { formatAmount } from '../../../Utils/formatAmount';
 
 interface IEditProductProps {
     product: {
@@ -214,12 +215,19 @@ const EditProduct = ({product}: IEditProductProps) => {
                 />
             </div>
             <div className="w-full">
-                <MyNumberInput  
-                    label="Discount"
-                    name="product_discount"
-                    value={productData?.product_discount}
-                    onInputChange={handleChange}
-                />
+                <div className='flex flex-row gap-2'>
+                    <div className='w-full md:w-[60%]'>
+                        <MyNumberInput  
+                            label="Discount"
+                            name="product_discount"
+                            value={productData?.product_discount}
+                            onInputChange={handleChange}
+                        />
+                    </div>
+                    <p className='font-medium text-green-600 align-bottom my-auto'>
+                        discount  = {" "} {(formatAmount((productData.product_discount/100) * productData.product_price)) ?? 0}
+                    </p>
+                </div>
             </div>
         </div>
 

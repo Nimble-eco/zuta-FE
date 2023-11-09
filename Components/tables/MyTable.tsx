@@ -10,10 +10,10 @@ interface IMyTableProps {
 const MyTable = ({headings, content, onRowButtonClick}: IMyTableProps) => {
    
   return (
-    <div className="p-4">
+    <div className="p-4 min-w-[950px] overflow-scroll">
         <table className="w-full min-w-fit overflow-x-auto text-base">
             <thead>
-                <tr className="justify-evenly text-sm text-left">
+                <tr className="justify-evenly text-sm text-left whitespace-nowrap">
                     {
                         headings?.map((heading: string) => (
                             <th key={heading}>
@@ -32,7 +32,7 @@ const MyTable = ({headings, content, onRowButtonClick}: IMyTableProps) => {
                     content?.map((item, index) => (
                         <tr 
                             key={item.id || index}
-                            className="border-b border-gray-200 cursor-pointer justify-evenly"
+                            className="border-b border-gray-200 cursor-pointer justify-evenly whitespace-nowrap"
                             // onClick={onRowButtonClick}
                         >
                             {headings.map((heading) => (

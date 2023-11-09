@@ -16,6 +16,7 @@ import { ToastContainer, toast } from 'react-toastify'
 import { injectStyle } from "react-toastify/dist/inject-style";
 import { useRouter } from 'next/router'
 import Cookies from 'js-cookie'
+import { formatAmount } from '../../../Utils/formatAmount'
 
 const CreateProduct = () => {
     const router = useRouter();
@@ -76,6 +77,7 @@ const CreateProduct = () => {
         const arr = newProduct.product_categories;
         arr.push(category);
         setNewProduct({...newProduct, product_categories: arr});
+        setSearchProductCategoriesString('');
         setShowProductCategoriesDropdown(false);
     }
 
@@ -108,6 +110,7 @@ const CreateProduct = () => {
         const arr = newProduct.product_tags;
         arr.push(category);
         setNewProduct({...newProduct, product_tags: arr});
+        setSearchProductTagsString('');
         setShowProductTagsDropdown(false);
     }
 
@@ -203,12 +206,19 @@ const CreateProduct = () => {
                 />
             </div>
             <div className="w-full">
-                <MyNumberInput 
-                    label="Discount"
-                    name="product_discount"
-                    value={newProduct.product_discount}
-                    onInputChange={handleChange}
-                />
+                <div className='flex flex-row gap-2'>
+                    <div className='w-full md:w-[60%]'>
+                        <MyNumberInput 
+                            label="Discount %"
+                            name="product_discount"
+                            value={newProduct.product_discount}
+                            onInputChange={handleChange}
+                        />
+                    </div>
+                    <p className='font-medium text-green-600 align-bottom my-auto'>
+                        discount  = {" "} {(formatAmount((newProduct.product_discount/100) * newProduct.product_price)) ?? 0}
+                    </p>
+                </div>
             </div>
         </div>
 

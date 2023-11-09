@@ -16,7 +16,12 @@ const ImagePicker = ({label, onSelect, files, onRemove}: ImagePickerProps) => {
       <div className="flex flex-row relative py-2 mb-4 border-b border-gray-200">
         <h4 className="font-semibold text-left pb-3 pl-3">{label}</h4>
         <div className=" hidden md:flex w-fit absolute right-2 bottom-1">
-          <TextButton action="Upload image" onClick={onSelect} />
+          <label
+            className=" hover:text-orange-800 text-orange-500 font-semibold py-2 px-4 min-w-fit mx-auto cursor-pointer"
+          >
+            Upload Image
+            <input type="file" onChange={onSelect} className="hidden" />
+          </label>  
         </div>
       </div>
       {
@@ -56,7 +61,12 @@ const ImagePicker = ({label, onSelect, files, onRemove}: ImagePickerProps) => {
               <HiOutlinePlusCircle className="text-2xl text-center mx-auto text-orange-500 text-opacity-60" />
             </div>
             <div className="flex md:hidden w-fit mx-auto mt-8">
-              <TextButton action="Upload image" onClick={onSelect} />
+              <label
+                className=" hover:text-orange-800 text-orange-500 font-semibold py-2 px-4 min-w-fit mx-auto cursor-pointer"
+              >
+                Upload Image
+                <input type="file" onChange={onSelect} className="hidden" />
+              </label> 
             </div>
           </div>
         )

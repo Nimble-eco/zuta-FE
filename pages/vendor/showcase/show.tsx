@@ -176,7 +176,7 @@ export async function getServerSideProps(context: any) {
         team: user?.vendor
       }
     });
-    console.log({getMyFeaturedProduct})
+
     const featuredProduct = getMyFeaturedProduct.data?.data.featured;
     const mostViewedInCategories = getMyFeaturedProduct.data?.data.most_viewed_products_in_categories;
 
@@ -188,14 +188,14 @@ export async function getServerSideProps(context: any) {
     }
   } catch (error: any) {
     console.log({error})
-      // if(error?.response?.status === 401) {
-      //   return {
-      //     redirect: {
-      //       destination: '/auth/signIn',
-      //       permanent: false
-      //     }
-      //   }
-      // }
+      if(error?.response?.status === 401) {
+        return {
+          redirect: {
+            destination: '/auth/signIn',
+            permanent: false
+          }
+        }
+      }
 
       return {
         props: {featuredProduct: {}, mostViewedInCategory: []}

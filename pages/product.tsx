@@ -100,7 +100,6 @@ function product({product, similar_products}: IProductPageProps) {
     useEffect(() => {
         if(similar_products.length > 0) getSimilarProductOpenOrder();
     }, []);
-    console.log({product})
 
     return (
         <div

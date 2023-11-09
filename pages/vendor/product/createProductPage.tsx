@@ -1,6 +1,5 @@
 import VendorSideNavPanel from "../../../Components/vendor/layout/VendorSideNavPanel"
 import CreateProduct from "../../../Components/vendor/product/CreateProduct"
-import axiosInstance from "../../../Utils/axiosConfig"
 
 const createProductPage = () => {
   return (
