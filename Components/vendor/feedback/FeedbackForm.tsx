@@ -1,25 +1,18 @@
-import { useState } from "react";
 import TextAreaInput from "../../inputs/TextAreaInput";
 
-const FeedbackForm = () => {
-    const [formDetails, setFormDetails] = useState({
-        message: '',
-    });
+interface IFeedbackFormProps {
+    message: string;
+    handleMessageChange: (e: any) => void;
+}
 
-    const handleFormChange = (value: string) => {
-        setFormDetails((prevState) => ({
-            ...prevState,
-            message: value
-        }))
-    }
-
+const FeedbackForm = ({message, handleMessageChange}: IFeedbackFormProps) => {
   return (
     <div>
         <TextAreaInput 
             label="message"
-            value={formDetails.message || ""}
+            value={message || ""}
             placeHolder="Tell us what you think, we will love to hear from you"
-            onInputChange={handleFormChange}
+            onInputChange={handleMessageChange}
         />
     </div>
   )

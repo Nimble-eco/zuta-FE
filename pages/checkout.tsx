@@ -256,7 +256,7 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
                             <div className="flex flex-col gap-1" key={address.id}>
                                 <div className="flex flex-row gap-1">
                                     {
-                                        selectedAddress.id === address.id ?
+                                        selectedAddress?.id === address?.id ?
                                         <MdOutlineRadioButtonChecked 
                                             className="text-base mt-1 cursor-pointer" 
                                         /> : 
@@ -294,7 +294,6 @@ export async function getServerSideProps(context: any) {
     const user = JSON.parse(cookies.user || 'null');
     const token = user?.access_token;
 
-    
     try{
         const getMyAddresses = await sendAxiosRequest(
           `/api/address/me`,

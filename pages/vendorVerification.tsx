@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { ToastContainer, toast} from "react-toastify";
 import { injectStyle } from "react-toastify/dist/inject-style";
 import { useRouter } from "next/router";
@@ -10,7 +10,6 @@ import VerificationSuccessModal from "../Components/modals/vendorVerification/Ve
 const NaijaStates = require('naija-state-local-government');
 
 const vendorVerification = () => {
-    
     const states = NaijaStates.states();
     const [showApplicationSuccessModal, setShowApplicationSuccessModal] = useState(false);
     
@@ -43,7 +42,7 @@ const vendorVerification = () => {
         });
     }
 
-    const [nextFormGroup, setNextFormGroup] = useState(true);
+    const [nextFormGroup, setNextFormGroup] = useState(false);
     const showNextForm = (e: any) => {
         e.preventDefault();
         if(vendorVerificationDataState.full_name == '')return notify("Name is required");
@@ -355,14 +354,16 @@ const vendorVerification = () => {
                                 </div>
 
                                 <div className="flex flex-col lg:flex-row gap-3 justify-end">
-                                    <button
-                                        onClick={() => setNextFormGroup(false)}
-                                        className="hover:bg-orange-700 hover:text-white text-orange-300 font-bold py-1 px-4 w-[80%] !mx-auto md:w-[35%] md:!mx-0 !h-14 rounded-full xs:border-0 sm:!border border-orange-700 focus:outline-none focus:shadow-outline"
-                                    >
-                                        Prev
-                                    </button>
+                                    <div className="h-12 w-[80%] !mx-auto md:w-[35%] md:!mx-0 rounded-full xs:border-0 sm:!border border-orange-700 focus:outline-none focus:shadow-outline hover:bg-orange-700 hover:!text-white">
+                                        <button
+                                            onClick={() => setNextFormGroup(false)}
+                                            className="text-orange-300 font-bold py-1 px-4 w-full h-full"
+                                        >
+                                            Prev
+                                        </button>
+                                    </div>
                                     
-                                    <div className="w-[80%] !mx-auto md:w-[40%] md:!mx-0">
+                                    <div className="w-[80%] !mx-auto md:w-[40%] md:!mx-0 h-12">
                                         <ButtonFull
                                             onClick={(e: any) => handleSubmit(e)}
                                             action="Submit"

@@ -1,6 +1,6 @@
 import Cookies from "js-cookie";
 import axiosInstance from "../../Utils/axiosConfig";
-import { IStoreProductShowcaseProps } from "./showcase.types";
+import { IFilterProductShowcaseActionProps, IStoreProductShowcaseProps } from "./showcase.types";
 
 export const storeProductShowcaseAction = async (payload: IStoreProductShowcaseProps) => {
     const user = JSON.parse(Cookies.get('user')!);
@@ -22,6 +22,16 @@ export const activateProductShowcaseAction = async (featured_id: number, vendorI
     });
 }
 
+export const reactivateProductShowcaseAction = async (featured_id: number, vendorId: string) => {
+    const user = JSON.parse(Cookies.get('user')!);
+    return axiosInstance.post('/api/featured/product/reactivate', {id: featured_id}, {
+        headers: {
+            Authorization: user.access_token,
+            team: vendorId
+        }
+    });
+}
+
 export const deactivateProductShowcaseAction = async (featured_id: number, vendorId: string) => {
     const user = JSON.parse(Cookies.get('user')!);
     return axiosInstance.post('/api/featured/product/deactivate', {id: featured_id}, {
@@ -30,4 +40,34 @@ export const deactivateProductShowcaseAction = async (featured_id: number, vendo
             team: vendorId
         }
     });
+}
+
+export const resumeProductShowcaseAction = async (featured_id: number, vendorId: string) => {
+    const user = JSON.parse(Cookies.get('user')!);
+    return axiosInstance.post('/api/featured/product/resume', {id: featured_id}, {
+        headers: {
+            Authorization: user.access_token,
+            team: vendorId
+        }
+    });
+}
+
+export const filterProductShowcaseAction = async (payload: IFilterProductShowcaseActionProps) => {
+    const user = JSON.parse(Cookies.get('user')!);
+    return axiosInstance.post('/api/featured/product/filter/index', payload, {
+        headers: {
+            Authorization: user.access_token,
+            team: payload.vendor_id
+        }
+    });
+}
+
+export const searchFeaturedProductsByVendorAction = async (search: string, vendor_id: string) => {
+    const user = JSON.parse(Cookies.get('user')!);
+    return axiosInstance.post('/api/featured/product/search/index', {search}, {
+        headers: {
+            Authorization: user.access_token,
+            team: vendor_id
+        }
+    })
 }

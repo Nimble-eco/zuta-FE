@@ -102,7 +102,7 @@ const paystack = () => {
 
                     {
                         paymentStatus === 'success' ? (
-                            <div className="flex flex-col gap-2 justify-center align-middle">
+                            <div className="flex flex-row justify-between gap-2 align-middle">
                                 <p className="text-left text-green-600">Payment successful</p>
                                 <div className="h-14 w-[30%]">
                                     <ButtonFull

@@ -3,7 +3,7 @@ import { useState } from "react"
 
 const VendorSideNavPanel = () => {
     const router = useRouter();
-    const activeStyle = "bg-orange-600 rounded-tr-[20px] rounded-br-[20px] text-white py-3 mr-2 hover:!text-white";
+    const activeStyle = "bg-orange-600 rounded-tr-[20px] rounded-br-[20px] !text-white py-3 mr-2 hover:!text-white";
     const [showDropdown, setShowDropdown] = useState({
         transactions: false
     });
@@ -26,14 +26,14 @@ const VendorSideNavPanel = () => {
         <div className="mb-12 mt-8 text-orange-500 text-xl font-serif">Zuta</div>
         <a 
             href="/vendor/product"
-            className={`text-black hover:!text-orange-500 cursor-pointer ${router.pathname.includes('product') && activeStyle}`}
+            className={`hover:!text-orange-500 cursor-pointer ${router.pathname.includes('product') && activeStyle}`}
         >
             Products
         </a>
         <a 
             href="#0"
             onClick={() => toggleDropdown('transactions')}
-            className={`text-black hover:!text-orange-500 cursor-pointer ${router.pathname.includes('transactions') && activeStyle}`}
+            className={`hover:!text-orange-500 cursor-pointer ${router.pathname.includes('transactions') && activeStyle}`}
         >
             Transactions
         </a>
@@ -53,19 +53,19 @@ const VendorSideNavPanel = () => {
         }
         <a 
             href="/vendor/showcase"
-            className={`text-black hover:!text-orange-500 cursor-pointer ${router.pathname.includes('showcase') && activeStyle}`}
+            className={`hover:!text-orange-500 cursor-pointer ${router.pathname.includes('showcase') && activeStyle}`}
         >
             Showcase
         </a>
-        <a 
+        {/* <a 
             href="/vendor/setting"
             className="text-black hover:!text-orange-500 cursor-pointer"
         >
             Settings
-        </a>
+        </a> */}
         <a 
             href="/vendor/feedback"
-            className="text-black hover:!text-orange-500 cursor-pointer"
+            className={`hover:!text-orange-500 cursor-pointer ${router.pathname.includes('feedback') && activeStyle}`}
         >
             Feedback
         </a>

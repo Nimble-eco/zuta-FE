@@ -3,16 +3,16 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import { ToastContainer, toast } from 'react-toastify'
 import { injectStyle } from "react-toastify/dist/inject-style";
-import ColumnTextInput from "../../../Components/inputs/ColumnTextInput";
 import FilterContainer from "../../../Components/modals/containers/FilterContainer";
 import VendorSideNavPanel from "../../../Components/vendor/layout/VendorSideNavPanel";
 import FilterAndSearchGroup from "../../../Components/inputs/FilterAndSearchGroup";
-import ButtonGhost from "../../../Components/buttons/ButtonGhost";
 import MyTable from "../../../Components/tables/MyTable";
 import { getDateAndTimeFromISODate } from "../../../Utils/convertIsoDateToDateString";
 import PaginationBar from "../../../Components/navigation/PaginationBar";
 import { parse } from "cookie";
 import axiosInstance from "../../../Utils/axiosConfig";
+import { filterProductShowcaseAction, searchFeaturedProductsByVendorAction } from "../../../requests/showcase/showcase.request";
+import MyDropDownInput from "../../../Components/inputs/MyDropDownInput";
 
 interface IProductShowcaseIndexPageProps {
     featured_products: any
@@ -24,8 +24,8 @@ const index = ({featured_products}: IProductShowcaseIndexPageProps) => {
     const [featuredProducts, setFeaturedProducts] = useState(featured_products);
     let vendorId: string = '';
     const [filterByDetails, setFilterByDetails] = useState({
-        product_id: 0,
-        product_name: '',
+        featured_paid: false,
+        status: '',
     })
     
     if(typeof window !== 'undefined') {
@@ -42,6 +42,105 @@ const index = ({featured_products}: IProductShowcaseIndexPageProps) => {
         }))
     }
 
+    const filterShowcase = async () => {
+        setLoading(true);
+
+        await filterProductShowcaseAction({
+            ...filterByDetails,
+            vendor_id: vendorId
+        })
+        .then((response: any) => {
+            if(response.status === 200) {
+                toast.success('Action successful');
+                setFeaturedProducts(response.data?.data);
+            }
+            else if(response.status === 204) {
+                toast.success('No content');
+                setFeaturedProducts({});
+            }
+        })
+        .catch((error: any) => {
+            console.log({error});
+            toast.error(error.response?.data?.message || 'Error try again later');
+        })
+        .finally(() => {
+            setLoading(false);
+            setShowFilterInput(false);
+        })
+    }
+
+    const searchShowcaseProducts = async (value: string) => {
+        setLoading(true);
+
+        await searchFeaturedProductsByVendorAction(value, vendorId)
+        .then((response) => {
+            if(response.status === 200) {
+                toast.success('Action successful');
+                setFeaturedProducts(response.data?.data);
+            }
+            else if(response.status === 204) {
+                toast.success('No content');
+                setFeaturedProducts({});
+            }
+        })
+        .catch(error => {
+            console.log({error});
+            toast.error(error.response?.data?.message || 'Error try again later');
+        })
+        .finally(() => {
+            setLoading(false);
+            setShowFilterInput(false);
+        })
+    }
+    
+    const paginateData = async (paginator: any, direction: 'prev' | 'next') => {
+        if(direction === 'prev' && paginator?.previous_page_url) {
+            setLoading(true);
+            await filterProductShowcaseAction({vendor_id: vendorId, pagination: paginator?.current_page - 1})
+            .then((response: any) => {
+                if(response.status === 200) {
+                    toast.success('Action successful');
+                    setFeaturedProducts(response.data?.data);
+                }
+                else if(response.status === 204) {
+                    toast.success('No content');
+                    setFeaturedProducts({});
+                }
+            })
+            .catch((error: any) => {
+                console.log({error});
+                toast.error(error.response?.data?.message || 'Error try again later');
+            })
+            .finally(() => {
+                setLoading(false);
+                setShowFilterInput(false);
+            });
+        }
+
+        if(direction === 'next' && paginator?.next_page_url) {
+            setLoading(true);
+            await filterProductShowcaseAction({vendor_id: vendorId, pagination: paginator?.current_page + 1})
+            .then((response: any) => {
+                if(response.status === 200) {
+                    toast.success('Action successful');
+                    setFeaturedProducts(response.data?.data);
+                }
+                else if(response.status === 204) {
+                    toast.success('No content');
+                    setFeaturedProducts({});
+                }
+            })
+            .catch((error: any) => {
+                console.log({error});
+                toast.error(error.response?.data?.message || 'Error try again later');
+            })
+            .finally(() => {
+                setLoading(false);
+                setShowFilterInput(false);
+            });
+        }
+    }
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
         <ToastContainer />
@@ -49,17 +148,32 @@ const index = ({featured_products}: IProductShowcaseIndexPageProps) => {
             showFilterInput && <FilterContainer 
                 show={showFilterInput}
                 setShow={() => setShowFilterInput(!showFilterInput)}
-                onFilter={() => {}}
+                onFilter={filterShowcase}
+                isLoading={loading}
                 children={[
                     <>
-                        <ColumnTextInput 
-                            label="Product ID"
-                            name="product_id"
-                            value={filterByDetails?.product_id}
-                            placeHolder="Enter a product id here"
-                            onInputChange={handleFilterByDetailsChange}
+                        <MyDropDownInput
+                            label="Featured Paid"
+                            name="featured_paid"
+                            value={filterByDetails.featured_paid}
+                            options={[
+                                {title: 'True', value: true},
+                                {title: 'False', value: false},
+                            ]}
+                            onSelect={handleFilterByDetailsChange}
                         />
 
+                        <MyDropDownInput
+                            label="Status"
+                            name="status"
+                            value={filterByDetails.status}
+                            options={[
+                                {title: 'Active', value: 'active'},
+                                {title: 'Inactive', value: 'inactive'},
+                                {title: 'Completed', value: 'completed'},
+                            ]}
+                            onSelect={handleFilterByDetailsChange}
+                        />
                     </>
                 ]}
             />
@@ -89,7 +203,7 @@ const index = ({featured_products}: IProductShowcaseIndexPageProps) => {
                     <div className="w-[full]">
                         <FilterAndSearchGroup 
                             searchInputPlaceHolder="Search product name, category"
-                            onSearch={() => {}}
+                            onSearch={searchShowcaseProducts}
                             onFilterButtonClick={() => setShowFilterInput(!showFilterInput)}
                             isSearching={loading}
                         />
@@ -101,7 +215,7 @@ const index = ({featured_products}: IProductShowcaseIndexPageProps) => {
                         headings={['product_name', 'featured_amount', 'paid', 'featured_payment_confirmed', 'status', 'start_date', 'end_date']}
                         content={featuredProducts?.data?.map((featuredProduct: any) => ({
                             ...featuredProduct,
-                            paid: featuredProduct.featured_paid_true ? 'Paid' : 'Not Paid',
+                            paid: featuredProduct.featured_paid ? 'Paid' : 'Not Paid',
                             featured_payment_confirmed: featuredProduct.featured_payment_confirmed ? 'Confirmed' : 'Unconfirmed',
                             start_date: getDateAndTimeFromISODate(featuredProduct.featured_start_date),
                             end_date: getDateAndTimeFromISODate(featuredProduct.featured_end_date),
@@ -110,7 +224,7 @@ const index = ({featured_products}: IProductShowcaseIndexPageProps) => {
                     />
                     <PaginationBar 
                         paginator={featuredProducts?.meta}
-                        paginateData={() => {}}
+                        paginateData={paginateData}
                     />
                 </div>
             </div>

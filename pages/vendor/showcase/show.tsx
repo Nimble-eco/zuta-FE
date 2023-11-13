@@ -4,7 +4,7 @@ import VendorSideNavPanel from "../../../Components/vendor/layout/VendorSideNavP
 import { getDateAndTimeFromISODate } from "../../../Utils/convertIsoDateToDateString";
 import { calculateTotalHours } from "../../../Utils/getHoursDifferenceFromDateTime";
 import ButtonFull from "../../../Components/buttons/ButtonFull";
-import { activateProductShowcaseAction, deactivateProductShowcaseAction } from "../../../requests/showcase/showcase.request";
+import { activateProductShowcaseAction, deactivateProductShowcaseAction, reactivateProductShowcaseAction, resumeProductShowcaseAction } from "../../../requests/showcase/showcase.request";
 import { useState } from "react";
 import Cookies from "js-cookie";
 import { useRouter } from "next/router";
@@ -46,6 +46,20 @@ const show = ({featuredProduct, mostViewedInCategories}: IShowFeaturedProductPag
     .finally(() => setIsLoading(false));
   }
 
+  const reactivateProductFeature = async () => {
+    setIsLoading(true);
+    await reactivateProductShowcaseAction(featuredProduct?.id, vendorId)
+    .then((response) => {
+        if(response.status === 202) {
+            router.push(response.data.data.pay_stack_checkout_url);
+        }
+    })
+    .catch(error => {
+        toast.error(error?.response?.data?.message || 'Error! Try again later');
+    })
+    .finally(() => setIsLoading(false));
+  }
+
   const deactivateProductFeature = async () => {
     setIsLoading(true);
     await deactivateProductShowcaseAction(featuredProduct?.id, vendorId)
@@ -59,7 +73,23 @@ const show = ({featuredProduct, mostViewedInCategories}: IShowFeaturedProductPag
     })
     .finally(() => setIsLoading(false));
   }
+
+  const resumeProductFeature = async () => {
+    setIsLoading(true);
+    await resumeProductShowcaseAction(featuredProduct?.id, vendorId)
+    .then((response) => {
+      if(response.status === 202) {
+        return toast.success('Showcase resumed');
+      }
+    })
+    .catch(error => {
+        toast.error(error?.response?.data?.message || 'Error! Try again later');
+    })
+    .finally(() => setIsLoading(false));
+  }
+
   console.log({featuredProduct})
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col overflow-auto">
       <div className="flex flex-row w-[95%] mx-auto mt-8 relative mb-10">
@@ -88,19 +118,27 @@ const show = ({featuredProduct, mostViewedInCategories}: IShowFeaturedProductPag
                       onClick={deactivateProductFeature}
                     />
                   </div> : 
-                featuredProduct?.deactivation_date && 
+                featuredProduct?.status === 'inactive' && !featuredProduct.deactivation_date ?
+                  <div className="h-12 w-[15%]">
+                    <ButtonFull
+                      action="Activate"
+                      onClick={activateProductFeature}
+                    />
+                  </div> : 
+                featuredProduct?.status === 'inactive' && 
                 new Date(featuredProduct.deactivation_date) > new Date(featuredProduct?.featured_start_date) ?
                   <div className="h-12 w-[15%]">
                     <ButtonFull
                       action="Resume"
-                      onClick={() => {}}
+                      onClick={resumeProductFeature}
                     />
                   </div> : 
+                featuredProduct?.status === 'completed' &&
                 <div className="h-12 w-[15%]">
                   <ButtonFull
-                    action="Activate"
+                    action="Reactivate"
                     loading={isLoading}
-                    onClick={activateProductFeature}
+                    onClick={reactivateProductFeature}
                   />
                 </div>
               }

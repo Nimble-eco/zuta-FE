@@ -32,6 +32,9 @@ import { filterMyOrderTrainStatusAction, getMyOrderTrainAction } from "../reques
 import { statusType } from "../requests/orderTrain/orderTrain.types";
 import Cookies from "js-cookie";
 import { getMyVendorAction } from "../requests/vendor/vendor.request";
+import { updateUserAction } from "../requests/user/user.request";
+import { AiFillEdit } from "react-icons/ai";
+import { convertToBase64 } from "../Utils/convertImageToBase64";
 
 interface IProfilePageProps {
     profile: any;
@@ -46,7 +49,7 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
     const {path} = router.query;
     
     const [isLoading, setIsLoading] = useState(false);
-    const [user, setUser] = useState<any>(userDummyData);
+    const [user, setUser] = useState<any>(profile);
     const [currentNav, setCurrentNav] = useState<string>(path?.toString() ?? 'profile');
     const [simpleOrdersData, setSimpleOrdersData] = useState(orders);
     const [orderTrainsData, setOrderTrainsData] = useState(orderTrains);
@@ -61,6 +64,8 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
     const [showViewOrderModal, setShowViewOrderModal] = useState(false);
     const [showViewOrderTrainModal, setShowViewOrderTrainModal] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState<any>({});
+
+    const handleProfileChange = (e: any) => setUser({...user, [e.target.name]: e.target.value});
 
     const toggleShowAddressMore = (index: number) => {
         const newArr = [...showAddressMore];
@@ -92,6 +97,34 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
 
     for (let i = 0; i < productsDummyData?.length; i += itemsPerPage) {
         productsPages.push(productsDummyData.slice(i, i + itemsPerPage));
+    }
+
+    const selectImage = async (e: any) => {
+        let base64_image = await convertToBase64(e.target.files[0]);
+        setUser({...user, picture: base64_image, base64_image: base64_image});
+    }
+
+    const updateUserProfile = async () => {
+        setIsLoading(true);
+
+        updateUserAction({
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            description: user.description,
+            base64_image: user.base64_image
+        })
+        .then((response) => {
+            if(response.status === 202) {
+                toast.success('Profile updated')
+            }
+        })
+        .catch(error => {
+            console.log({error})
+            toast.error(error.response?.message || 'Error try again later');
+        })
+        .finally(() => setIsLoading(false))
     }
 
     const filterSimpleOrders = async (status?: string) => {
@@ -158,7 +191,9 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
     useEffect(() => {
         Cookies.get('currentNav') ? setCurrentNav(Cookies.get('currentNav')!) : null;
         Cookies.get('orderType') ? setOrderType(Cookies.get('orderType')!) : null;
-    }, [])
+    }, []);
+
+    console.log({profile, user})
 
     return (
         <div
@@ -258,11 +293,23 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                                     <div 
                                         className="flex flex-col md:w-[40%] mx-auto mt-6"
                                     >
-                                        <img 
-                                            src={user.image || 'https://via.placeholder.com/100'}
-                                            alt="profile" 
-                                            className="rounded-full h-auto w-[30%] mx-auto" 
-                                        />
+                                        <div className="rounded-full h-40 w-40 mx-auto relative group">
+                                            <img 
+                                                src={user?.picture ?? 'https://via.placeholder.com/100'}
+                                                alt="profile" 
+                                                className="h-full w-full rounded-full" 
+                                            />
+                                            <div className="bg-gray-500 absolute bottom-0 top-0 left-0 right-0 rounded-full bg-opacity-50 z-20 group" />
+                                            <label className="cursor-pointer absolute bottom-[40%] right-[40%] z-30 hidden group group-hover:flex">
+                                                <AiFillEdit className="text-2xl text-orange-500" />
+                                                <input
+                                                    type="file"
+                                                    accept=".jpg,.jpeg,.png"
+                                                    className="hidden"
+                                                    onChange={selectImage}
+                                                />
+                                            </label>
+                                        </div>
                                         <div
                                             className="flex flex-col mt-6 w-fit mx-auto"
                                         >
@@ -284,6 +331,13 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                                                     {user.phone}
                                                 </h3>
                                             </div>
+                                            <div 
+                                                className={`flex flex-row cursor-pointer px-4 py-2 pb-1 rounded-[20px] font-medium bg-orange-500 bg-opacity-20 justify-center align-middle`}
+                                                onClick={() => getPage('vendor/product/')}
+                                            >
+                                                <MdStore className="text-2xl mr-2" />
+                                                <p>My Store</p>
+                                            </div>
                                         </div>  
                                     </div>
                                     <div className="flex flex-col border border-gray-100 md:w-[60%] px-8 pb-4">
@@ -292,26 +346,29 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                                             <TextInput 
                                                 label="name"
                                                 value={user?.name}
-                                                onInputChange={() => {}}
+                                                onInputChange={handleProfileChange}
                                                 placeHolder='Enter your name'
                                             />
                                             <TextInput 
                                                 label="email"
+                                                name="email"
                                                 value={user?.email}
-                                                onInputChange={() => {}}
+                                                onInputChange={handleProfileChange}
                                                 placeHolder='Enter your email'
                                             />
                                             <TextInput 
                                                 label="phone"
+                                                name='phone'
                                                 value={user?.phone}
-                                                onInputChange={() => {}}
+                                                onInputChange={handleProfileChange}
                                                 placeHolder='Enter your Phone number'
                                             />
                                         </form>
                                         <div className="h-14 w-[60%] mx-auto">
                                             <ButtonFull 
                                                 action="Save changes"
-                                                onClick={() => {}}
+                                                loading={isLoading}
+                                                onClick={updateUserProfile}
                                             />
                                         </div>
                                     </div>
@@ -525,7 +582,7 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                         {
                             currentNav === 'address' && (
                             <div className="flex flex-col relative">
-                                <div className="w-fit absolute top-0 right-4">
+                                <div className="w-fit absolute top-2 right-8">
                                     <ButtonFull
                                         action="Add Address"
                                         onClick={() => setShowNewAddressModal(!showNewAddressModal)}
@@ -534,7 +591,7 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
 
                                 <div className="w-[90%] md:w-[50%] mx-auto mt-10 flex flex-col">
                                     {
-                                        addresses ? addresses.map((address: any, index: number) => (
+                                        addresses && addresses?.length > 0 ? addresses?.map((address: any, index: number) => (
                                             <div className='flex flex-col py-3 px-4 shadow-lg rounded-md mb-4' key={address.name}>
                                                 <div className="flex flex-row relative">
                                                     <GoLocation className="text-xl text-gray-500 mr-2" />
@@ -585,7 +642,7 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                                                 <span
                                                     className="text-xl text-gray-600 font-serif"
                                                 >
-                                                    No Orders Yet
+                                                    No Address has been saved Yet
                                                 </span>
                                             </div>
                                         )

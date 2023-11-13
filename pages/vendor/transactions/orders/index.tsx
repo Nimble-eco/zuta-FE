@@ -165,6 +165,7 @@ const index = ({orders}: IOrdersIndexPageProps) => {
                 show={showFilterInput}
                 setShow={() => setShowFilterInput(!showFilterInput)}
                 onFilter={filterOrderTransactionsPage}
+                isLoading={loading}
                 children={[
                     <>
                         <ColumnTextInput 
@@ -249,6 +250,7 @@ const index = ({orders}: IOrdersIndexPageProps) => {
                     <div className="w-[full]">
                         <FilterAndSearchGroup 
                             searchInputPlaceHolder="Search name, price, category"
+                            isSearching={loading}
                             onSearch={searchOrders}
                             onFilterButtonClick={() => setShowFilterInput(!showFilterInput)}
                         />
