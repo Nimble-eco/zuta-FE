@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import InfiniteScroll from 'react-infinite-scroll-component';
+import { ToastContainer, toast} from "react-toastify";
+import { injectStyle } from "react-toastify/dist/inject-style";
 import Header from "../Components/Header";
 import ProductComponent from "../Components/ProductComponent"
 import ResultsPageSideNavPanel from "../Components/navigation/SideNavPanel";
@@ -9,6 +11,7 @@ import BottomDrawer from "../Components/drawer/BottomDrawer";
 import { MdOutlineFilterList } from "react-icons/md";
 import axiosInstance from "../Utils/axiosConfig";
 import { useRouter } from "next/router";
+import { filterPublicProductsByPriceAction, filterPublicProductsByRatingAction } from "../requests/publicProducts/public-products.request";
 
 interface IResultsPageProps {
     products: any[];
@@ -21,33 +24,30 @@ function results({products, openOrderProducts, featuredProducts}: IResultsPagePr
     const [data, setData] = useState(products);
     const [featuredProductsList, setFeaturedProductsList] = useState(featuredProducts);
     const [sortType, setSortType] = useState('location')
-    const cartRef = useRef<any>({});
     const [page, setPage] = useState(1);
     const [showMobileFilterDrawer, setShowMobileFilterDrawer] = useState<boolean>(false);
     const { search } = router.query;
     const [moreProducts, setMoreProducts] = useState(true);
     const [moreFeatures, setMoreFeatures] = useState(true);
 
+    if (typeof window !== "undefined") injectStyle();
+
     const loadMoreData = async () => {
-        
         await axiosInstance.post('/api/public/product/search/index', {
             search: search,
             pagination: page + 1
         })
         .then((response) => {
-            console.log({response})
             if(response.data.data) {
                 setData(data.concat(response.data.data));
                 setPage(page + 1);
             }
             else setMoreProducts(false);
-          
         })
 
     };
 
     const loadFeaturedProductsData = async () => {
-       
         await axiosInstance.post('/api/public/product/search/index', {
             search: search,
             pagination: page + 1
@@ -61,6 +61,43 @@ function results({products, openOrderProducts, featuredProducts}: IResultsPagePr
           
         })
     };
+
+    const filterByPrice = async (start_price: number, end_price?: number) => {
+        await filterPublicProductsByPriceAction({start_price, end_price, search: search as string})
+        .then(response => {
+            console.log({response})
+            if(response.status === 200) {
+                setData(response.data?.data?.data);
+                toast.success('Products filtered successfully');
+            }
+            if(response.status === 204) {
+                setData([]);
+                toast.success('No Products in this range');
+            }
+        })
+        .catch(error => {
+            console.log({error});
+            toast.error(error?.data?.response?.message || 'Error try again later');
+        })
+    }
+
+    const filterByRating = async (rating: number) => {
+        await filterPublicProductsByRatingAction({rating, search: search as string})
+        .then(response => {
+            if(response.status === 200) {
+                setData(response.data?.data.data);
+                toast.success('Products filtered successfully');
+            }
+            if(response.status === 204) {
+                setData([]);
+                toast.success('No Products in this range');
+            }
+        })
+        .catch(error => {
+            console.log({error});
+            toast.error(error?.data?.response?.message || 'Error try again later');
+        })
+    }
 
     // useEffect(() => {
     //     const sortArray = (type: any) => {
@@ -127,9 +164,12 @@ function results({products, openOrderProducts, featuredProducts}: IResultsPagePr
                 </div>
             </div>
 
-            <div className="flex flex-row relative">
+            <div className="flex flex-row relative w-full">
                 <div className="hidden md:flex md:flex-col md:w-[25%] px-5">
-                    <ResultsPageSideNavPanel />
+                    <ResultsPageSideNavPanel 
+                        filterByPrice={filterByPrice}
+                        filterByRating={filterByRating}
+                    />
                     <div className="md:w-full lg:w-[95%] mx-auto">
                         <InfiniteScroll
                             dataLength={featuredProductsList?.length}
@@ -139,7 +179,7 @@ function results({products, openOrderProducts, featuredProducts}: IResultsPagePr
                             className='flex flex-col w-full gap-y-48'
                         >
                             {
-                                featuredProductsList?.map((product: any, index: number) => (
+                                featuredProductsList?.length > 0 && featuredProductsList?.map((product: any, index: number) => (
                                     <FeaturedProductCard 
                                         key={`${product.id}-${index}`}
                                         product={product}
@@ -151,7 +191,7 @@ function results({products, openOrderProducts, featuredProducts}: IResultsPagePr
                     </div>
                 </div>
 
-                <div className="flex flex-col md:w-[75%] mt-16">
+                <div className="flex flex-col w-full md:w-[75%] mt-4 overflow-x-auto">
                     { openOrderProducts?.length > 0 && <div className='mt-10 xs:max-w-[18rem] sm:!max-w-[24rem] bmd:!max-w-xl md:!max-w-screen-md lg:!min-w-full'>
                         <HorizontalSlider 
                             list={openOrderProducts}
@@ -159,7 +199,7 @@ function results({products, openOrderProducts, featuredProducts}: IResultsPagePr
                         />
                     </div>}
                     
-                    <h3 className="text-lg font-bold mb-4 pl-4">Product Results</h3>
+                    <h3 className="text-lg font-bold mb-4 pl-6">Product Results</h3>
                     <div className="">
                         <InfiniteScroll
                             dataLength={data?.length}
@@ -172,9 +212,9 @@ function results({products, openOrderProducts, featuredProducts}: IResultsPagePr
                                     Loading...
                                 </h4>
                             }
-                            className='flex flex-col gap-y-10 md:grid md:grid-cols-2 md:gap-4 lg:grid-cols-3 lg:gap-5 xl:grid-cols-4 md:w-full px-5'
+                            className='flex flex-col gap-y-10 md:grid md:grid-cols-2 md:gap-4 lg:grid-cols-3 lg:gap-5 xl:grid-cols-4 w-full px-8'
                         >
-                            {data.map((product: any, index: number) => (
+                            {data?.map((product: any, index: number) => (
                                 <ProductComponent 
                                     key={index} 
                                     product={product} 
@@ -218,6 +258,7 @@ export async function getServerSideProps(context: any) {
         const products = productsResult.status === 'fulfilled' && productsResult.value.data ? productsResult.value.data?.data : [];
         const openOrderProducts = openOrderProductsResult.status === 'fulfilled' && openOrderProductsResult.value.data ? openOrderProductsResult.value.data?.data : [];
         const featuredProducts = featuredProductsResult.status === 'fulfilled' && featuredProductsResult.value.data ? featuredProductsResult.value.data?.data : [];
+        console.log({products, openOrderProducts, featuredProducts})
 
         return {
             props: {

@@ -11,11 +11,11 @@ interface IMyDropDownInputProps {
 
 const MyDropDownInput = ({label, name, options, value, onSelect}: IMyDropDownInputProps) => {
   return (
-    <div className='flex flex-col mb-4'>
+    <div className='flex flex-col mb-4 w-full'>
         <label className='font-semibold mb-1 text-sm'>
             {capitalizeFirstLetter(label)}:
         </label>
-        <select name={name ?? label} className='text-gray-500 text-sm bg-gray-100 py-2 px-4' onChange={(e) => onSelect(e)}>
+        <select name={name ?? label} className='text-gray-500 text-sm bg-gray-100 py-2 px-4' value={value as string} onChange={(e) => onSelect(e)}>
             <option value={''}>Select an option</option>
             {
                 options?.map((item: any, index: number) => (
@@ -24,7 +24,7 @@ const MyDropDownInput = ({label, name, options, value, onSelect}: IMyDropDownInp
                         key={`${item.value ?? item.name} ${index}`}
                         className="mb-3 border-b border-gray-200 py-2"
                     >
-                        {item.title || item.name}
+                        {capitalizeFirstLetter(item.title || item.name)}
                     </option>
                 ))
             }

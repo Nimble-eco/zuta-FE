@@ -9,7 +9,6 @@ import { BsArrowRightCircle } from 'react-icons/bs'
 import Header from "../Components/Header"
 import { sendAxiosRequest } from "../Utils/sendAxiosRequest";
 import Image from "next/image";
-import { userDummyData } from "../data/user";
 import { RiHomeSmileLine } from "react-icons/ri";
 import { MdOutlineRateReview, MdStore } from "react-icons/md";
 import { CgMoreO } from "react-icons/cg";
@@ -19,9 +18,8 @@ import { HiOutlineMail, HiOutlinePhone } from "react-icons/hi";
 import { BsPersonSquare } from "react-icons/bs";
 import { capitalizeFirstLetter } from "../Utils/capitalizeFirstLettersOfString";
 import { GoLocation } from "react-icons/go";
-import UpdateAddressModal, { IAddress } from "../Components/modals/address/UpdateAddressModal";
+import UpdateAddressModal from "../Components/modals/address/UpdateAddressModal";
 import NewAddressModal from "../Components/modals/address/NewAddressModal";
-import { productsDummyData } from "../data/products";
 import axiosInstance from "../Utils/axiosConfig";
 import { formatAmount } from "../Utils/formatAmount";
 import ShowOrderModal from "../Components/modals/orders/ShowOrderModal";
@@ -35,6 +33,7 @@ import { getMyVendorAction } from "../requests/vendor/vendor.request";
 import { updateUserAction } from "../requests/user/user.request";
 import { AiFillEdit } from "react-icons/ai";
 import { convertToBase64 } from "../Utils/convertImageToBase64";
+import MyDropDownInput from "../Components/inputs/MyDropDownInput";
 
 interface IProfilePageProps {
     profile: any;
@@ -47,7 +46,6 @@ interface IProfilePageProps {
 function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePageProps) {
     const router = useRouter();
     const {path} = router.query;
-    
     const [isLoading, setIsLoading] = useState(false);
     const [user, setUser] = useState<any>(profile);
     const [currentNav, setCurrentNav] = useState<string>(path?.toString() ?? 'profile');
@@ -64,13 +62,14 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
     const [showViewOrderModal, setShowViewOrderModal] = useState(false);
     const [showViewOrderTrainModal, setShowViewOrderTrainModal] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState<any>({});
+    const [isVendor, setIsVendor] = useState(false);
 
     const handleProfileChange = (e: any) => setUser({...user, [e.target.name]: e.target.value});
 
     const toggleShowAddressMore = (index: number) => {
         const newArr = [...showAddressMore];
         
-        newArr.map((item, i) => {
+        newArr.forEach((item, i) => {
             if(i === index) newArr[i] = !newArr[i];
             else newArr[i] = false;
         });
@@ -82,22 +81,7 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
         injectStyle();
     }
 
-    let host: string = "";
-    const env = process.env.ENV;
-    if (env === 'production') {
-        host = process.env.HOST!;
-    } else {
-        host = 'http://localhost'
-    }
-
     const getPage = (page: string) => router.push(`/${page}`);
-
-    const itemsPerPage = 8;
-    const productsPages = [];
-
-    for (let i = 0; i < productsDummyData?.length; i += itemsPerPage) {
-        productsPages.push(productsDummyData.slice(i, i + itemsPerPage));
-    }
 
     const selectImage = async (e: any) => {
         let base64_image = await convertToBase64(e.target.files[0]);
@@ -189,11 +173,19 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
     }
 
     useEffect(() => {
-        Cookies.get('currentNav') ? setCurrentNav(Cookies.get('currentNav')!) : null;
-        Cookies.get('orderType') ? setOrderType(Cookies.get('orderType')!) : null;
+        let isMounted = true;
+
+        if(isMounted) {
+            Cookies.get('currentNav') ? setCurrentNav(Cookies.get('currentNav')!) : null;
+            Cookies.get('orderType') ? setOrderType(Cookies.get('orderType')!) : null;
+
+            const userCookie = JSON.parse(Cookies.get('user')!);
+            if(userCookie?.vendor) setIsVendor(true);
+        }
+
+        return () => { isMounted = false }
     }, []);
 
-    console.log({profile, user})
 
     return (
         <div
@@ -235,7 +227,7 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                     }
 
                     <div className="flex flex-col text-gray-700 bg-white rounded-md py-6 mb-10 min-h-screen">
-                        <div className="flex flex-row border-b border-gray-300 w-[90%] md:w-[80%] mx-auto whitespace-nowrap justify-evenly pb-3 mb-4">
+                        <div className="hidden lg:flex flex-row border-b border-gray-300 w-[90%] md:w-[80%] mx-auto whitespace-nowrap justify-evenly pb-3 mb-4">
                             <div 
                                 className={`${currentNav === 'profile' && 'bg-orange-400 bg-opacity-25'} flex flex-row cursor-pointer px-4 pt-2 pb-1 rounded-[20px] font-medium`}
                                 onClick={() => {
@@ -245,13 +237,6 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                             >
                                 <GiPerson className="text-xl mr-2" />
                                 <p>Personal Info</p>
-                            </div>
-                            <div 
-                                className={`${currentNav === 'vendor' && 'bg-orange-400 bg-opacity-25'} flex flex-row cursor-pointer px-4 pt-2 pb-1 rounded-[20px] font-medium`}
-                                onClick={() => getPage('vendor/product/')}
-                            >
-                                <MdStore className="text-xl mr-2" />
-                                <p>My Store</p>
                             </div>
                             <div 
                                 className={`${currentNav === 'orders' && 'bg-orange-400 bg-opacity-25'} flex flex-row cursor-pointer px-4 pt-2 pb-1 rounded-[20px] font-medium`}
@@ -285,13 +270,30 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                             </div>
                         </div>
 
+                        <div className="flex lg:hidden w-[60%] mx-auto whitespace-nowrap py-3 mb-4">
+                            <MyDropDownInput
+                                label="Tab"
+                                value={currentNav}
+                                onSelect={(currentTab: any) => {
+                                    setCurrentNav(currentTab.target?.value);
+                                    Cookies.set('currentNav', currentTab.target?.value);
+                                }}
+                                options={[
+                                    {name: 'profile'},
+                                    {name: 'orders'},
+                                    {name: 'address'},
+                                    {name: 'reviews'}
+                                ]}
+                            />
+                        </div>
+
                         {
                             currentNav === 'profile' && (
                                 <div
                                     className="flex flex-col md:flex-row justify-between w-[90%] md:w-[80%] mx-auto min-h-screen"
                                 >
                                     <div 
-                                        className="flex flex-col md:w-[40%] mx-auto mt-6"
+                                        className="flex flex-col md:w-[40%] mx-auto my-6"
                                     >
                                         <div className="rounded-full h-40 w-40 mx-auto relative group">
                                             <img 
@@ -331,13 +333,16 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                                                     {user.phone}
                                                 </h3>
                                             </div>
-                                            <div 
-                                                className={`flex flex-row cursor-pointer px-4 py-2 pb-1 rounded-[20px] font-medium bg-orange-500 bg-opacity-20 justify-center align-middle`}
-                                                onClick={() => getPage('vendor/product/')}
-                                            >
-                                                <MdStore className="text-2xl mr-2" />
-                                                <p>My Store</p>
-                                            </div>
+                                            {
+                                                isVendor && <div 
+                                                    className={`flex flex-row cursor-pointer px-4 py-2 pb-1 rounded-[20px] font-medium bg-orange-500 bg-opacity-20 justify-center align-middle`}
+                                                    onClick={() => getPage('vendor/product/')}
+                                                >
+                                                    <MdStore className="text-2xl mr-2" />
+                                                    <p>My Store</p>
+                                                </div>
+                                            }
+                                          
                                         </div>  
                                     </div>
                                     <div className="flex flex-col border border-gray-100 md:w-[60%] px-8 pb-4">
@@ -378,7 +383,7 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
 
                         {
                             currentNav === 'orders' && (
-                            <div className="flex flex-col w-[90%] md:w-[80%] mx-auto relative">
+                            <div className="flex flex-col w-[90%] md:w-[80%] mx-auto relative overflow-auto">
                                 <div className="flex flex-row absolute top-1 right-4 bg-gray-300 rounded-md text-sm">
                                     <div className={`${orderType === 'simple' && 'bg-gray-600 text-white text-base rounded-md'} px-4 py-2 cursor-pointer`} onClick={() => {
                                         setOrderType('simple');
@@ -393,8 +398,8 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                                         Order Train
                                     </div>
                                 </div>
-                                <div className="flex flex-col md:flex-row w-full mt-16">
-                                    <div className="flex !flex-row md:!flex-col md:!min-h-fit mt-10 md:w-fit text-sm">
+                                <div className="flex flex-row w-full mt-16">
+                                    <div className="flex !flex-col md:!min-h-fit mt-10 md:w-fit text-sm">
                                         <div 
                                             className={`px-4 py-1 bg-gray-200 cursor-pointer mb-2 ${filterOrderStatus === 'all' && 'bg-gray-600 text-white'}`}
                                             onClick={() => {
@@ -461,7 +466,7 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                                             <span>Cancelled</span>
                                         </div>
                                     </div>
-                                    <table className="md:w-full ml-2 text-sm h-fit">
+                                    <table className="md:w-full ml-2 text-sm h-fit min-w-[600px] overflow-auto">
                                         <thead className="bg-gray-200 px-4">
                                             <tr className="!w-full px-4">
                                                 <th className='w-[40%]'>
@@ -495,7 +500,10 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                                         {
                                             orderType === 'simple' ? 
                                                 simpleOrdersData?.data?.length > 0 ? simpleOrdersData?.data?.map((order: any) => (
-                                                    <tr className="border-b border-gray-200" key={order.id}>
+                                                    <tr className="border-b border-gray-200" key={order.id}  onClick={() => {
+                                                        setSelectedOrder(order);
+                                                        setShowViewOrderModal(true);
+                                                    }}>
                                                         <td className="">
                                                             <p className="mb-2 pl-4">{order?.product_name}</p>
                                                         </td>
@@ -536,7 +544,10 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                                         {
                                             orderType === 'train' ?
                                                 orderTrainsData?.length > 0 ? orderTrainsData?.map((order: any) => (
-                                                    <tr className="py-6 border-b border-gray-200" key={order.id}>
+                                                    <tr className="py-6 border-b border-gray-200" key={order.id}  onClick={() => {
+                                                        setSelectedOrder(order);
+                                                        setShowViewOrderTrainModal(true);
+                                                    }}>
                                                         <td className="">
                                                             <p className="mb-2 pl-4">{order?.product_name}</p>
                                                         </td>
@@ -582,7 +593,7 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                         {
                             currentNav === 'address' && (
                             <div className="flex flex-col relative">
-                                <div className="w-fit absolute top-2 right-8">
+                                <div className="hidden lg:flex w-fit absolute top-2 right-8">
                                     <ButtonFull
                                         action="Add Address"
                                         onClick={() => setShowNewAddressModal(!showNewAddressModal)}
@@ -630,7 +641,7 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                                             </div>
                                         )) : (
                                             <div
-                                                className="flex flex-col justify-center items-center"
+                                                className="flex flex-col gap-1 justify-center items-center"
                                             >
                                                 <Image
                                                     src='https://dl.dropbox.com/s/d2ilx96oi0612ha/undraw_a_moment_to_relax_bbpa.png?dl=0'
@@ -640,10 +651,16 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                                                     className='rounded-md mb-10'
                                                 />
                                                 <span
-                                                    className="text-xl text-gray-600 font-serif"
+                                                    className="text-base lg:text-xl text-gray-600 font-serif"
                                                 >
                                                     No Address has been saved Yet
                                                 </span>
+                                                <div className="flex lg:hidden w-[70%] mx-auto">
+                                                    <ButtonFull
+                                                        action="Add Address"
+                                                        onClick={() => setShowNewAddressModal(!showNewAddressModal)}
+                                                    />
+                                                </div>
                                             </div>
                                         )
                                     }
@@ -655,17 +672,17 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                         {/* PENDING PRODUCT REVIEWS SECTION */}
                         {
                             currentNav === 'reviews' && (
-                            <div className="flex flex-col w-[90%] lg:w-[70%] mx-auto py-8">
+                            <div className="flex flex-col w-[90%] lg:w-[70%] mx-auto">
                                 <div className="border border-gray-100 rounded-sm px-4 py-3 flex flex-row mb-6">
                                     <div className="w-[19%] mr-[1%]">
                                         <img src="https://via.placeholder.com/100" alt="product image" />
                                     </div>
                                     <div className="flex flex-col w-full text-sm">
-                                        <div className="flex flex-row justify-between mb-2 text-lg">
+                                        <div className="flex flex-row justify-between mb-2 lg:text-lg">
                                             <p className="line-clamp-1">12V Battery Charger Car Solar AGM GEL VRLA</p>
                                             <a
                                                 href="#0"
-                                                className="!text-orange-500 font-bold cursor-pointer text-sm ml-5"
+                                                className="!text-orange-500 font-bold cursor-pointer whitespace-nowrap !text-xs lg:!text-sm ml-5"
                                             >
                                                 RATE THIS PRODUCT
                                             </a>

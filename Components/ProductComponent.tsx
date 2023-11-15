@@ -23,7 +23,7 @@ const ProductComponent: FC<IProductComponentProps> = ({product}) => {
 
     return (
         <div
-            className='flex xs:flex-col sm:!flex-row md:!flex-col bg-white rounded-md mb-4 shadow-xl w-fit min-w-[95%]'
+            className='flex xs:flex-col sm:!flex-col md:!flex-col bg-white rounded-md mb-4 shadow-xl w-fit min-w-full'
         >
             <img
                 src={product?.product_images[0]}

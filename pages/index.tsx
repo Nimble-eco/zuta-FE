@@ -61,14 +61,14 @@ const Home = ({products, openOrders, categories, tags, catalogues}: IHomePagePro
             
         </div>
       </div>
-      <div className='h-[50vh] my-10 w-[80%] mx-auto'>
+      <div className='lg:h-[50vh] my-10 w-[80%] mx-auto'>
         <SwiperSlider 
           slides={cataloguesDummyData}
         />
       </div>
 
       <div 
-        className="flex flex-col justify-between w-[80%] mx-auto mb-16"
+        className="flex flex-col gap-2 justify-between w-[80%] mx-auto mb-16"
       >
         <span
           className='text-left text-xl font-mono pl-6 mb-5 text-gray-700 font-extrabold'
@@ -76,7 +76,7 @@ const Home = ({products, openOrders, categories, tags, catalogues}: IHomePagePro
           Categories
         </span>
         <div
-          className="hidden lg:flex lg:flex-row gap-4 px-5 py-8 overflow-x-scroll"
+          className="hidden lg:flex lg:flex-row gap-6 py-4 overflow-x-scroll"
         >
           {
             categories.length > 0 && categories?.map((category: any, index: number) => (
@@ -144,7 +144,7 @@ const Home = ({products, openOrders, categories, tags, catalogues}: IHomePagePro
 
         <div className='grid grid-cols-2 gap-3 md:grid-cols-3 lg:hidden px-5'>
           {
-            tags.length > 0 && tags?.map((tag: any, index: number) => (
+            tags.length > 0 && tags?.slice(0, 8).map((tag: any, index: number) => (
               <CategoryCard 
                 key={`${tag.name} ${index}`}
                 image={tag?.image}
@@ -211,7 +211,7 @@ export async function getServerSideProps() {
         getCategories,
         getTags
       ]);
-      console.log({productsResult})
+
       const products = productsResult.status === 'fulfilled' ? productsResult?.value?.data : [];
       // const openOrders = openOrdersResult.status === 'fulfilled' ? openOrdersResult?.value?.data : [];
       const categories = categoriesResult.status === 'fulfilled' ? categoriesResult?.value?.data : [];
