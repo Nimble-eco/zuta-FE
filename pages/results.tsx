@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { ToastContainer, toast} from "react-toastify";
 import { injectStyle } from "react-toastify/dist/inject-style";
@@ -23,7 +23,6 @@ function results({products, openOrderProducts, featuredProducts}: IResultsPagePr
     const router = useRouter();
     const [data, setData] = useState(products);
     const [featuredProductsList, setFeaturedProductsList] = useState(featuredProducts);
-    const [sortType, setSortType] = useState('location')
     const [page, setPage] = useState(1);
     const [showMobileFilterDrawer, setShowMobileFilterDrawer] = useState<boolean>(false);
     const { search } = router.query;
@@ -65,7 +64,6 @@ function results({products, openOrderProducts, featuredProducts}: IResultsPagePr
     const filterByPrice = async (start_price: number, end_price?: number) => {
         await filterPublicProductsByPriceAction({start_price, end_price, search: search as string})
         .then(response => {
-            console.log({response})
             if(response.status === 200) {
                 setData(response.data?.data?.data);
                 toast.success('Products filtered successfully');
@@ -79,6 +77,7 @@ function results({products, openOrderProducts, featuredProducts}: IResultsPagePr
             console.log({error});
             toast.error(error?.data?.response?.message || 'Error try again later');
         })
+        .finally(() => setShowMobileFilterDrawer(false));
     }
 
     const filterByRating = async (rating: number) => {
@@ -97,29 +96,28 @@ function results({products, openOrderProducts, featuredProducts}: IResultsPagePr
             console.log({error});
             toast.error(error?.data?.response?.message || 'Error try again later');
         })
+        .finally(() => setShowMobileFilterDrawer(false));
     }
 
-    // useEffect(() => {
-    //     const sortArray = (type: any) => {
-    //         const types: any = {
-    //             price: 'price',
-    //             location: 'location',
-    //             date: 'date'
-    //         };
-    //         const sortProperty = types[type];
-    //         const sorted = [...props.products].sort((a, b) => b[sortProperty] - a[sortProperty]);
-    //         setData(sorted);
-    //     };
-    //     sortArray(sortType);
-    // }, [sortType]);
+    const sortResultsByPrice = (direction: string) => {
+        let sortedData;
+        if (direction === 'asc') sortedData = [...data].sort((a, b) => a.product_price - b.product_price);
+        if (direction === 'desc') sortedData = [...data].sort((a, b) => b.product_price - a.product_price);
+      
+        if (sortedData) setData(sortedData);
+    };
 
     return (
         <div
             className="flex flex-col w-full bg-white min-h-screen relative"
         >
             <Header />
+            <ToastContainer />
 
-            { showMobileFilterDrawer && <BottomDrawer /> }
+            { showMobileFilterDrawer && <BottomDrawer 
+                filterByPrice={filterByPrice}
+                filterByRating={filterByRating}
+            /> }
 
             <div className="flex flex-col md:flex-row shadow-md py-5 relative">
                 <div className='flex flex-row relative'>
@@ -132,33 +130,28 @@ function results({products, openOrderProducts, featuredProducts}: IResultsPagePr
                 <div
                     className="flex flex-row justify-center items-center min-w-fit bg-gray-100 rounded-xl px-3 py-2 md:absolute md:top-3 md:right-4 md:mb-10 sm:max-w-fit sm:ml-2 max-w-[80%] md:max-w-none"
                 >
-                    <span
-                        className="text-gray-600 text-sm font-semibold"
-                    >
-                        Sort By:
-                    </span>
                     <select 
                         name="filter" 
-                        onChange={(e) => setSortType(e.target.value)}
+                        onChange={(e) => sortResultsByPrice(e.target.value)}
                         className="cursor-pointer text-gray-600 min-w-fit outline-none bg-transparent"
                     >
                         <option 
-                            value="date"
-                            className="py-3 border-b-2 border-solid border-gray-400"
+                            value=""
+                            className="py-3 border-b-2 border-solid border-gray-400 cursor-pointer"
                         >
-                            Date added
+                            Sort results
                         </option>
                         <option 
-                            value="location"
-                            className="py-3 border-b-2 border-solid border-gray-400"
-                        >
-                            Location
-                        </option>
-                        <option 
-                            value="price"
-                            className="py-3 border-b-2 border-solid border-gray-400"
+                            value="asc"
+                            className="py-3 border-b-2 border-solid border-gray-400 cursor-pointer"
                         >
                             low to high price
+                        </option>
+                        <option 
+                            value="desc"
+                            className="py-3 border-b-2 border-solid border-gray-400 cursor-pointer"
+                        >
+                            high to low price
                         </option>
                     </select>
                 </div>
@@ -199,7 +192,7 @@ function results({products, openOrderProducts, featuredProducts}: IResultsPagePr
                         />
                     </div>}
                     
-                    <h3 className="text-lg font-bold mb-4 pl-6">Product Results</h3>
+                    <h3 className="text-lg font-bold mb-4 pl-12 lg:pl-6">Product Results</h3>
                     <div className="">
                         <InfiniteScroll
                             dataLength={data?.length}
@@ -212,14 +205,14 @@ function results({products, openOrderProducts, featuredProducts}: IResultsPagePr
                                     Loading...
                                 </h4>
                             }
-                            className='flex flex-col gap-y-10 md:grid md:grid-cols-2 md:gap-4 lg:grid-cols-3 lg:gap-5 xl:grid-cols-4 w-full px-8'
+                            className='flex flex-col gap-y-10 md:grid md:grid-cols-2 md:gap-4 lg:grid-cols-3 lg:gap-5 xl:grid-cols-4 w-[90%] mx-auto lg:w-full px-8'
                         >
-                            {data?.map((product: any, index: number) => (
+                            {data?.length > 0 ? data?.map((product: any, index: number) => (
                                 <ProductComponent 
                                     key={index} 
                                     product={product} 
                                 />
-                            ))}
+                            )) : <p className="text-center font-medium">No Products found</p>}
                         </InfiniteScroll>
                     </div>
                 </div>

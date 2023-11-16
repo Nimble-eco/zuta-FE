@@ -68,7 +68,7 @@ const ResultsPageSideNavPanel = ({filterByPrice, filterByRating}: IResultsPageSi
             <div className='cursor-pointer mb-3' onClick={() => filterByPrice(50000, 100000)}>
                 <p>N50,000 to N100,000</p>
             </div>
-            <div className='cursor-pointer mb-3' onClick={() => filterByPrice(100000)}>
+            <div className='cursor-pointer mb-3' onClick={() => filterByPrice(100000, 1000000000000)}>
                 <p>N100,000 & above</p>
             </div>
         </div>
