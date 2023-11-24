@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import Modal from 'react-bootstrap/Modal';
 import { MdOutlineArrowRight, MdOutlineArrowLeft, MdOutlinePlayArrow, MdOutlinePause, MdOutlineClose } from "react-icons/md";
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { IoIosCloseCircleOutline } from 'react-icons/io';
 
 interface IMyGalleryProps {
     show: boolean;
@@ -11,7 +12,6 @@ interface IMyGalleryProps {
 
 const MyGallery = ({show, setShow, slides}: IMyGalleryProps) => {
     const [currentIndex, setCurrentIndex] = useState<number>(0);
-    const [nextIndex, setNextIndex] = useState<number>(1);
     const [autoSlide, setAutoSlide] = useState<boolean>(false);
 
     let slideInterval: any;
@@ -42,12 +42,12 @@ const MyGallery = ({show, setShow, slides}: IMyGalleryProps) => {
 
 
   return (
-    <div className="!rounded-md ">
-        <Modal show={show} onHide={setShow} backdrop="static" dialogClassName='modal-90w'>
-            <Modal.Body className='min-w-[60vw] w-[60vw]'>
-                <div className='flex flex-col min-h-[70vh] h-[90vh] relative'>
-                    <MdOutlineClose className='text-3xl cursor-pointer absolute top-3 right-3' onClick={setShow} />
-                    <div className='h-[65%] '>
+    <div className="!rounded-md z-50">
+        <Modal show={show} onHide={setShow} dialogClassName='lg:modal-90w !w-[90vw] max-w-full overflow-auto'>
+            <Modal.Body className='lg:min-w-[60vw] lg:w-[60vw]'>
+                <div className='flex flex-col h-[60vh] lg:min-h-[70vh] lg:h-[90vh] relative'>
+                    <IoIosCloseCircleOutline className='text-3xl text-red-600 cursor-pointer absolute top-3 right-3' onClick={setShow} />
+                    <div className='h-[50%] lg:h-[65%] w-full'>
                         <img 
                             src={slides[currentIndex]} 
                             alt='product image'
@@ -82,7 +82,7 @@ const MyGallery = ({show, setShow, slides}: IMyGalleryProps) => {
                                     key={`${slide}${index}`}
                                     src={slide}
                                     alt='product image'
-                                    className='cursor-pointer rounded-md'
+                                    className='cursor-pointer rounded-md w-32 h-32'
                                     onClick={() => setCurrentIndex(index)}
                                 />
                             ))

@@ -14,7 +14,7 @@ const CategoryCard = ({image, title}: ICategoryCardProps) => {
 
   return (
     <div
-      className="flex flex-col bg-white rounded-md px-2 py-3 min-w-70 cursor-pointer h-fit lg:h-40 drop-shadow-2xl"
+      className="flex flex-col bg-white rounded-md px-2 py-3 min-w-70 cursor-pointer h-fit lg:h-40"
       onClick={() => handleClick(title)}
     >
       <img

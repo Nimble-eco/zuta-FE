@@ -64,11 +64,12 @@ const Home = ({products, openOrders, categories, tags, catalogues}: IHomePagePro
       <div className='lg:h-[50vh] my-10 w-[80%] mx-auto'>
         <SwiperSlider 
           slides={cataloguesDummyData}
+          slidesToShow={2}
         />
       </div>
 
       <div 
-        className="flex flex-col gap-2 justify-between w-[80%] mx-auto mb-16"
+        className="flex flex-col gap-2 justify-between w-full px-[10%] py-8 bg-gray-100 mb-16"
       >
         <span
           className='text-left text-xl font-mono pl-6 mb-5 text-gray-700 font-extrabold'
@@ -90,7 +91,7 @@ const Home = ({products, openOrders, categories, tags, catalogues}: IHomePagePro
         </div>
 
         <div
-          className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:hidden px-5 max-w-full"
+          className="grid grid-cols-3 gap-3 md:grid-cols-3 lg:hidden px-5 max-w-full"
         >
           {
             categories.length > 0 && categories?.slice(0, 8).map((category: any, index: number) => (
@@ -123,14 +124,14 @@ const Home = ({products, openOrders, categories, tags, catalogues}: IHomePagePro
       </div>
       
       <div 
-        className='flex flex-col justify-between text-gray-800 my-16 w-full md:w-[80%] mx-auto'
+        className='flex flex-col justify-between text-gray-800 my-16 w-full px-[10%] py-8 mx-auto bg-gray-100'
       >
         <h2
           className='justify-start text-xl font-mono pl-6 mb-5 font-extrabold'
         >
           Tags
         </h2>
-        <div className='hidden lg:flex lg:flex-row gap-4 px-5 py-8 overflow-x-scroll'>
+        <div className='hidden lg:flex lg:flex-row gap-4 px-5 overflow-x-scroll'>
           {
             tags.length > 0 && tags?.map((tag: any, index: number) => (
               <CategoryCard 
@@ -142,7 +143,7 @@ const Home = ({products, openOrders, categories, tags, catalogues}: IHomePagePro
           }
         </div>
 
-        <div className='grid grid-cols-2 gap-3 md:grid-cols-3 lg:hidden px-5'>
+        <div className='grid grid-cols-3 gap-3 md:grid-cols-3 lg:hidden px-5'>
           {
             tags.length > 0 && tags?.slice(0, 8).map((tag: any, index: number) => (
               <CategoryCard 

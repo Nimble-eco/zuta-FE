@@ -24,7 +24,7 @@ a{
   /* for horizontal scrollbar */
   ::-webkit-scrollbar {
     width: 0.2em;
-    background-color: #FFFFFF;
+    background-color: transparent;
   }
    
   ::-webkit-scrollbar-thumb {
@@ -32,13 +32,13 @@ a{
    
   ::-webkit-scrollbar-track {
     border-radius: 10px;
-    background-color: #FFFFFF;
+    background-color: transparent;
   }
   
   /* for vertical scrollbar */
   ::-webkit-scrollbar {
     width: 0.2em;
-    background-color: #FFFFFF;
+    background-color: transparent;
   }
    
   ::-webkit-scrollbar-thumb {
@@ -46,7 +46,7 @@ a{
    
   ::-webkit-scrollbar-track {
     border-radius: 10px;
-    background-color: #FFFFFF;
+    background-color: transparent;
   }
   
 

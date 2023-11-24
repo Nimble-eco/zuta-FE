@@ -2,7 +2,7 @@ import Head from 'next/head'
 import Cookies from 'js-cookie'
 import { toast, ToastContainer } from 'react-toastify';
 import { injectStyle } from "react-toastify/dist/inject-style";
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Header from "../Components/Header"
 import { sendAxiosRequest } from '../Utils/sendAxiosRequest';
 import SwiperSlider from '../Components/sliders/Swiper';
@@ -13,6 +13,7 @@ import axiosInstance from '../Utils/axiosConfig';
 import router from 'next/router';
 import { formatAmount } from '../Utils/formatAmount';
 import { capitalizeFirstLetter } from '../Utils/capitalizeFirstLettersOfString';
+import ProductDetailsSideDrawer from "../Components/drawer/ProductDetailsSideDrawer";
 
 interface IProductPageProps {
     product: {
@@ -37,6 +38,7 @@ interface IProductPageProps {
 function product({product, similar_products}: IProductPageProps) {
     const [showImageGallery, setShowImageGallery] = useState<boolean>(false);
     const [similarProductOpenOrder, setSimilarProductOpenOrder] = useState<any>(null);
+    const ProductDetailsSideDrawerRef = useRef<any>(null);
 
     const toggleImageGallery = () => setShowImageGallery(!showImageGallery);
     const [currentReviewPage, setCurrentReviewPage] = useState(0);
@@ -81,6 +83,8 @@ function product({product, similar_products}: IProductPageProps) {
             localStorage.setItem("cart", JSON.stringify(cart));
         }
 
+        toast.success('Cart updated');
+
         if(user?.access_token) {
             await axiosInstance.post('/api/cart/update', {
                 ...cart,
@@ -105,6 +109,12 @@ function product({product, similar_products}: IProductPageProps) {
         <div
             className='w-full bg-white min-h-screen relative'
         >
+            <ProductDetailsSideDrawer
+                title={product.product_name}
+                description={product.product_description}
+                ref={ProductDetailsSideDrawerRef}
+            />
+
             <Head>
                 <title>{product.product_name}</title>
                 <meta name="viewport" content="initial-scale=1.0, width=device-width" />
@@ -121,27 +131,29 @@ function product({product, similar_products}: IProductPageProps) {
             />
 
             <div 
-                className="flex flex-col md:flex-row w-[95%] mx-auto px-5 py-4 mt-10 relative"
+                className="flex flex-col md:flex-row w-full px-3 lg:px-8 py-4 mt-10 relative"
             >
-                <div className='w-full md:w-1/3 md:!mr-3 cursor-pointer max-w-1/3 h-full flex align-middle' onClick={toggleImageGallery}>
+                <div className='w-[80%] max-w-full md:w-1/3 md:mx-0 md:!mr-3 cursor-pointer h-full flex align-middle overflow-auto' onClick={toggleImageGallery}>
                     <SwiperSlider 
                         slides={product?.product_images}
                     />
                 </div>
-                <div className="w-[95%] md:w-[35%] md:!mx-0 lg:!mx-0 flex flex-col mt-10 md:mt-0">
+                <div className="w-full md:w-[35%] md:!mx-0 lg:!mx-0 flex flex-col mt-10 md:mt-0">
                     <h1 className="text-xl md:text-2xl justify-center mb-0">
                         {capitalizeFirstLetter(product.product_name)}
                     </h1>
-                    <p className="text-gray-600 py-2 mb-0">
+                    
+                    <p className="w-[80%] text-gray-600 mb-2 lg:mb-0 line-clamp-4 lg:line-clamp-3 flex flex-row">
                         {product.product_description}
+                        <span className="text-orange-500 text-sm cursor-pointer ml-1" onClick={() => ProductDetailsSideDrawerRef.current?.open()}>...more</span>
                     </p>
                     {
                         product.openOrders && (
                             <div className="flex flex-row gap-8 w-full mr-2 my-1">
                                 <div 
-                                    className='flex flex-row gap-1'
+                                    className='flex flex-col lg:flex-row lg:gap-1'
                                 >
-                                    <p className="text-gray-600 flex flex-col md:flex-row">
+                                    <p className="text-gray-600 flex flex-col md:flex-row mb-0">
                                         Open Price:
                                     </p>
                                     <span className='font-semibold text-red-600 pulse'>
@@ -149,9 +161,9 @@ function product({product, similar_products}: IProductPageProps) {
                                     </span>
                                 </div>
                                 <div 
-                                    className='flex flex-row gap-1'
+                                    className='flex flex-col lg:flex-row lg:gap-1'
                                 >
-                                    <p className="text-gray-600 flex flex-col md:flex-row">
+                                    <p className="text-gray-600 flex flex-col md:flex-row mb-0">
                                         Open discount: 
                                     </p>
                                     <span className='font-semibold line-through'>
@@ -162,9 +174,9 @@ function product({product, similar_products}: IProductPageProps) {
                         )
                     }
 
-                    <div className="flex flex-row gap-8 w-full mr-2 my-1">
+                    <div className="flex flex-row gap-4 lg:gap-8 w-full mr-2 my-1">
                         <div 
-                            className='flex flex-row gap-1'
+                            className='flex flex-col lg:flex-row gap-1'
                         >
                             <p className="text-gray-600 flex flex-col md:flex-row">
                                 Price:
@@ -174,7 +186,7 @@ function product({product, similar_products}: IProductPageProps) {
                             </span>
                         </div>
                         <div 
-                            className='flex flex-row gap-1'
+                            className='flex flex-col lg:flex-row gap-1'
                         >
                             <p className="text-gray-600 flex flex-col md:flex-row">
                                 Current discount: 
@@ -193,13 +205,13 @@ function product({product, similar_products}: IProductPageProps) {
                     </button>
                 </div>
 
-                <div className='bg-white shadow-gray-600 shadow-xl rounded-[20px] px-4 py-2 min-w-fit flex flex-col gap-2 absolute top-1 right-4'>
-                    <p className='text-black mb-0'>Buy this product at {" "}
+                <div className='bg-white shadow-2xl rounded-[20px] px-4 py-2 w-[240px] lg:w-fit flex flex-col gap-2 text-sm lg:text-base mt-4 lg:absolute lg:top-1 lg:right-4 lg:mx-0 lg:mt-0'>
+                    <p className='text-black mb-0 whitespace-nowrap'>Buy this product at {" "}
                         <span className='text-orange-600'>{formatAmount(product.product_price - ((product.product_discount/100) * product.product_price))}</span>
                     </p>
                     <button
                         onClick={() => router.push(`/order-train/${product.id}`)}
-                        className="bg-orange-500 hover:bg-orange-700 text-white flex text-center justify-center font-bold py-2 px-4 rounded w-[80%] md:w-[80%] mx-auto whitespace-nowrap"
+                        className="border-orange-500 border-2 lg:border-0 lg:bg-orange-500 hover:bg-orange-700 text-orange-500 lg:text-white flex text-center justify-center font-bold py-2 px-4 rounded w-full mx-auto whitespace-nowrap"
                     >
                         Open Order Train
                     </button>
@@ -214,7 +226,7 @@ function product({product, similar_products}: IProductPageProps) {
                             </p>
                             <button
                                 onClick={() => {}}
-                                className="bg-orange-500 hover:bg-orange-700 text-white flex text-center justify-center font-bold py-2 px-4 rounded w-[80%] md:w-[80%] mx-auto whitespace-nowrap"
+                                className="border-orange-500 border hover:bg-orange-700 text-white flex text-center justify-center font-bold py-2 px-4 rounded w-[80%] md:w-[80%] mx-auto whitespace-nowrap"
                             >
                                 Join Order Train
                             </button>
@@ -237,7 +249,7 @@ function product({product, similar_products}: IProductPageProps) {
             }
 
             { reviewPages.length > 0 ?
-                <div className="my-10 flex flex-col w-[90%] mx-auto mb-10">
+                <div className="my-10 flex flex-col w-[80%] lg:w-[90%] mx-auto mb-10">
                     <h2 className="text-2xl font-mono text-orange-500 text-left mb-6">
                         Reviews
                     </h2> 
@@ -255,7 +267,7 @@ function product({product, similar_products}: IProductPageProps) {
                         <button disabled={currentReviewPage === 0} onClick={() => setCurrentReviewPage(currentReviewPage - 1)} className='mr-3 cursor-pointer'>Previous</button>
                         <button disabled={currentReviewPage === reviewPages.length - 1} onClick={() => setCurrentReviewPage(currentReviewPage + 1)} className='mr-3 cursor-pointer'>Next</button>
                     </div>
-                </div> : <p className='text-center text-xl mt-8'>No reviews yet</p>
+                </div> : <p className='lg:text-center text-xl mt-8'>No reviews yet</p>
             }
         </div>
     )
