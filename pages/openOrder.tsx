@@ -46,7 +46,7 @@ const openOrder = ({product, similar_products}: IOpenOrderProductPageProps) => {
     const getRecentOrderList = () => {
         const recentOrders: string[] = [];
         product?.subscribersList?.map((order: any) => {
-            recentOrders.push(`${order?.user_id} purchased about ${timeAgo.format(new Date(order?.created_at))}`)
+            recentOrders.push(`${order?.name} purchased about ${timeAgo.format(new Date(order?.created_at))}`)
         });
         return recentOrders;
     }

@@ -24,6 +24,8 @@ const Header = ({search = true, onSearch}: INavBarProps) => {
         router.push(`/cart`);
     }
 
+    const searchProducts = (searchStr: string) => router.push(`/results?search=${searchStr}`);
+
     const [cartCount, setCartCount] = useState(0);
 
     useEffect(() => {
@@ -71,7 +73,7 @@ const Header = ({search = true, onSearch}: INavBarProps) => {
                             type="submit" 
                             onClick={(e: any) => {
                                 e.preventDefault();
-                                onSearch!(searchStr)
+                                searchProducts(searchStr)
                             }}
                             className='text-gray-600 text-sm hover:text-orange-500 bg-orange-500 rounded-r-md px-4'
                         >

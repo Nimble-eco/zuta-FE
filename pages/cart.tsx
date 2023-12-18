@@ -26,15 +26,18 @@ const cart = ({similar_products}: ICartPageProps) => {
 
   const handleQuantityChange = (key: string, index: number, newQuantity: number) => {
     const updatedItems: any = JSON.parse(localStorage.getItem("cart")!);
-    console.log({updatedItems, items})
     updatedItems[key][index].quantity = newQuantity;
     setItems(updatedItems);
-    console.log('2', {updatedItems, items})
     localStorage.setItem("cart", JSON.stringify(updatedItems));
   };
 
   const handleRemove = (type: string, index: number) => {
-    setItems(items[type].filter((item: any, i: number) => i !== index));
+    const updatedItems = {
+        ...items, 
+        [type]: items[type].filter((item: any, i: number) => i !== index)
+    };
+    setItems(updatedItems);
+    localStorage.setItem("cart", JSON.stringify(updatedItems));
   };
 
 //   const getFeaturedProductsInCategory = async () => {
@@ -71,7 +74,6 @@ const cart = ({similar_products}: ICartPageProps) => {
         let cart = JSON.parse(localStorage.getItem("cart")!);
         setItems(cart);
     }, []);
-    console.log({items})
 
   return (
     <div className="flex flex-col bg-gray-100 relative">
@@ -80,7 +82,10 @@ const cart = ({similar_products}: ICartPageProps) => {
             <Total items={items} />
             <button
                 className="bg-orange-500 px-4 py-3 text-white rounded cursor-pointer"
-                onClick={() => router.push('/checkout')}
+                onClick={() => {
+                    localStorage.setItem("cart", JSON.stringify(items));
+                    router.push('/checkout')
+                }}
             >
                 Proceed to Checkout
             </button>
@@ -95,7 +100,10 @@ const cart = ({similar_products}: ICartPageProps) => {
                     <Total items={items} />
                     <button
                         className="bg-orange-500 px-4 py-3 text-white rounded cursor-pointer"
-                        onClick={() => router.push('/checkout')}
+                        onClick={() => {
+                            localStorage.setItem("cart", JSON.stringify(items));
+                            router.push('/checkout')
+                        }}
                     >
                         Proceed to Checkout
                     </button>

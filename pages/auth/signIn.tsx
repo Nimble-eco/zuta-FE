@@ -1,7 +1,7 @@
 import { useState } from 'react'
+import Cookies from 'js-cookie';
 import { toast, ToastContainer } from 'react-toastify';
 import { injectStyle } from "react-toastify/dist/inject-style";
-import { getCsrfToken, getProviders, getSession, signIn } from "next-auth/react";
 import { FaGoogle,
     FaTwitter,
     FaFacebook
@@ -10,7 +10,6 @@ import Password from "../../Components/inputs/Password";
 import ButtonFull from "../../Components/buttons/ButtonFull";
 import { useRouter } from 'next/router';
 import axiosInstance from '../../Utils/axiosConfig';
-import Cookies from 'js-cookie';
 import TextInput from '../../Components/inputs/MyTextInput';
 
 export default function SignIn({ providers }: any) {
@@ -68,7 +67,10 @@ export default function SignIn({ providers }: any) {
                 setIsLoading(false);
                 Cookies.set('user', JSON.stringify(response.data.data))
                 toast.success('Login successful');
-                setTimeout(() => router.push('/'), 3000)
+                setTimeout(() => {
+                    if (router && router.asPath && router.asPath !== '/') router.back();
+                    else router.push('/');
+                }, 5000);
             }
         })
         .catch(error => {
@@ -161,21 +163,4 @@ export default function SignIn({ providers }: any) {
         </div>
     </div>
   );
-}
-export async function getServerSideProps(context: any) {
-    const { req } = context;
-    const session = await getSession({ req });
-  
-    if (session) {
-      return {
-        redirect: { destination: "back" },
-      };
-    }
-  
-    return {
-      props: {
-        providers: await getProviders(),
-        csrfToken: await getCsrfToken(context),
-      },
-    };
 }

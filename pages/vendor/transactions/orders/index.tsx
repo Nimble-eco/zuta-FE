@@ -160,6 +160,7 @@ const index = ({orders}: IOrdersIndexPageProps) => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
+        <ToastContainer />
         {
             showFilterInput && <FilterContainer 
                 show={showFilterInput}
@@ -292,7 +293,7 @@ export async function getServerSideProps(context: any) {
     const token = user?.access_token;
 
     try {
-        const getMyOrders = await axiosInstance.get('/api/order/me', {
+        const getMyOrders = await axiosInstance.post('/api/order/filter/index', {vendor_id: user?.vendor}, {
             headers: {
                 Authorization: token,
                 team: user?.vendor

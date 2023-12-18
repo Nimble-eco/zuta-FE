@@ -1,7 +1,6 @@
 import { useState } from "react";
 import Modal from 'react-bootstrap/Modal';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { MdOutlineClose } from 'react-icons/md';
 const NaijaStates = require('naija-state-local-government');
 import { ToastContainer, toast } from 'react-toastify';
 import { injectStyle } from 'react-toastify/dist/inject-style';
@@ -10,7 +9,7 @@ import { getAddressDetailsFromGoogleAPI } from "../../../Utils/getAddressDetails
 import { sendAxiosRequest } from "../../../Utils/sendAxiosRequest";
 import ButtonFull from "../../buttons/ButtonFull";
 import Cookies from "js-cookie";
-import { useRouter } from "next/router";
+import { IoIosCloseCircleOutline } from "react-icons/io";
 
 interface INewAddressModalProps {
     setShow: () => void;
@@ -18,7 +17,6 @@ interface INewAddressModalProps {
 }
 
 const NewAddressModal = ({setShow, redirect}: INewAddressModalProps) => {
-    const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [userAddress, setUserAddress] = useState<any>({
         title: '',
@@ -86,7 +84,7 @@ const NewAddressModal = ({setShow, redirect}: INewAddressModalProps) => {
         <Modal show={true} onHide={setShow} backdrop="static" dialogClassName='modal-90w'>
             <Modal.Body className='md:!min-w-[40vw] !w-[40vw]'>
                 <div className='flex flex-col min-h-[50vh] relative'>
-                    <MdOutlineClose className='text-3xl cursor-pointer absolute top-3 right-3' onClick={setShow} />
+                    <IoIosCloseCircleOutline className='text-3xl text-red-600 text-opacity-60 cursor-pointer absolute top-3 right-3' onClick={setShow} />
                     <form className="flex flex-col w-[90%] md:w-[60%] mx-auto my-10">
                         <h3 className="text-center mb-3 font-bold text-base text-gray-600">Enter New Address</h3>
                         <div className="flex flex-col mb-3">
@@ -261,14 +259,16 @@ const NewAddressModal = ({setShow, redirect}: INewAddressModalProps) => {
                             />
                         </div>
                             
-                        <ButtonFull
-                            action="Save Address" 
-                            onClick={(e: any) => {
-                                e.preventDefault()
-                                saveUserAddress()
-                            }} 
-                            loading={isLoading}   
-                        />
+                        <div className="h-12 w-fit mx-auto">
+                            <ButtonFull
+                                action="Save Address" 
+                                onClick={(e: any) => {
+                                    e.preventDefault()
+                                    saveUserAddress()
+                                }} 
+                                loading={isLoading}   
+                            />
+                        </div>
                     </form>
                 </div>
             </Modal.Body>

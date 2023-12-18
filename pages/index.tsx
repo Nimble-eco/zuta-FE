@@ -72,7 +72,7 @@ const Home = ({products, openOrders, categories, tags, catalogues}: IHomePagePro
         className="flex flex-col gap-2 justify-between w-full px-[10%] py-8 bg-gray-100 mb-16"
       >
         <span
-          className='text-left text-xl font-mono pl-6 mb-5 text-gray-700 font-extrabold'
+          className='text-left text-xl font-mono pl-6 mb-2 text-gray-700 font-extrabold'
         >
           Categories
         </span>
@@ -127,7 +127,7 @@ const Home = ({products, openOrders, categories, tags, catalogues}: IHomePagePro
         className='flex flex-col justify-between text-gray-800 my-16 w-full px-[10%] py-8 mx-auto bg-gray-100'
       >
         <h2
-          className='justify-start text-xl font-mono pl-6 mb-5 font-extrabold'
+          className='justify-start text-xl font-mono pl-6 mb-2 font-extrabold'
         >
           Tags
         </h2>
@@ -214,15 +214,14 @@ export async function getServerSideProps() {
       ]);
 
       const products = productsResult.status === 'fulfilled' ? productsResult?.value?.data : [];
-      // const openOrders = openOrdersResult.status === 'fulfilled' ? openOrdersResult?.value?.data : [];
+      const openOrders = openOrdersResult.status === 'fulfilled' ? openOrdersResult?.value?.data : [];
       const categories = categoriesResult.status === 'fulfilled' ? categoriesResult?.value?.data : [];
       const tags = tagsResult.status === 'fulfilled' ? tagsResult?.value?.data : [];      
     
       return {
         props: {
           products : products.data,
-          // openOrders: openOrders.data,
-          openOrders: [],
+          openOrders: openOrders.data,
           categories: categories.data,
           tags: tags.data,
           catalogues: []

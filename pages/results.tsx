@@ -106,7 +106,7 @@ function results({products, openOrderProducts, featuredProducts}: IResultsPagePr
       
         if (sortedData) setData(sortedData);
     };
-
+    console.log({data, products})
     return (
         <div
             className="flex flex-col w-full bg-white min-h-screen relative"

@@ -76,7 +76,7 @@ const CartComponent = ({ items, onQuantityChange, onRemove }: ICartComponentsPro
                             <p className="text-green-600 font-medium md:mr-4">{formatAmount(item.open_order_price * (item.quantity || 1))}</p>
 
                             <p
-                                onClick={() => onRemove('products', index)}
+                                onClick={() => onRemove('subscriptions', index)}
                                 className='text-red-600 text-xs font-semibold cursor-pointer px-2 py-2 bg-red-400 bg-opacity-20 rounded-[20px]'
                             >
                                 X  Delete
@@ -114,7 +114,7 @@ const CartComponent = ({ items, onQuantityChange, onRemove }: ICartComponentsPro
                             <p className="text-green-600 font-medium md:mr-4">{formatAmount(item.product_price * (item.order_count || 1))}</p>
 
                             <p
-                                onClick={() => onRemove('subscriptions', index)}
+                                onClick={() => onRemove('bundles', index)}
                                 className='text-red-600 text-xs font-semibold cursor-pointer px-2 py-2 bg-red-400 bg-opacity-20 rounded-[20px]'
                             >
                                 X  Delete

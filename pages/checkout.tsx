@@ -34,7 +34,6 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
         cart = JSON.parse(localStorage.getItem('cart')!) ?? [];
         userCookie = Cookies.get('user') ? JSON.parse(Cookies.get('user')!) : null; 
     }
-
     
     const getAllVendorsAddressFromCart = async () => {
         return cart?.products?.map((item: any) => item.vendor.vendor_address);
@@ -62,7 +61,11 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
     const [userAddressDetails, setUserAddressDetails] = useState<any>({});
 
     const checkOut = async () => {
-        if(!selectedAddress?.id) {
+        if(addresses?.length !== 0 && !selectedAddress?.id) {
+            toast.error('Select an address');
+            return;
+        }
+        else if(addresses?.length === 0) {
             setShowAddAddressModal(true);
             return;
         }
@@ -72,13 +75,13 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
             user_id: userCookie?.id,
             address_id: selectedAddress.id
         }).then((res) => {
-            console.log({res})
             setIsLoading(false)
             router.push(res.data.data.pay_stack_checkout_url)
         })
         .catch(error => {
             setIsLoading(false);
             console.log({error})
+            toast.error(error?.response?.data?.message || 'Error! Try again later')
         })
     }
 
@@ -114,13 +117,14 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
     useEffect(() => {
         axiosInstance.post('/api/cart/update', {
             ...cart,
-            user_id: userCookie?.id
+            user_id: userCookie?.id,
+            open_order_products: cart.subscriptions
         }, {
             headers: {
                 Authorization: userCookie?.access_token
             }
         })
-        .then((response) => console.log({response}))
+        // .then((response) => console.log({response}))
         .catch(error => {
             toast.error(error.response?.message || "Error try again later")
         })
@@ -240,12 +244,13 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
             <div className="flex flex-col w-[90%] mx-auto lg:w-[25%]">
                 <div className="hidden lg:flex flex-col bg-white py-4 px-3 h-fit mb-4 rounded-md">
                     <h3 className="mb-2 text-center text-lg">Proceed to payment</h3>
-                    <p className="mb-2">Deliver fee: {formatAmount(deliveryFee)}</p>
+                    <p className="mb-2 text-center">Deliver fee: {formatAmount(deliveryFee)}</p>
+                    <p className="text-center text-lg font-semibold text-orange-500 mb-6">Total: {formatAmount((subTotal + deliveryFee))}</p>
                     <button 
                         onClick={() => checkOut()}
-                        className="bg-orange-500 px-4 py-3 text-white rounded cursor-pointer"
+                        className="text-center font-medium text-[#0ba4db] cursor-pointer border-2 border-[#0ba4db] rounded-md py-3"
                     >
-                        {isLoading ? 'Loading...' : `Pay ${formatAmount((subTotal + deliveryFee))}`}
+                        {isLoading ? 'Loading...' : `Pay with PayStack`}
                     </button>
                 </div>
 

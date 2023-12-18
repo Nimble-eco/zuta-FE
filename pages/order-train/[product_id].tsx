@@ -15,6 +15,7 @@ import SelectAddressModal from "../../Components/modals/address/SelectAddressMod
 import ButtonGhost from "../../Components/buttons/ButtonGhost";
 import { useRouter } from "next/router";
 import { formatAmount } from "../../Utils/formatAmount";
+import NewAddressModal from "../../Components/modals/address/NewAddressModal";
 
 interface ICreateOrderTrainPageProps {
     product: {
@@ -43,6 +44,7 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
     const [quantity, setQuantity] = useState<number | string>(1);
     const [selectedAddress, setSelectedAddress] = useState<any>({});
     const [showSelectAddressModal, setShowSelectAddressModal] = useState(false);
+    const [showCreateAddressModal, setShowCreateAddressModal] = useState(false);
     const [deliveryFee, setDeliveryFee] = useState(1000);
     const [totalAmount, setTotalAmount] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
@@ -168,12 +170,23 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
                     selectAddressAndGetDeliveryCharge(address)
                     setShowSelectAddressModal(false)
                 }}
+                showNewAddressModal={() => {
+                    setShowSelectAddressModal(false);
+                    setShowCreateAddressModal(true);
+                }}
             />
         }
 
-        <div className='w-full h-[50vh] cursor-pointer flex align-middle mt-2' onClick={toggleImageGallery}>
+        {
+            showCreateAddressModal && <NewAddressModal
+                setShow={() => setShowCreateAddressModal(false)}
+            />
+        }
+
+        <div className='w-full h-[60vh] cursor-pointer flex align-middle mt-2' onClick={toggleImageGallery}>
             <SwiperSlider 
                 slides={product?.product_images}
+                slidesToShow={2}
             />
         </div>
 
@@ -237,9 +250,8 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
 
             <div className="flex flex-col gap-2 lg:px-4 w-full md:w-[40%] px-4 py-3 border-[1px] border-gray-200 shadow-sm">
                 <p className="text-sm">
-                    When an order train is opened for a product, multiple users will place their orders for the product, 
-                    those orders accumulate as one order and the price of the product is reduced.<br />
-                    The difference between the amount a user pays for an item and the final amount will be refunded back to the user. 
+                    Buy this product now at the current price and share with others. The more people buy, the cheaper the product becomes.<br />
+                    The difference between the amount you pay for this item and the final amount when the order is closed will be refunded back to you. 
                 </p>
 
                 <div className="flex flex-row gap-2">
@@ -266,7 +278,7 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
                 <div className="flex flex-row gap-2">
                     {
                         selectedAddress?.address && (
-                            <div className="h-14 w-fit">
+                            <div className="h-12 w-fit">
                                 <ButtonGhost
                                     action="Change address"
                                     onClick={() => setShowSelectAddressModal(true)}
@@ -281,9 +293,9 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
                             }
                             else createPayment().then(() => initializePayment(onSuccess, onClose))
                         }}
-                        className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 h-14 rounded w-[60%] md:w-[40%] !mx-auto md:!mx-0 lg:!mx-0 whitespace-nowrap"
+                        className="bg-orange-500 hover:bg-orange-700 text-white font-medium py-2 px-4 h-12 rounded-full w-[60%] !mx-auto md:!mx-0 lg:!mx-0 whitespace-nowrap"
                     >
-                        {selectedAddress?.address ? `Checkout N${totalAmount }` : 'Start Order Train'}
+                        {selectedAddress?.address ? `Checkout ${formatAmount(totalAmount) }` : 'Start Order Train'}
                     </button>
                 </div>
 

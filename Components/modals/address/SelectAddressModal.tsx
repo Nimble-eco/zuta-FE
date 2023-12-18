@@ -14,9 +14,10 @@ import LoadingState from "../../loaders/Loader";
 interface ISelectAddressModalProps {
     selectAddress: (address: any) => void;
     setShow: () => void;
+    showNewAddressModal?: () => void;
 }
 
-const SelectAddressModal = ({selectAddress, setShow}: ISelectAddressModalProps) => {
+const SelectAddressModal = ({selectAddress, setShow, showNewAddressModal}: ISelectAddressModalProps) => {
     const [selectedAddress, setSelectedAddress] = useState<any>({});
     const [myAddresses, setMyAddresses] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -45,6 +46,7 @@ const SelectAddressModal = ({selectAddress, setShow}: ISelectAddressModalProps) 
         }).catch(error => {
             console.log({error})
             isMounted && setIsLoading(false);
+            if(error.response?.status === 401) return toast.error('Session expired. You need to login');
             toast.error(error?.response?.message || 'Error! Try again later')
         });
 
@@ -80,7 +82,7 @@ const SelectAddressModal = ({selectAddress, setShow}: ISelectAddressModalProps) 
                         }
 
                         {
-                            myAddresses?.map((address) => (
+                            myAddresses?.length > 0 ? myAddresses?.map((address) => (
                                 <div 
                                     key={address.id}
                                     onClick={() => setSelectedAddress(address)}
@@ -92,10 +94,11 @@ const SelectAddressModal = ({selectAddress, setShow}: ISelectAddressModalProps) 
                                     </div>
                                     <p className="text-sm line-clamp-3 pt-0">{address.address}</p>
                                 </div>
-                            ))
+                            )) : 
+                            <p className="text-center font-medium cursor-pointer text-orange-500 mt-4" onClick={showNewAddressModal}>Add Address</p>
                         }
 
-                        <div className="h-14 w-[20%] mx-auto">
+                        <div className="h-12 w-[40%] mx-auto">
                             <ButtonFull
                                 action="Continue"
                                 onClick={() => selectAddress(selectedAddress)}

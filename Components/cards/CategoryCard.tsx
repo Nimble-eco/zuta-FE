@@ -23,7 +23,7 @@ const CategoryCard = ({image, title}: ICategoryCardProps) => {
         className='hidden lg:flex rounded-full mb-4 min-h-[6rem] min-w-[6rem] w-full'  
       />
       <span
-        className='text-center text-base font-bold text-gray-500 pt-1 max-h-[10%]'
+        className='text-center text-base font-bold text-gray-500 py-2 max-h-[10%]'
       >
         {title}
       </span>

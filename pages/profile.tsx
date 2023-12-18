@@ -34,6 +34,7 @@ import { updateUserAction } from "../requests/user/user.request";
 import { AiFillEdit } from "react-icons/ai";
 import { convertToBase64 } from "../Utils/convertImageToBase64";
 import MyDropDownInput from "../Components/inputs/MyDropDownInput";
+import DeleteAddressModal from "../Components/modals/address/DeleteAddressModal";
 
 interface IProfilePageProps {
     profile: any;
@@ -56,6 +57,7 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
 
     const [showNewAddressModal, setShowNewAddressModal] = useState(false);
     const [showEditAddressModal, setShowEditAddressModal] = useState(false);
+    const [showDeleteAddressModal, setShowDeleteAddressModal] = useState(false);
     const [selectedAddress, setSelectedAddress] = useState<any>({});
 
     const [showAddressMore, setShowAddressMore] = useState<boolean[]>(addresses?.map(() => false));
@@ -203,6 +205,14 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                         showEditAddressModal && <UpdateAddressModal
                             setShow={() => setShowEditAddressModal(!showEditAddressModal)}
                             address={selectedAddress}
+                        />
+                    }
+
+                    {
+                        showDeleteAddressModal && <DeleteAddressModal
+                            setShow={() => setShowDeleteAddressModal(!showDeleteAddressModal)}
+                            id={selectedAddress.id}
+                            redirect={() => router.push('/profile')}
                         />
                     }
 
@@ -627,6 +637,7 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                                                                     </a>
                                                                     <a 
                                                                         href="#0" 
+                                                                        onClick={() => setShowDeleteAddressModal(!showDeleteAddressModal)}
                                                                         className='cursor-pointer hover:text-orange-500 mb-3'
                                                                     >
                                                                         Delete
