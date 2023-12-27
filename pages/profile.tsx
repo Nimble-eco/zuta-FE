@@ -29,7 +29,6 @@ import ShowOrderTrainModal from "../Components/modals/order-train/ShowOrderTrain
 import { filterMyOrderTrainStatusAction, getMyOrderTrainAction } from "../requests/orderTrain/orderTrain.request";
 import { statusType } from "../requests/orderTrain/orderTrain.types";
 import Cookies from "js-cookie";
-import { getMyVendorAction } from "../requests/vendor/vendor.request";
 import { updateUserAction } from "../requests/user/user.request";
 import { AiFillEdit } from "react-icons/ai";
 import { convertToBase64 } from "../Utils/convertImageToBase64";

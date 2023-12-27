@@ -2,26 +2,31 @@ import { useState } from "react";
 import Modal from 'react-bootstrap/Modal';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { MdOutlineClose } from 'react-icons/md';
-import { ToastContainer } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
 import { injectStyle } from 'react-toastify/dist/inject-style';
 import MyDropDownInput from "../../inputs/MyDropDownInput";
 import MySearchInput from "../../inputs/MySearchInput";
 import TextInput from "../../inputs/ColumnTextInput";
 import MyNumberInput from "../../inputs/MyNumberInput";
 import ButtonFull from "../../buttons/ButtonFull";
+import ngBanks from 'ng-banks';
+import { storeBankDetailsAction } from "../../../requests/wallet/wallet.request";
 
+const banks = ngBanks.getBanks();
 interface IAddPaymentMethodModalProps {
   show: boolean;
   setShow: () => void;
+  redirect?: () => void;
 }
 
-const AddPaymentMethodModal = ({show, setShow}: IAddPaymentMethodModalProps) => {
+const AddPaymentMethodModal = ({show, setShow, redirect}: IAddPaymentMethodModalProps) => {
+  if (typeof window !== "undefined") injectStyle();
   const [loading, setLoading] = useState(false);
   const [newPaymentInfo, setNewPaymentInfo] = useState({
-    type: 'Fiat',
-    account_id: '' || 0,
+    account_type: 'Fiat',
+    account_number: '' || 0,
     account_name: '',
-    institute_name: ''
+    bank_name: ''
   });
 
   const handleChange = (e: any) => {
@@ -29,6 +34,22 @@ const AddPaymentMethodModal = ({show, setShow}: IAddPaymentMethodModalProps) => 
       ...prev,
       [e.target.name]: e.target.value
     }))
+  }
+
+  const storeBankDetails = async () => {
+    setLoading(true);
+
+    await storeBankDetailsAction(newPaymentInfo)
+    .then(response => {
+      toast.success('Bank details saved successfully')
+      setShow();
+      if(redirect) redirect();
+    })
+    .catch(error => {
+      console.log({error});
+      toast.error(error.response?.data?.message || 'Error! Try again later');
+    })
+    .finally(() => setLoading(false));
   }
 
   return (
@@ -43,25 +64,23 @@ const AddPaymentMethodModal = ({show, setShow}: IAddPaymentMethodModalProps) => 
               <div className="flex flex-col mb-3">
                 <MyDropDownInput 
                   label="Type"
-                  name="type"
+                  name="account_type"
                   options={[{ name: 'Fiat'}, {name: 'Crypto'}]}
-                  value={newPaymentInfo?.type}
+                  value={newPaymentInfo?.account_type}
                   onSelect={handleChange}
                 />
               </div>
 
               {
-                newPaymentInfo?.type.toLowerCase() === 'fiat' ? (
+                newPaymentInfo?.account_type.toLowerCase() === 'fiat' ? (
                   <div className="flex flex-col">
                     <div className='flex flex-col'>
-                      <label className="text-base text-gray-700 my-2">
-                        Bank Name
-                      </label>
-                      <MySearchInput
-                        name="institute_name"
-                        value={newPaymentInfo.institute_name}
-                        searchInputPlaceHolder="Search bank name"
-                        onSearch={() => {}}
+                      <MyDropDownInput
+                        label="Bank Name"
+                        name="bank_name"
+                        value={newPaymentInfo.bank_name}
+                        options={banks!.map((obj: any) => ({ name: obj.name }))}
+                        onSelect={handleChange}
                       />
                     </div>
                     <div className='flex flex-col mt-3'>
@@ -76,21 +95,21 @@ const AddPaymentMethodModal = ({show, setShow}: IAddPaymentMethodModalProps) => 
                     <div className='flex flex-col mt-3'>
                       <MyNumberInput
                         label="Account Number"
-                        name="account_id"
-                        value={newPaymentInfo?.account_id}
+                        name="account_number"
+                        value={newPaymentInfo?.account_number}
                         onInputChange={handleChange}
                       />
                     </div>
 
-                    <div className="w-fit mx-auto">
+                    <div className="w-fit mx-auto h-12">
                       <ButtonFull 
                         action="Save"
                         loading={loading}
-                        onClick={() => {}}
+                        onClick={storeBankDetails}
                       />
                     </div>
                   </div>
-                ) : newPaymentInfo.type.toLowerCase() === 'crypto' ? (
+                ) : newPaymentInfo.account_type.toLowerCase() === 'crypto' ? (
                   <div>
                     <p>Coming soon</p>
                   </div>

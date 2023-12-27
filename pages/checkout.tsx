@@ -3,7 +3,6 @@ import { useRouter } from "next/router";
 import { FC, useEffect, useState } from "react";
 import { toast, ToastContainer } from 'react-toastify';
 import { injectStyle } from "react-toastify/dist/inject-style";
-import { usePaystackPayment, PaystackConsumer } from 'react-paystack';
 import Header from "../Components/Header"
 import { sendAxiosRequest } from "../Utils/sendAxiosRequest";
 import { parse } from "cookie";

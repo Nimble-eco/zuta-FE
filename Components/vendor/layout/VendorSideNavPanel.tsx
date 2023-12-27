@@ -57,12 +57,12 @@ const VendorSideNavPanel = () => {
         >
             Showcase
         </a>
-        {/* <a 
+        <a 
             href="/vendor/setting"
-            className="text-black hover:!text-orange-500 cursor-pointer"
+            className={`hover:!text-orange-500 cursor-pointer ${router.pathname.includes('setting') && activeStyle}`}
         >
             Settings
-        </a> */}
+        </a>
         <a 
             href="/vendor/feedback"
             className={`hover:!text-orange-500 cursor-pointer ${router.pathname.includes('feedback') && activeStyle}`}

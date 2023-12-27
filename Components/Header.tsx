@@ -1,6 +1,7 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState } from "react";
 import { HiSearch, HiUser, HiUserAdd, HiMenu, HiOutlineLogout } from "react-icons/hi";
+import { BsShop } from "react-icons/bs";
 import { MdOutlineShoppingCart } from "react-icons/md";
 import { AiFillCloseCircle } from "react-icons/ai";
 import Cookies from 'js-cookie';
@@ -19,6 +20,7 @@ const Header = ({search = true, onSearch}: INavBarProps) => {
     let token: string = '';
     const [mobileMenu, showMobileMenu] = useState<boolean>(false);
     const [searchStr, setSearchStr] = useState<string>('');
+    const [user, setUser] = useState<any>({});
 
     const goToCartPage = () => {
         router.push(`/cart`);
@@ -29,14 +31,14 @@ const Header = ({search = true, onSearch}: INavBarProps) => {
     const [cartCount, setCartCount] = useState(0);
 
     useEffect(() => {
+        let userCookie = Cookies.get('user') ? JSON.parse(Cookies.get('user')!) : null;
+        setUser(userCookie);
+        token = userCookie?.access_token;
+
         const cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')!) : [];
-        setCartCount(cart?.length);
+        setCartCount((cart?.products?.length + cart?.subscriptions?.length) || 0);
     }, []);
 
-    if(typeof window !== 'undefined') {
-        let user = Cookies.get('user') ? JSON.parse(Cookies.get('user')!) : null;
-        token = user?.access_token;
-    }
 
     return (
         <div
@@ -89,6 +91,13 @@ const Header = ({search = true, onSearch}: INavBarProps) => {
                             className='text-3xl text-white cursor-pointer'
                         />
                     </div>
+                    {
+                        user?.vendor && (
+                            <a href="/vendor/product">
+                                <BsShop className="text-3xl text-white"/>
+                            </a>
+                        )
+                    }
                     {token ? (
                         <div className="flex flex-row gap-4">   
                             <a 

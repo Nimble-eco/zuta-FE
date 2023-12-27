@@ -20,7 +20,7 @@ const ColumnTextInput = ({label, name, value, onInputChange, placeHolder, type='
         className="text-base text-gray-700 bg-gray-100 px-3 py-2"
         name={name || label.toLowerCase()}
         value={value || ''}
-        onChange={(e) => onInputChange(e)}
+        onChange={onInputChange}
       />
     </div>
   )

@@ -18,6 +18,7 @@ const override = {
 const ButtonFull: FC<IButtonFullProps> = ({action, onClick, loading}) => {
   return (
     <button
+      type="button"
       onClick={onClick}
       className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 h-full rounded-full min-w-[8rem] w-full mx-auto whitespace-nowrap"
     >
