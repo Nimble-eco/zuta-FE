@@ -31,7 +31,7 @@ const SimilarProductsHorizontalSlider = ({ list, list_name }: IHorizontalSliderP
                         />
                         <div className="flex flex-row justify-between px-2 py-2">
                             <h4 className="text-sm line-clamp-2 my-auto mr-4">{item?.product_name}</h4>
-                            <p className="text-green-500 font-medium">{formatAmount(item?.product_price)}</p>
+                            <p className="text-green-500 font-medium mb-0">{formatAmount(item?.product_price)}</p>
                         </div>
                     </div>
                 ))

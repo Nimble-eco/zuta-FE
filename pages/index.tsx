@@ -35,11 +35,11 @@ const Home = ({products, openOrders, categories, tags, catalogues}: IHomePagePro
       <Header onSearch={searchProducts}/>
 
       <div
-        className='flex flex-col justify-center w-[90%] md:w-[80%] mx-auto px-5 py-10 my-10'
+        className='flex flex-col justify-center w-full lg:w-[90%] md:w-[80%] mx-auto px-5 py-10 my-10'
       >
-        <div className=' rounded-md w-[90%] md:w-[60%] flex flex-col text-left'>
+        <div className=' rounded-md w-[90%] md:w-[60%] flex flex-col text-left lg:pl-[4%]'>
           <h2
-            className='text-2xl md:text-5xl text-gray-600 font-bold w-[80%] mb-8'
+            className='text-2xl md:text-5xl text-gray-600 font-bold w-full lg:w-[80%] mb-8'
           >
             Make we buy am {''}
               <span 
@@ -49,10 +49,10 @@ const Home = ({products, openOrders, categories, tags, catalogues}: IHomePagePro
               </span>  
           </h2>
           <div 
-            className='flex flex-col text-base justify-start w-[80%] font-mono font-semibold text-left text-gray-500'
+            className='flex flex-col text-base justify-start w-full lg:w-[80%] font-mono font-semibold text-left text-gray-500'
           >
             <p className='pb-1'>
-              Get wholesale discounts
+              Enjoy Wholesale prices
             </p>
             <p className='pb-1'>
               Money back if the discount rate increases 
@@ -69,7 +69,7 @@ const Home = ({products, openOrders, categories, tags, catalogues}: IHomePagePro
       </div>
 
       <div 
-        className="flex flex-col gap-2 justify-between w-full px-[10%] py-8 bg-gray-100 mb-16"
+        className="flex flex-col gap-2 justify-between w-full px-[5%] lg:px-[10%] py-8 bg-gray-100 mb-16"
       >
         <span
           className='text-left text-xl font-mono pl-6 mb-2 text-gray-700 font-extrabold'
@@ -105,7 +105,7 @@ const Home = ({products, openOrders, categories, tags, catalogues}: IHomePagePro
         </div>
       </div>
       
-      <div className='text-2xl mb-4 w-[80%] ml-[12%] flex flex-row cursor-pointer'>
+      <div className='text-2xl mb-4 w-[90%] lg:w-[80%] ml-[12%] flex flex-row cursor-pointer'>
         <h2 className='font-semibold mr-3'>Open Orders</h2>
         <MdArrowForward className='text-4xl' />
       </div>
@@ -124,7 +124,7 @@ const Home = ({products, openOrders, categories, tags, catalogues}: IHomePagePro
       </div>
       
       <div 
-        className='flex flex-col justify-between text-gray-800 my-16 w-full px-[10%] py-8 mx-auto bg-gray-100'
+        className='flex flex-col justify-between text-gray-800 my-16 w-full px-[5%] lg:px-[10%] py-8 mx-auto bg-gray-100'
       >
         <h2
           className='justify-start text-xl font-mono pl-6 mb-2 font-extrabold'
@@ -157,7 +157,7 @@ const Home = ({products, openOrders, categories, tags, catalogues}: IHomePagePro
       </div>
 
       <div
-        className='flex flex-col md:grid md:grid-cols-2 md:gap-6 lg:grid-cols-3 lg:gap-4 xl:grid-cols-4 xl:gap-6 justify-between w-[80%] mx-auto my-3 px-5 py-2'
+        className='flex flex-col md:grid md:grid-cols-2 md:gap-6 lg:grid-cols-3 lg:gap-4 xl:grid-cols-4 xl:gap-6 justify-between w-[90%] lg:w-[80%] mx-auto my-3 px-5 py-2'
       >
         {
           products.length > 0 && products?.map((product:any, index: number) => (

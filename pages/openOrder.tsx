@@ -175,7 +175,7 @@ const openOrder = ({product, similar_products}: IOpenOrderProductPageProps) => {
                     </div>
 
                     <div className='flex flex-col md:flex-row gap-6 mt-6'>
-                        <div className='max-w-[50%] !mx-auto md:!mx-0'>
+                        <div className='lg:max-w-[50%] !mx-auto md:!mx-0'>
                             <VerticalTextSlider 
                                 list={getRecentOrderList()}
                                 list_name='Recent orders'
@@ -184,7 +184,7 @@ const openOrder = ({product, similar_products}: IOpenOrderProductPageProps) => {
 
                         <button
                             onClick={() => addToCart(product)}
-                            className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded w-[50%] !mx-auto md:w-[40%] md:!mx-0 lg:w-[30%] md:ml-4 mt-3 whitespace-nowrap"
+                            className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded w-full !mx-auto md:w-[40%] md:!mx-0 lg:w-[30%] md:ml-4 mt-3 whitespace-nowrap"
                         >
                             Add to Cart
                         </button>

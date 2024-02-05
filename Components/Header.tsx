@@ -51,7 +51,7 @@ const Header = ({search = true, onSearch}: INavBarProps) => {
                     </a>
                     <a href='/' className=''>
                         <img
-                            src="https://via.placeholder.com/100" 
+                            src="/images/logo.jpeg" 
                             alt="logo"
                             width={40}
                             height={40}

@@ -133,17 +133,17 @@ function product({product, similar_products}: IProductPageProps) {
             <div 
                 className="flex flex-col md:flex-row w-full px-3 lg:px-8 py-4 mt-10 relative"
             >
-                <div className='w-[80%] max-w-full md:w-1/3 md:mx-0 md:!mr-3 cursor-pointer h-full flex align-middle overflow-auto' onClick={toggleImageGallery}>
+                <div className='w-[80%] max-w-full md:w-1/3 !mx-auto md:!mx-0 lg:!mx-0 md:!mr-3 cursor-pointer h-full flex align-middle overflow-auto' onClick={toggleImageGallery}>
                     <SwiperSlider 
                         slides={product?.product_images}
                     />
                 </div>
-                <div className="w-full md:w-[35%] md:!mx-0 lg:!mx-0 flex flex-col mt-10 md:mt-0">
-                    <h1 className="text-xl md:text-2xl justify-center mb-0">
+                <div className="w-full md:w-[35%] !mx-auto md:!mx-0 lg:!mx-[20px] flex flex-col mt-10 md:mt-0">
+                    <h1 className="text-xl md:text-2xl justify-center mb-0 !text-center lg:!text-left">
                         {capitalizeFirstLetter(product.product_name)}
                     </h1>
                     
-                    <p className="w-[80%] text-gray-600 mb-2 lg:mb-0 line-clamp-4 lg:line-clamp-3 flex flex-row">
+                    <p className="w-[80%] !mx-auto lg:!mx-0 text-gray-600 mb-2 lg:mb-0 line-clamp-4 lg:line-clamp-3 flex flex-row">
                         {product.product_description}
                         <span className="text-orange-500 text-sm cursor-pointer ml-1" onClick={() => ProductDetailsSideDrawerRef.current?.open()}>...more</span>
                     </p>
@@ -174,7 +174,7 @@ function product({product, similar_products}: IProductPageProps) {
                         )
                     }
 
-                    <div className="flex flex-row gap-4 lg:gap-8 w-full mr-2 my-1">
+                    <div className="flex flex-row gap-4 lg:gap-8 w-full mr-2 my-1 justify-center lg:justify-between">
                         <div 
                             className='flex flex-col lg:flex-row gap-1'
                         >
@@ -199,13 +199,13 @@ function product({product, similar_products}: IProductPageProps) {
                     
                     <button
                         onClick={() => addToCart(product)}
-                        className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded w-[60%] md:w-[40%] mt-3"
+                        className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded w-[60%] md:w-[40%] !mx-auto lg:!mx-0 mt-3"
                     >
                         Add to Cart
                     </button>
                 </div>
 
-                <div className='bg-white shadow-2xl rounded-[20px] px-4 py-2 w-[240px] lg:w-fit flex flex-col gap-2 text-sm lg:text-base mt-4 lg:absolute lg:top-1 lg:right-4 lg:mx-0 lg:mt-0'>
+                <div className='bg-white shadow-2xl rounded-[20px] px-4 py-2 w-[240px] lg:w-fit !mx-auto flex flex-col gap-2 text-sm lg:text-base mt-4 lg:absolute lg:top-1 lg:right-4 lg:mx-0 lg:mt-0'>
                     <p className='text-black mb-0 whitespace-nowrap'>Buy this product at {" "}
                         <span className='text-orange-600'>{formatAmount(product.product_price - ((product.product_discount/100) * product.product_price))}</span>
                     </p>

@@ -1,17 +1,11 @@
 import axios, { AxiosRequestConfig } from "axios";
 import router from "next/router";
 
-let host: string = "";
-const env = process.env.ENV;
-if (env === 'production') {
-  host = process.env.HOST!;
-} else {
-  host = 'http://localhost'
-}
+let host: string = process.env.NEXT_PUBLIC_API_BASEURL!;
 
 export const sendAxiosRequest =async (path: string, method: string, data: any, token?: string, vendorUid?: string) => {
     let response = await axios({
-        url: `${host}:3333${path}`,
+        url: `${host}${path}`,
         method: method as AxiosRequestConfig["method"] | undefined,
         data: data,
         headers: {

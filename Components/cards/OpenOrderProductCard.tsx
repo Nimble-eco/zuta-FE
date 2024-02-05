@@ -1,8 +1,6 @@
 import { useRouter } from 'next/router';
 import { FC } from 'react'
 import { HiOutlineShoppingCart } from 'react-icons/hi'
-import TimeAgo from 'javascript-time-ago'
-import en from 'javascript-time-ago/locale/en'
 import RatingsCard from './RatingsCard';
 import { formatAmount } from '../../Utils/formatAmount';
 
@@ -13,6 +11,7 @@ interface IOpenOrderProductCardProps {
         open_order_discount: number,
         user_id: string,
         created_at: string | Date,
+        subscribers_count: number,
         product: {
             product_name: string,
             product_id: string;
@@ -22,13 +21,11 @@ interface IOpenOrderProductCardProps {
             product_discount?: number,
             reviews?: number,
         },
-        subscribers: any[]
+        subscribers_list: any[]
     }
 }
 
 const OpenOrderProductCard: FC<IOpenOrderProductCardProps> = ({order}) => {
-    TimeAgo.addLocale(en)
-    const timeAgo = new TimeAgo('en-US')
     const router = useRouter();
     const goToProductPage = (id : string) => {
         router.push(`/openOrder?id=${id}`);
@@ -41,7 +38,7 @@ const OpenOrderProductCard: FC<IOpenOrderProductCardProps> = ({order}) => {
             <div className='relative'>
                 <div className='bg-white rounded-md text-center px-3 py-2 flex flex-row absolute top-2 left-2'>
                     <HiOutlineShoppingCart className='text-lg text-orange-300 mr-1 my-auto' />
-                    <span className=''>200</span>
+                    <span className=''>{order?.subscribers_count ?? 10}</span>
                 </div>
                 <img
                     src={order.product?.product_images[0]}
@@ -67,7 +64,7 @@ const OpenOrderProductCard: FC<IOpenOrderProductCardProps> = ({order}) => {
                         {formatAmount(order?.open_order_price)}
                     </p>
                     <p className='text-sm font-thin line-through mr-2 my-auto'>
-                        {order.product?.product_price}
+                        {formatAmount(order.product?.product_price)}
                     </p>
                     <span className='text-sm my-auto'>
                         {order?.open_order_discount}% Off
