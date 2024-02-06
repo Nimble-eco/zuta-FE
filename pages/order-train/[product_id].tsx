@@ -183,7 +183,7 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
             />
         }
 
-        <div className='w-full h-[60vh] cursor-pointer flex align-middle mt-2' onClick={toggleImageGallery}>
+        <div className='w-full h-fit lg:h-[60vh] cursor-pointer flex align-middle mt-2' onClick={toggleImageGallery}>
             <SwiperSlider 
                 slides={product?.product_images}
                 slidesToShow={2}
@@ -191,21 +191,21 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
         </div>
 
         <div 
-            className="flex flex-col md:flex-row w-[95%] mx-auto px-5 py-4 mt-6 relative"
+            className="flex flex-col md:flex-row w-full lg:w-[95%] mx-auto px-3 lg:px-5 py-4 mt-6 relative"
         >
             <div className="w-full md:w-[60%] flex flex-col lg:px-4">
-                <h1 className="text-xl md:text-2xl justify-center mb-0">
+                <h1 className="text-xl md:text-2xl justify-center mb-0 !text-center lg:!text-left">
                     {product.product_name}
                 </h1>
-                <p className="text-gray-600 py-2 mb-0 line-clamp-4">
+                <p className="text-gray-600 py-2 mb-0 line-clamp-4 !text-center lg:!text-left">
                     {product.product_description}
                 </p>
 
-                <div className="flex flex-row gap-8 w-full mr-2 my-1">
+                <div className="grid grid-cols-2 lg:flex lg:flex-row gap-8 w-full mr-2 my-1 lg:justify-start">
                     <div 
-                        className='flex flex-row gap-1'
+                        className='flex flex-col lg:flex-row lg:gap-1'
                     >
-                        <p className="text-gray-600 flex flex-col md:flex-row">
+                        <p className="text-gray-600 flex flex-col md:flex-row mb-0">
                             Price:
                         </p>
                         <span className='font-semibold text-green-600'>
@@ -213,9 +213,9 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
                         </span>
                     </div>
                     <div 
-                        className='flex flex-row gap-1'
+                        className='flex flex-col lg:flex-row lg:gap-1'
                     >
-                        <p className="text-gray-600 flex flex-col md:flex-row">
+                        <p className="text-gray-600 flex flex-col md:flex-row mb-0">
                             Current discount: 
                         </p>
                         <span className='font-semibold line-through'>
@@ -224,11 +224,11 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
                     </div>
                 </div>
 
-                <div className="flex flex-row gap-8 w-full mr-2 my-1">
+                <div className="grid grid-cols-2 lg:flex lg:flex-row gap-8 w-full mr-2 my-1 lg:justify-start">
                     <div 
-                        className='flex flex-row gap-1'
+                        className='flex flex-col lg:flex-row lg:gap-1'
                     >
-                        <p className="text-gray-600 flex flex-col md:flex-row">
+                        <p className="text-gray-600 flex flex-col md:flex-row mb-0">
                             Next Price:
                         </p>
                         <span className='font-semibold text-orange-600 animate-pulse'>
@@ -236,9 +236,9 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
                         </span>
                     </div>
                     <div 
-                        className='flex flex-row gap-1'
+                        className='flex flex-col lg:flex-row lg:gap-1'
                     >
-                        <p className="text-gray-600 flex flex-col md:flex-row">
+                        <p className="text-gray-600 flex flex-col md:flex-row mb-0">
                             Next discount: 
                         </p>
                         <span className='font-semibold line-through'>
@@ -254,21 +254,25 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
                     The difference between the amount you pay for this item and the final amount when the order is closed will be refunded back to you. 
                 </p>
 
-                <div className="flex flex-row gap-2">
-                    <p className="">Quantity:</p>
-                    <input
-                        type="number"
-                        value={quantity}
-                        onChange={event => setQuantity(Number(event.target.value))}
-                        className='outline-none bg-gray-100 border-gray-200 rounded-md w-fit mb-4 py-2 pl-3 text-sm md:mr-4'
-                    />
-                    <p>=</p>
-                    <p className="text-green-400">{formatAmount(Number(quantity) * product.product_price)}</p>
+                <div className="flex flex-col lg:flex-row gap-2">
+                    <div className="flex flex-row gap-2">
+                        <p className="mr-4 lg:mr-0">Quantity:</p>
+                        <input
+                            type="number"
+                            value={quantity}
+                            onChange={event => setQuantity(Number(event.target.value))}
+                            className='outline-none bg-gray-100 border-gray-200 rounded-md w-fit mb-4 py-2 pl-3 text-sm md:mr-4'
+                        />
+                    </div>
+                    <div className="flex flex-row gap-1 justify-center lg:justify-start">
+                        <p>=</p>
+                        <p className="text-green-400 block lg:flex">{formatAmount(Number(quantity) * product.product_price)}</p>
+                    </div>
                 </div>
 
                 {
                     deliveryFee && (
-                        <div className="flex flex-row gap-1">
+                        <div className="flex flex-row gap-1 justify-center lg:justify-start">
                             <p className="font-medium">Delivery Fee:</p>
                             <p className="text-orange-500 font-semibold">{formatAmount(deliveryFee)}</p>
                         </div>

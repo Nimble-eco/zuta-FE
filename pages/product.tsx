@@ -149,7 +149,7 @@ function product({product, similar_products}: IProductPageProps) {
                     </p>
                     {
                         product.openOrders && (
-                            <div className="flex flex-row gap-8 w-full mr-2 my-1">
+                            <div className="flex flex-row gap-8 w-full mr-2 my-1 justify-center lg:justify-between">
                                 <div 
                                     className='flex flex-col lg:flex-row lg:gap-1'
                                 >
@@ -267,7 +267,7 @@ function product({product, similar_products}: IProductPageProps) {
                         <button disabled={currentReviewPage === 0} onClick={() => setCurrentReviewPage(currentReviewPage - 1)} className='mr-3 cursor-pointer'>Previous</button>
                         <button disabled={currentReviewPage === reviewPages.length - 1} onClick={() => setCurrentReviewPage(currentReviewPage + 1)} className='mr-3 cursor-pointer'>Next</button>
                     </div>
-                </div> : <p className='lg:text-center text-xl mt-8'>No reviews yet</p>
+                </div> : <p className='text-center text-xl mt-8'>No reviews yet</p>
             }
         </div>
     )
