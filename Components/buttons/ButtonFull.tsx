@@ -10,7 +10,8 @@ interface IButtonFullProps {
 const override = {
   display: "block",
   width: '50%',
-  margin: " auto",
+  margin: "auto",
+  marginBottom: '10px',
   padding: '10px auto',
   borderColor: " #FFFFFF",
 };
@@ -20,7 +21,7 @@ const ButtonFull: FC<IButtonFullProps> = ({action, onClick, loading}) => {
     <button
       type="button"
       onClick={onClick}
-      className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 h-full rounded-full min-w-[8rem] w-full mx-auto whitespace-nowrap"
+      className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 h- min-h-[2rem] rounded-full min-w-[8rem] w-full mx-auto whitespace-nowrap"
     >
       {loading ? 
         <PropagateLoader 

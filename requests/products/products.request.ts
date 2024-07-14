@@ -32,12 +32,12 @@ export const filterProductsByVendorAction = async (payload: IFilterProductAction
     })
 }
 
-export const searchProductsByVendorAction = async (search: string, vendor_id: string) => {
+export const searchProductsByVendorAction = async (search: string, vendor_id?: string) => {
     const user = JSON.parse(Cookies.get('user')!);
     return axiosInstance.post('/api/product/search/index', {search}, {
         headers: {
             Authorization: user.access_token,
-            team: vendor_id
+            team: vendor_id ?? ''
         }
     })
 }
@@ -69,5 +69,19 @@ export const deleteProductByVendorAction = async (id: number, vendor_id: string)
             Authorization: user.access_token,
             team: vendor_id
         }
+    });
+}
+
+export const managementUnApproveProductAction = async (id: string) => {
+    const user = JSON.parse(Cookies.get('user')!);
+    return axiosInstance.post('/api/product/management/unapprove', {id}, {
+        headers: {Authorization: user.access_token}
+    });
+}
+
+export const managementApproveProductAction = async (id: string) => {
+    const user = JSON.parse(Cookies.get('user')!);
+    return axiosInstance.post('/api/product/management/approve', {id}, {
+        headers: {Authorization: user.access_token}
     });
 }

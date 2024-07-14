@@ -33,7 +33,10 @@ const MyTable = ({headings, content, onRowButtonClick}: IMyTableProps) => {
                         <tr 
                             key={item.id || index}
                             className="border-b border-gray-200 cursor-pointer justify-evenly whitespace-nowrap"
-                            // onClick={onRowButtonClick}
+                            onClick={(e: any) => {
+                                e.preventDefault();
+                                onRowButtonClick(item)
+                            }}
                         >
                             {headings.map((heading) => (
                                 <td 

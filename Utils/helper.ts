@@ -1,0 +1,1 @@
+export const calculateRatio = (value: number, total: number) =>`${(value/100) * total} %`;

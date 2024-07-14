@@ -6,3 +6,15 @@ export interface IUpdateUserPayloadProps {
     description?: string;
     base64_image?: string;
 }
+
+export interface IFilterUserIndexPayload {
+    name?: string;
+    email?: string;
+    gender?: string;
+    blocked?: number;
+    user_verified?: number;
+    flag?: number;
+    start_date?: string;
+    end_date?: string;
+    pagination?: number;
+}

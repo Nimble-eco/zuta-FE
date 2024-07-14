@@ -27,7 +27,7 @@ export interface IUpdateProductActionProps {
 }
 
 export interface IFilterProductActionProps {
-    vendor_id: string;
+    vendor_id?: string;
     product_name?: string;
     product_description?: string;
     product_price?: number;

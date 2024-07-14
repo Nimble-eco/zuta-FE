@@ -36,13 +36,16 @@ const register = () => {
 
         await axiosInstance.post('/api/auth/register', data)
         .then((response) => {
-            Cookies.set('user', JSON.stringify(response.data.data))
-            toast.success('Registration successful');
-            setTimeout(() => router.push('/'), 3000)
+            if(response.status === 201) {
+                Cookies.set('user', JSON.stringify(response.data.data))
+                toast.success('Registration successful');
+                setTimeout(() => router.push('/'), 3000)
+            }
         })
         .catch(error => {
             toast.error(error.message || 'Error try again later');
         })
+        .finally(() => setIsLoading(false))
     }
 
     if(typeof window !== 'undefined') injectStyle();

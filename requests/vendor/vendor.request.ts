@@ -1,6 +1,6 @@
 import Cookies from "js-cookie";
 import axiosInstance from "../../Utils/axiosConfig";
-import { IUpdateVendorPayload } from "./vendor.types";
+import { IFilterVendorsPayload, IUpdateVendorPayload } from "./vendor.types";
 
 export const getMyVendorAction = async () => {
     const user = JSON.parse(Cookies.get('user')!);
@@ -19,4 +19,19 @@ export const updateMyVendorAction = async (payload: IUpdateVendorPayload) => {
             team: payload.id
         }
     });
+}
+
+
+export const filterVendorsAction = async (payload: IFilterVendorsPayload) => {
+    const user = JSON.parse(Cookies.get('user')!);
+    return axiosInstance.post('/api/vendor/filter/index', payload, {
+        headers: {Authorization: user.access_token}
+    })
+}
+
+export const searchVendorsAction = async (search: string) => {
+    const user = JSON.parse(Cookies.get('user')!);
+    return axiosInstance.post('/api/vendor/search/index', {search}, {
+        headers: {Authorization: user.access_token}
+    })
 }
