@@ -20,9 +20,45 @@ export const cancelAnOrderAction = async (payload: ICancelOrderActionProps) => {
     })
 }
 
+export const closeAnOrderAction = async (payload: ICancelOrderActionProps) => {
+    const user = JSON.parse(Cookies.get('user')!);
+    return axiosInstance.post('/api/order/close', payload, {
+        headers: {
+            Authorization: user.access_token
+        }
+    })
+}
+
 export const completeAnOrderAction = async (payload: ICancelOrderActionProps) => {
     const user = JSON.parse(Cookies.get('user')!);
     return axiosInstance.post('/api/order/complete', payload, {
+        headers: {
+            Authorization: user.access_token
+        }
+    })
+}
+
+export const shipAnOrderAction = async (payload: ICancelOrderActionProps) => {
+    const user = JSON.parse(Cookies.get('user')!);
+    return axiosInstance.post('/api/order/ship', payload, {
+        headers: {
+            Authorization: user.access_token
+        }
+    })
+}
+
+export const unshipAnOrderAction = async (payload: ICancelOrderActionProps) => {
+    const user = JSON.parse(Cookies.get('user')!);
+    return axiosInstance.post('/api/order/unship', payload, {
+        headers: {
+            Authorization: user.access_token
+        }
+    })
+}
+
+export const deliverAnOrderAction = async (payload: ICancelOrderActionProps) => {
+    const user = JSON.parse(Cookies.get('user')!);
+    return axiosInstance.post('/api/order/deleivered', payload, {
         headers: {
             Authorization: user.access_token
         }

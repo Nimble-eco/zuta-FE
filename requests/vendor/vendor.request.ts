@@ -35,3 +35,17 @@ export const searchVendorsAction = async (search: string) => {
         headers: {Authorization: user.access_token}
     })
 }
+
+export const managementUnApproveVendorAction = async (id: string) => {
+    const user = JSON.parse(Cookies.get('user')!);
+    return axiosInstance.post('/api/vendor/management/unapprove', {id}, {
+        headers: {Authorization: user.access_token}
+    });
+}
+
+export const managementApproveVendorAction = async (id: string) => {
+    const user = JSON.parse(Cookies.get('user')!);
+    return axiosInstance.post('/api/vendor/management/approve', {id}, {
+        headers: {Authorization: user.access_token}
+    });
+}

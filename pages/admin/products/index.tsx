@@ -137,7 +137,7 @@ const ProductsIndexPage = ({products}:IProductsIndexPageProps) => {
 
 
   return (
-<div className="min-h-screen bg-gray-100 flex flex-col overflow-scroll">
+    <div className="min-h-screen bg-gray-100 flex flex-col overflow-scroll">
         {
             showFilterInput && <FilterContainer 
                 show={showFilterInput}
@@ -268,7 +268,7 @@ export async function getServerSideProps(context: any) {
         ]);
 
         const products = productsResult.status === 'fulfilled' ? productsResult?.value?.data : [];
-        console.log({products})
+        
         return {
             props: {
                 products
@@ -288,7 +288,7 @@ export async function getServerSideProps(context: any) {
 
         return {
             props: {
-                Products: {}
+                products: {}
             }
         }
     }
