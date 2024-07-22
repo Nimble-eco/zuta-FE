@@ -17,6 +17,7 @@ export interface IJoinOrderTrainProps {
 
 export interface IUpdateOrderTrainStatusProps {
     id: string;
+    user_id?: string;
     status: statusType;
 }
 

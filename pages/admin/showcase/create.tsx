@@ -1,24 +1,21 @@
-import { useState } from "react";
-import { ToastContainer, toast } from 'react-toastify'
-import { injectStyle } from "react-toastify/dist/inject-style";
-import VendorSideNavPanel from "../../../Components/vendor/layout/VendorSideNavPanel"
-import { parse } from "cookie";
-import axiosInstance from "../../../Utils/axiosConfig";
-import { capitalizeFirstLetter } from "../../../Utils/capitalizeFirstLettersOfString";
-import { formatAmount } from "../../../Utils/formatAmount";
-import ButtonFull from "../../../Components/buttons/ButtonFull";
-import { calculateTotalHours } from "../../../Utils/getHoursDifferenceFromDateTime";
-import ButtonGhost from "../../../Components/buttons/ButtonGhost";
-import Cookies from "js-cookie";
-import { storeProductShowcaseAction } from "../../../requests/showcase/showcase.request";
-import { useRouter } from "next/router";
+import React, { useState } from 'react'
+import AdminSideNavPanel from '../../../Components/admin/layout/AdminSideNav'
+import ButtonFull from '../../../Components/buttons/ButtonFull'
+import ButtonGhost from '../../../Components/buttons/ButtonGhost'
+import { useRouter } from 'next/router';
+import { toast } from 'react-toastify';
+import { calculateTotalHours } from '../../../Utils/getHoursDifferenceFromDateTime';
+import { storeProductShowcaseAction } from '../../../requests/showcase/showcase.request';
+import { formatAmount } from '../../../Utils/formatAmount';
+import { parse } from 'cookie';
+import axiosInstance from '../../../Utils/axiosConfig';
 
-interface IStoreProductFeaturePageProps {
+interface ICreateProductFeaturePageProps {
     product: any;
     rate: any
 }
 
-const store = ({product, rate}: IStoreProductFeaturePageProps) => {
+const CreateFeaturedProduct = ({product, rate}: ICreateProductFeaturePageProps) => {
     const router = useRouter();
     const [featuredDetails, setFeaturedDetails] = useState({
         featured_start_date: '',
@@ -26,12 +23,6 @@ const store = ({product, rate}: IStoreProductFeaturePageProps) => {
     });
     const [totalHours, setTotalHours] = useState<number>(0);
     const [isLoading, setIsLoading] = useState(false);
-    let vendorId: string = '';
-
-    if(typeof window !== 'undefined') {
-        injectStyle();
-        vendorId = JSON.parse(Cookies.get('user')!).vendor;
-    }
 
     const handleChange = (e: any) => {
         setFeaturedDetails({
@@ -61,7 +52,7 @@ const store = ({product, rate}: IStoreProductFeaturePageProps) => {
         await storeProductShowcaseAction({
             ...featuredDetails,
             product_id: product.id,
-            vendor_id: vendorId,
+            vendor_id: '',
             featured_duration_in_hours: totalHours,
         })
         .then((response) => {
@@ -77,14 +68,13 @@ const store = ({product, rate}: IStoreProductFeaturePageProps) => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-        <ToastContainer />
-        <div className="flex flex-row w-[95%] mx-auto mt-8 relative mb-10">
-            <VendorSideNavPanel />
-            <div className="flex flex-col w-[80%] absolute right-0 left-[21%]">
-                <div className='flex flex-row my-4 justify-between'>
-                    <h2 className="text-2xl font-bold my-auto text-slate-700 mb-4">Showcase: {capitalizeFirstLetter(product.product_name)}</h2>
-                    
-                    <div className="w-[20%] h-14 hidden lg:flex">
+       
+        <div className="flex flex-row w-full mx-auto mt-8 relative mb-10">
+            <AdminSideNavPanel />
+            <div className="flex flex-col w-[80%] absolute right-0 left-[20%]">
+                <div className='flex flex-row my-4 justify-between items-center'>
+                    <h2 className="text-2xl font-bold my-auto text-slate-700">Showcase</h2>
+                    <div className="w-[15%] h-10 hidden lg:flex">
                         <ButtonFull
                             action="Showcase"
                             loading={isLoading}                        
@@ -172,7 +162,7 @@ const store = ({product, rate}: IStoreProductFeaturePageProps) => {
   )
 }
 
-export default store
+export default CreateFeaturedProduct
 
 export async function getServerSideProps(context: any) {
     const { product_id } = context.query;

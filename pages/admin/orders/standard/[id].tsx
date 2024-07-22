@@ -105,7 +105,7 @@ const ShowOrder = ({order}: IShowOrderPageProps) => {
                     <div className="flex flex-col gap-1">
                         <p className="text-slate-600 font-semibold">Customer Details</p>
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                        <TextCard label="Recipient name" value={order?.recipient_name} />
+                            <TextCard label="Recipient name" value={order?.recipient_name} />
                             <TextCard label="Recipient email" value={order?.recipient_email} />
                             <TextCard label="Recipient phone" value={order?.recipient_phone} />
                             <TextCard label="Recipient Address" value={order?.recipient_address} />

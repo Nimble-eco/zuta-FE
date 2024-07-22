@@ -46,7 +46,6 @@ const ShowOrderTrainModal = ({orderTrain, setShow}: IShowOrderTrainModalProps) =
         })
     }
 
-    
     const completeOrder = async () => {
         setIsLoading(true);
         updateOrderTrainStatusAction({

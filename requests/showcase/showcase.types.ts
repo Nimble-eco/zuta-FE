@@ -8,12 +8,18 @@ export interface IStoreProductShowcaseProps {
 }
 
 export interface IFilterProductShowcaseActionProps {
-    vendor_id: string;
+    vendor_id?: string;
     product_name?: string;
     featured_paid?: boolean;
     featured_payment_confirmed?: boolean;
+    featured_duration_in_hours?: number;
     status?: string;
     start_date?: string;
     end_date?: string;
+    pagination?: number;
+}
+
+export interface IIndexProductShowcaseActionProps {
+    properties?: number;
     pagination?: number;
 }

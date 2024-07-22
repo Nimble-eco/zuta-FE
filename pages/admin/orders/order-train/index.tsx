@@ -7,10 +7,10 @@ import MyTable from "../../../../Components/tables/MyTable"
 import { toast } from "react-toastify"
 import { parse } from "cookie"
 import axiosInstance from "../../../../Utils/axiosConfig"
-import { filterOrderAction } from "../../../../requests/order/order.request"
 import FilterContainer from "../../../../Components/modals/containers/FilterContainer"
 import MyDropDownInput from "../../../../Components/inputs/MyDropDownInput"
 import TextInput from "../../../../Components/inputs/MyTextInput"
+import { filterOrderTrainByVendorAction } from "../../../../requests/orderTrain/orderTrain.request"
 
 interface IStandardOrdersIndexPageProps {
     orders: any
@@ -26,14 +26,8 @@ const index = ({orders}: IStandardOrdersIndexPageProps) => {
         user_id: '',
         product_name: '',
         product_id: '',
-        quantity: 0,
-        order_amount: 0,
         status: '',
         vendor_id: '',
-        recipient_city: '',
-        recipient_state: '',
-        recipient_country: '',
-        recipient_zip: '',
         start_date: '',
         end_date: '',
     });
@@ -49,7 +43,7 @@ const index = ({orders}: IStandardOrdersIndexPageProps) => {
     const paginateData = async (paginator: any, direction: 'prev' | 'next') => {
         if(direction === 'prev' && paginator?.previous_page_url) {
             setLoading(true);
-            await filterOrderAction({pagination: paginator?.current_page - 1})
+            await filterOrderTrainByVendorAction({pagination: paginator?.current_page - 1})
             .then((response: any) => {
                 if(response.status === 200) {
                     toast.success('Action successful');
@@ -72,7 +66,7 @@ const index = ({orders}: IStandardOrdersIndexPageProps) => {
 
         if(direction === 'next' && paginator?.next_page_url) {
             setLoading(true);
-            await filterOrderAction({pagination: paginator?.current_page + 1})
+            await filterOrderTrainByVendorAction({pagination: paginator?.current_page + 1})
             .then((response: any) => {
                 if(response.status === 200) {
                     toast.success('Action successful');
@@ -111,44 +105,23 @@ const index = ({orders}: IStandardOrdersIndexPageProps) => {
                     />,
 
                     <TextInput
-                        label="Product ID"
+                        label="Product id"
                         name="product_id"
                         value={filterByDetails.product_id}
                         handleChange={handleFilterByDetailsChange}
                     />,
 
                     <TextInput
-                        label="User ID"
+                        label="User id"
                         name="user_id"
                         value={filterByDetails.user_id}
                         handleChange={handleFilterByDetailsChange}
                     />,
 
                     <TextInput
-                        label="vendor ID"
+                        label="vendor id"
                         name="vendor_id"
                         value={filterByDetails.vendor_id}
-                        handleChange={handleFilterByDetailsChange}
-                    />,
-
-                    <TextInput
-                        label="recipient city"
-                        name="recipient_city"
-                        value={filterByDetails.recipient_city}
-                        handleChange={handleFilterByDetailsChange}
-                    />,
-
-                    <TextInput
-                        label="recipient state"
-                        name="recipient_state"
-                        value={filterByDetails.recipient_state}
-                        handleChange={handleFilterByDetailsChange}
-                    />,
-
-                    <TextInput
-                        label="recipient country"
-                        name="recipient_country"
-                        value={filterByDetails.recipient_country}
                         handleChange={handleFilterByDetailsChange}
                     />,
 
@@ -157,12 +130,11 @@ const index = ({orders}: IStandardOrdersIndexPageProps) => {
                         onSelect={handleFilterByDetailsChange}
                         name="status"
                         options={[
-                            {title: 'pending', value: 'pending'},
-                            {title: 'shipped', value: 'shipped'},
-                            {title: 'unshipped', value: 'unshipped'},
-                            {title: 'delivered', value: 'delivered'},
+                            {title: 'open', value: 'open'},
                             {title: 'closed', value: 'closed'},
                             {title: 'cancelled', value: 'cancelled'},
+                            {title: 'rejected', value: 'rejected'},
+                            {title: 'completed', value: 'completed'},
                         ]}
                         value={filterByDetails.status}
                     /> 
@@ -172,7 +144,7 @@ const index = ({orders}: IStandardOrdersIndexPageProps) => {
         <div className="flex flex-row w-[90%] mx-auto mt-8 relative mb-10">
             <AdminSideNavPanel />
             <div className="flex flex-col w-[80%] absolute right-0 left-[21%]">
-                <h2 className="text-2xl font-bold text-slate-700 mb-4">Standard Orders</h2>
+                <h2 className="text-2xl font-bold text-slate-700 mb-4">Order Train</h2>
                 <div className="grid grid-cols-4 gap-4 mb-6">
                     <StatsCard
                         title='All Orders'
@@ -208,18 +180,16 @@ const index = ({orders}: IStandardOrdersIndexPageProps) => {
                 {/* OORDERS TABLE */}
                 <div className="flex flex-col pb-8 bg-white overflow-y-auto">
                     <MyTable
-                        headings={['id', 'product_name', 'quantity', 'price', 'status', 'order_amount', 'order_paid', 'state', 'country']}
+                        headings={['id', 'product_name', 'quantity', 'price', 'next_price', 'next_discount', 'status', 'stock', 'order_amount', 'order_paid',]}
                         content={ordersData?.data?.data?.map((order: any) => ({
                             ...order,
                             id: order.id,
                             product_name: order.product_name,
                             quantity: order.quantity,
-                            price: order.product_price_paid,
+                            price: order.open_order_price,
                             status: order.status,
-                            state: order.recipient_state,
-                            country: order.recipient_country
                         }))} 
-                        onRowButtonClick={(order: any) => router.push(`standard/${order.id}`)}
+                        onRowButtonClick={(order: any) => router.push(`order-train/${order.id}`)}
                     />
                     <div className='flex flex-row justify-end text-sm w-[80%] mx-auto'>
                         <button onClick={() => paginateData(ordersData?.data?.meta, 'prev')} className='mr-3 cursor-pointer'>Previous</button>
@@ -243,7 +213,7 @@ export async function getServerSideProps(context: any) {
     const token = user?.access_token;
 
     try {
-        const getAllOrders = await axiosInstance.get('/api/order/index?properties=1', {
+        const getAllOrders = await axiosInstance.get('/api/open-order/index?properties=1', {
             headers: {
                 Authorization: token,
                 // team: user?.vendor
