@@ -8,75 +8,89 @@ import { openOrderProductsDummyData } from "../data/openOrderProducts";
 import Cookies from "js-cookie";
 import { useRouter } from "next/router";
 import { formatAmount } from "../Utils/formatAmount";
+import axiosInstance from "../Utils/axiosConfig";
 
-interface ICartPageProps {
-    similar_products: any[];
-}
 
-const cart = ({similar_products}: ICartPageProps) => {
-  const [items, setItems] = useState<any>({});
-  const [openOrderProducts, setOpenOrderProducts] = useState<any[]>(openOrderProductsDummyData.splice(0, 4));
-  const router = useRouter();
+const cart = () => {
+    const [items, setItems] = useState<any>({});
+    const [similar_products, setSimilarProducts] = useState<any>({});
+    const [openOrderProducts, setOpenOrderProducts] = useState<any[]>(openOrderProductsDummyData.splice(0, 4));
+    const [featuredProducts, setFeaturedProducts] = useState<any>({});
+    const router = useRouter();
   
-  let user: any = {};
+    let user: any = {};
 
-  if(typeof window !== 'undefined') {
-    user = Cookies.get('user') ? JSON.parse(Cookies.get('user')!) : null;
-  }
+    if(typeof window !== 'undefined') {
+        user = Cookies.get('user') ? JSON.parse(Cookies.get('user')!) : null;
+    }
 
-  const handleQuantityChange = (key: string, index: number, newQuantity: number) => {
-    const updatedItems: any = JSON.parse(localStorage.getItem("cart")!);
-    updatedItems[key][index].quantity = newQuantity;
-    setItems(updatedItems);
-    localStorage.setItem("cart", JSON.stringify(updatedItems));
-  };
-
-  const handleRemove = (type: string, index: number) => {
-    const updatedItems = {
-        ...items, 
-        [type]: items[type].filter((item: any, i: number) => i !== index)
+    const handleQuantityChange = (key: string, index: number, newQuantity: number) => {
+        const updatedItems: any = JSON.parse(localStorage.getItem("cart")!);
+        updatedItems[key][index].quantity = newQuantity;
+        setItems(updatedItems);
+        localStorage.setItem("cart", JSON.stringify(updatedItems));
     };
-    setItems(updatedItems);
-    localStorage.setItem("cart", JSON.stringify(updatedItems));
-  };
 
-//   const getFeaturedProductsInCategory = async () => {
-//     let categoryList = items?.map((item) => item.categories);
-//     let tagList = items?.map((item) => item.tags);
+    const handleRemove = (type: string, index: number) => {
+        const updatedItems = {
+            ...items, 
+            [type]: items[type].filter((item: any, i: number) => i !== index)
+        };
+        setItems(updatedItems);
+        localStorage.setItem("cart", JSON.stringify(updatedItems));
+    };
 
-//     categoryList = categoryList.reduce((acc, curr) => acc.concat(curr), []);
-//     tagList = tagList.reduce((acc, curr) => acc.concat(curr), []);
+    const getProductsInCategory = async (items: any) => {
+        let categoryList: any[] = [];
+        let tagsList: any[] = [];
+        for (const [propertyName, propertyArray] of Object.entries(items)) {
+            if (Array.isArray(propertyArray)) {
+                for (const objectItem of propertyArray) {
+                    categoryList.push(objectItem.product_categories);
+                    tagsList.push(objectItem.product_tags)
+                }
+            }
+        }
 
-//     const res = await sendAxiosRequest('public/open-order/filter', 'post', {categories: categoryList, tags: tagList});
+        categoryList = categoryList.reduce((acc, curr) => acc.concat(curr), []);
+        tagsList = tagsList.reduce((acc, curr) => acc.concat(curr), []);
 
-//     if(res.status === 200) {
-//         const openOrderProductsList = res.data?.splice(0, 4);
-//         setOpenOrderProducts(openOrderProductsList);
-//     }
-//   }
+        const showcaseRes = await axiosInstance.post('/api/featured/product/filter/index', {
+            product_categories: categoryList, 
+            product_tags: tagsList
+        });
 
-//   const getSimilarProductsInCategory = async () => {
-//     let categoryList = items?.map((item) => item.categories);
-//     let tagList = items?.map((item) => item.tags);
+        const productsRes = await axiosInstance.post('/api/public/product/filter/index', {
+            product_categories: categoryList, 
+            product_tags: tagsList
+        });
 
-//     categoryList = categoryList.reduce((acc, curr) => acc.concat(curr), []);
-//     tagList = tagList.reduce((acc, curr) => acc.concat(curr), []);
+        if(productsRes.status === 200) {
+            setSimilarProducts(productsRes.data?.data?.splice(0, 6));
+        }
 
-//     const res = await sendAxiosRequest('public/featured/filter', 'post', {categories: categoryList, tags: tagList});
-
-//     if(res.status === 200) {
-//         const similarProductsList = res.data?.splice(0, 4);
-//     }
-//   }
-
+        if(showcaseRes.status === 200) {
+            setFeaturedProducts(showcaseRes?.data?.data?.splice(0, 6));
+        }
+    }
 
     useEffect(() => {
-        let cart = JSON.parse(localStorage.getItem("cart")!);
-        setItems(cart);
+        let isMounted = true;
+
+        if(isMounted) {
+            let cart = JSON.parse(localStorage.getItem("cart")!);
+            setItems(cart);
+            getProductsInCategory(cart ?? {});
+        }
+
+        return () => {
+            isMounted = false;
+        }
+
     }, []);
 
   return (
-    <div className="flex flex-col bg-gray-100 relative">
+    <div className="flex flex-col bg-gray-100 relative  overflow-scroll">
         <Header />
         <div className="flex flex-col bg-white py-4 px-3 h-fit w-[90%] fixed bottom-0 left-[5%] right-[5%] shadow-md z-50 mb-4 lg:hidden">
             <Total items={items} />
@@ -108,56 +122,69 @@ const cart = ({similar_products}: ICartPageProps) => {
                         Proceed to Checkout
                     </button>
                 </div>
-                <div className="flex flex-col bg-white pl-2 rounded-md">
-                    <h4 className="font-semibold my-3 text-sm">Open orders for similar products</h4>
-                    {
-                        openOrderProducts?.map((product) => (
-                            <div
-                                className='flex flex-row cursor-pointer mb-6 h-28 text-sm'
-                                // onClick={() => goToProductPage(product?.id)}
-                                key={product.id}
-                            >
-                                <img
-                                    src={product?.image}
-                                    alt="product image"
-                                    className='mr-3 h-full rounded-md'
-                                />
-                                
-                                <div 
-                                    className="flex flex-col py-2"
+                <div className="flex flex-col py-3 bg-white pl-2 rounded-md">
+                    <h4 className="font-semibold my-3 text-sm">Join these order train</h4>
+                    <div className="flex flex-row overflow-x-scroll lg:flex-col gap-4">
+                        {
+                            openOrderProducts?.map((product) => (
+                                <div
+                                    className='flex flex-col lg:flex-row cursor-pointer lg:h-28 text-sm bg-gray-100 lg:bg-transparent px-2 py-3 min-w-[10rem] '
+                                    // onClick={() => goToProductPage(product?.id)}
+                                    key={product.id}
                                 >
-                                    <div className='flex flex-col mb-2'>
-                                        <h3 className='text-base font-mono line-clamp-1 mb-1'>
-                                            {product?.name}
-                                        </h3>
-                                        { product.rating && <RatingsCard rating={product.rating} /> }
-                                    </div>
+                                    <img
+                                        src={product?.image}
+                                        alt="product image"
+                                        className='lg:mr-3 h-24 lg:h-full rounded-md'
+                                    />
+                                    
                                     <div 
-                                        className='flex flex-col'
+                                        className="flex flex-col py-2"
                                     >
-                                        <p 
-                                            className='text-orange-300 font-semibold mr-4'
+                                        <div className='flex flex-col mb-2'>
+                                            <h3 className='text-sm font-mono line-clamp-1 mb-1'>
+                                                {product?.name}
+                                            </h3>
+                                            { product.rating && <RatingsCard rating={product.rating} /> }
+                                        </div>
+                                        <div 
+                                            className='flex flex-col'
                                         >
-                                            {formatAmount(product.price)}
-                                        </p>
-                                        <span>
-                                            {product.discount}% Off
-                                        </span>
+                                            <p 
+                                                className='text-orange-300 font-semibold mr-4'
+                                            >
+                                                {formatAmount(product.price)}
+                                            </p>
+                                            <span className="text-xs">
+                                                {product.discount}% Off
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))
-                    }
+                            ))
+                        }
+                    </div>
                 </div>
             </div>
         </div>
+
+        {
+            featuredProducts?.data?.data && featuredProducts?.data?.data?.length > 0 && (
+                <div className='mt-10 w-[98%] ml-[2%]'>
+                    <HorizontalSlider
+                        list={featuredProducts}
+                        list_name='Recommended for you'
+                    />
+                </div>
+            )
+        }
 
         {
             similar_products && similar_products.length > 0 && (
                 <div className='mt-10 w-[98%] ml-[2%]'>
                     <HorizontalSlider
                         list={similar_products}
-                        list_name='Similar items'
+                        list_name='You might also like'
                     />
                 </div>
             )
@@ -167,3 +194,53 @@ const cart = ({similar_products}: ICartPageProps) => {
 };
 
 export default cart;
+
+export async function getServerSideProps(context: any) {
+    try{
+        const search = context.query.search;
+
+        const getProducts = await axiosInstance.post(
+            `/api/public/product/search/index`,
+            {search}
+        );
+
+        const getOpenOrders = await axiosInstance.post(
+            '/api/open-order/search/index',
+            {search}
+        );
+
+        const getFeaturedProducts = await axiosInstance.post(
+            '/api/featured/product/search/index',
+            {search}
+        );
+
+        const [productsResult, openOrderProductsResult, featuredProductsResult] = await Promise.allSettled([
+            getProducts.data,
+            getOpenOrders.data,
+            getFeaturedProducts.data
+        ]);
+
+        const products = productsResult.status === 'fulfilled' && productsResult.value.data ? productsResult.value.data?.data : [];
+        const openOrderProducts = openOrderProductsResult.status === 'fulfilled' && openOrderProductsResult.value.data ? openOrderProductsResult.value.data?.data : [];
+        const featuredProducts = featuredProductsResult.status === 'fulfilled' && featuredProductsResult.value.data ? featuredProductsResult.value.data?.data : [];
+        console.log({products, openOrderProducts, featuredProducts})
+
+        return {
+            props: {
+                products,
+                openOrderProducts,
+                featuredProducts
+            },
+        }
+    }
+    catch(err) {
+        console.log({err})
+        return {
+            props: {
+                products: [],
+                openOrderProducts: [],
+                featuredProducts: []
+            },
+        }
+    }
+}

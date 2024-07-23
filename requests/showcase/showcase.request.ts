@@ -7,47 +7,61 @@ export const storeProductShowcaseAction = async (payload: IStoreProductShowcaseP
     return axiosInstance.post('/api/featured/product/store', payload, {
         headers: {
             Authorization: user.access_token,
-            team: payload.vendor_id
+            team: payload.vendor_id!
         }
     });
 }
 
-export const activateProductShowcaseAction = async (featured_id: number, vendorId: string) => {
+export const showcaseByAdminAction = async (payload: IStoreProductShowcaseProps) => {
+    const user = JSON.parse(Cookies.get('user')!);
+    return axiosInstance.post('/api/featured/product/showcase/admin', payload, {
+        headers: { Authorization: user.access_token }
+    });
+}
+
+export const activateProductShowcaseAction = async (featured_id: number, vendorId?: string) => {
     const user = JSON.parse(Cookies.get('user')!);
     return axiosInstance.post('/api/featured/product/activate', {id: featured_id}, {
         headers: {
             Authorization: user.access_token,
-            team: vendorId
+            team: vendorId ?? ''
         }
     });
 }
 
-export const reactivateProductShowcaseAction = async (featured_id: number, vendorId: string) => {
+export const reactivateProductShowcaseAction = async (featured_id: number, vendorId?: string) => {
     const user = JSON.parse(Cookies.get('user')!);
     return axiosInstance.post('/api/featured/product/reactivate', {id: featured_id}, {
         headers: {
             Authorization: user.access_token,
-            team: vendorId
+            team: vendorId ?? ''
         }
     });
 }
 
-export const deactivateProductShowcaseAction = async (featured_id: number, vendorId: string) => {
+export const reactivateShowcaseByAdminAction = async (featured_id: number) => {
+    const user = JSON.parse(Cookies.get('user')!);
+    return axiosInstance.post('/api/featured/product/admin-reactivate', {id: featured_id}, {
+        headers: { Authorization: user.access_token }
+    });
+}
+
+export const deactivateProductShowcaseAction = async (featured_id: number, vendorId?: string) => {
     const user = JSON.parse(Cookies.get('user')!);
     return axiosInstance.post('/api/featured/product/deactivate', {id: featured_id}, {
         headers: {
             Authorization: user.access_token,
-            team: vendorId
+            team: vendorId ?? ''
         }
     });
 }
 
-export const resumeProductShowcaseAction = async (featured_id: number, vendorId: string) => {
+export const resumeProductShowcaseAction = async (featured_id: number, vendorId?: string) => {
     const user = JSON.parse(Cookies.get('user')!);
     return axiosInstance.post('/api/featured/product/resume', {id: featured_id}, {
         headers: {
             Authorization: user.access_token,
-            team: vendorId
+            team: vendorId ?? ''
         }
     });
 }

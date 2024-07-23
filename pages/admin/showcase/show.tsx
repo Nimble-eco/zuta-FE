@@ -1,16 +1,16 @@
 import { parse } from "cookie";
 import axiosInstance from "../../../Utils/axiosConfig";
-import VendorSideNavPanel from "../../../Components/vendor/layout/VendorSideNavPanel";
 import { getDateAndTimeFromISODate } from "../../../Utils/convertIsoDateToDateString";
 import { calculateTotalHours } from "../../../Utils/getHoursDifferenceFromDateTime";
 import ButtonFull from "../../../Components/buttons/ButtonFull";
-import { activateProductShowcaseAction, deactivateProductShowcaseAction, reactivateProductShowcaseAction, resumeProductShowcaseAction } from "../../../requests/showcase/showcase.request";
+import { activateProductShowcaseAction, deactivateProductShowcaseAction, reactivateProductShowcaseAction, reactivateShowcaseByAdminAction, resumeProductShowcaseAction } from "../../../requests/showcase/showcase.request";
 import { useState } from "react";
 import Cookies from "js-cookie";
 import { useRouter } from "next/router";
 import { ToastContainer, toast } from 'react-toastify'
 import { injectStyle } from "react-toastify/dist/inject-style";
 import { capitalizeFirstLetter } from "../../../Utils/capitalizeFirstLettersOfString";
+import AdminSideNavPanel from "../../../Components/admin/layout/AdminSideNav";
 
 interface IShowFeaturedProductPageProps {
   featuredProduct: any;
@@ -20,11 +20,9 @@ interface IShowFeaturedProductPageProps {
 const show = ({featuredProduct, mostViewedInCategories}: IShowFeaturedProductPageProps) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  let vendorId: string = '';
-
+  
   if(typeof window !== 'undefined') {
     injectStyle();
-    vendorId = JSON.parse(Cookies.get('user')!).vendor;
   }
 
   const getElapsedTime = () => {
@@ -34,7 +32,7 @@ const show = ({featuredProduct, mostViewedInCategories}: IShowFeaturedProductPag
 
   const activateProductFeature = async () => {
     setIsLoading(true);
-    await activateProductShowcaseAction(featuredProduct?.id, vendorId)
+    await activateProductShowcaseAction(featuredProduct?.id)
     .then((response) => {
         if(response.status === 202) {
             router.push(response.data.data.pay_stack_checkout_url);
@@ -48,21 +46,21 @@ const show = ({featuredProduct, mostViewedInCategories}: IShowFeaturedProductPag
 
   const reactivateProductFeature = async () => {
     setIsLoading(true);
-    await reactivateProductShowcaseAction(featuredProduct?.id, vendorId)
+    await reactivateShowcaseByAdminAction(featuredProduct?.id)
     .then((response) => {
-        if(response.status === 201) {
-            router.push(response.data.data.pay_stack_checkout_url);
-        }
+      if(response.status === 201) {
+        toast.success('Showcase active');
+      }
     })
     .catch(error => {
-        toast.error(error?.response?.data?.message || 'Error! Try again later');
+      toast.error(error?.response?.data?.message || 'Error! Try again later');
     })
     .finally(() => setIsLoading(false));
   }
 
   const deactivateProductFeature = async () => {
     setIsLoading(true);
-    await deactivateProductShowcaseAction(featuredProduct?.id, vendorId)
+    await deactivateProductShowcaseAction(featuredProduct?.id)
     .then((response) => {
       if(response.status === 202) {
         router.push(response.data.data.pay_stack_checkout_url);
@@ -76,7 +74,7 @@ const show = ({featuredProduct, mostViewedInCategories}: IShowFeaturedProductPag
 
   const resumeProductFeature = async () => {
     setIsLoading(true);
-    await resumeProductShowcaseAction(featuredProduct?.id, vendorId)
+    await resumeProductShowcaseAction(featuredProduct?.id)
     .then((response) => {
       if(response.status === 202) {
         return toast.success('Showcase resumed');
@@ -93,7 +91,7 @@ const show = ({featuredProduct, mostViewedInCategories}: IShowFeaturedProductPag
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col overflow-auto">
       <div className="flex flex-row w-[95%] mx-auto mt-8 relative mb-10">
-        <VendorSideNavPanel />
+        <AdminSideNavPanel />
         <div className="min-h-screen bg-gray-100 flex flex-col w-full md:w-[80%] absolute right-0 md:left-[21%] rounded-md px-4">
           <div className="flex flex-row gap-4 flex-wrap">
             <div className="bg-white rounded-md shadow-md flex flex-col gap-1 px-4 py-2">

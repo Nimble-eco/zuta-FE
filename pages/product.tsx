@@ -33,9 +33,10 @@ interface IProductPageProps {
         reviews: any[]
     };
     similar_products: any[];
+    featured_similar_products: any[];
 }
 
-function product({product, similar_products}: IProductPageProps) {
+function product({product, similar_products, featured_similar_products}: IProductPageProps) {
     const [showImageGallery, setShowImageGallery] = useState<boolean>(false);
     const [similarProductOpenOrder, setSimilarProductOpenOrder] = useState<any>(null);
     const ProductDetailsSideDrawerRef = useRef<any>(null);
@@ -241,6 +242,17 @@ function product({product, similar_products}: IProductPageProps) {
                 similar_products && similar_products.length > 0 && (
                     <div className='mt-10 w-[95%] ml-[5%]'>
                         <HorizontalSlider 
+                            list={featured_similar_products}
+                            list_name='Recommended for you'
+                        />
+                    </div>
+                )
+            }
+            
+            {
+                similar_products && similar_products.length > 0 && (
+                    <div className='mt-10 w-[95%] ml-[5%]'>
+                        <HorizontalSlider 
                             list={similar_products}
                             list_name='Similar items'
                         />
@@ -290,7 +302,8 @@ export async function getServerSideProps(context: any) {
         return {
             props: {
                 product: getProduct.data.product,
-                similar_products: getProduct.data.similar_products
+                similar_products: getProduct.data.similar_products,
+                featured_similar_products: getProduct.data.featured_similar_products,
             }
         }
     }

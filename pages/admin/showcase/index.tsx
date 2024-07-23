@@ -11,7 +11,6 @@ import { filterProductShowcaseAction, searchFeaturedProductsByVendorAction } fro
 import FilterContainer from "../../../Components/modals/containers/FilterContainer";
 import TextInput from "../../../Components/inputs/MyTextInput";
 import MyDropDownInput from "../../../Components/inputs/MyDropDownInput";
-import ButtonFull from "../../../Components/buttons/ButtonFull";
 
 interface IShowcaseIndexPageProps {
     items: any;
@@ -195,12 +194,12 @@ const ShowcaseIndexPage = ({items}: IShowcaseIndexPageProps) => {
             <div className="flex flex-col w-[80%] absolute right-0 left-[20%]">
                 <div className="flex flex-row gap-6 justify-between lg:w-[95%] items-center mb-6">
                     <h2 className="text-2xl font-bold text-slate-700">Showcase</h2>
-                    <div className="w-20">
+                    {/* <div className="w-20">
                         <ButtonFull
                             action="Create"
                             onClick={()=>router.push('showcase/create')}
                         />
-                    </div>
+                    </div> */}
                 </div>
                 <div className="grid grid-cols-4 gap-4 mb-6">
                     <StatsCard
@@ -238,7 +237,7 @@ const ShowcaseIndexPage = ({items}: IShowcaseIndexPageProps) => {
                             ...item,
                             duration: item.featured_duration_in_hours
                         }))} 
-                        onRowButtonClick={(item: any) => router.push(`showcase/${item.id}`)}
+                        onRowButtonClick={(item: any) => router.push(`showcase/show?id=${item.id}`)}
                     />
                     <div className='flex flex-row justify-end text-sm w-[80%] mx-auto'>
                         <button onClick={() => paginateData(featuredItemsData?.data?.meta, 'prev')} className='mr-3 cursor-pointer'>Previous</button>

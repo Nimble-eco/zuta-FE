@@ -174,6 +174,38 @@ const showProduct = ({product}: IShowProductPageProps) => {
                         <TextCard label="Flag(s)" value={product?.vendor?.vendor_flag} />
                     </div>
                 </div>
+
+                {
+                    product?.featured ? 
+                    <div className='flex flex-col bg-white mt-6 rounded-md p-4'>
+                        <div className="flex flex-row justify-between items-center">
+                            <h4 className="text-base text-slate-700 font-semibold">Showcase</h4>
+                            <p 
+                                onClick={()=>router.push(`/admin/showcase/${product.id}`)}
+                                className="text-sm text-gray-800 cursor-pointer hover:text-orange-500 font-medium"
+                            >
+                                View
+                            </p>
+                        </div>
+                        <div className="gird grid-cols-2 lg:grid-cols-4 gap-4">
+                            <TextCard label="Amount" value={product?.featured?.featured_amount} />
+                            <TextCard label="Duration" value={product?.featured?.featured_duration_in_hours} />
+                            <TextCard label="Status" value={product?.featured?.status} />
+                            <TextCard label="Activation Date" value={product?.featured?.activation_date} />
+                            <TextCard label="Deactivation Date" value={product?.featured?.deactivation_date} />
+                            <TextCard label="Paid" value={product?.featured?.featured_paid ? 'True' : 'False'} />
+                        </div>
+                    </div> : 
+                    <div className='bg-white py-6 px-4 rounded-md flex flex-row justify-between items-center'>
+                        <h4 className="text-base text-slate-700 font-semibold">Showcase</h4>
+                        <p 
+                            onClick={()=>router.push(`/admin/showcase/create/${product.id}`)}
+                            className="text-sm text-gray-800 cursor-pointer hover:text-orange-500 font-medium"
+                        >
+                            Showcase Product
+                        </p>
+                    </div>
+                }
         
                 <div className="flex flex-col gap-4 bg-white rounded-md">
                     <div className="flex flex-row gap-4 text-gray-600 mt-8 pl-4 items-center">

@@ -5,7 +5,7 @@ import ButtonGhost from '../../../Components/buttons/ButtonGhost'
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
 import { calculateTotalHours } from '../../../Utils/getHoursDifferenceFromDateTime';
-import { storeProductShowcaseAction } from '../../../requests/showcase/showcase.request';
+import { showcaseByAdminAction } from '../../../requests/showcase/showcase.request';
 import { formatAmount } from '../../../Utils/formatAmount';
 import { parse } from 'cookie';
 import axiosInstance from '../../../Utils/axiosConfig';
@@ -49,15 +49,14 @@ const CreateFeaturedProduct = ({product, rate}: ICreateProductFeaturePageProps) 
         if(!totalHours) return toast.error('Please fill all inputs!');
 
         setIsLoading(true);
-        await storeProductShowcaseAction({
+        await showcaseByAdminAction({
             ...featuredDetails,
             product_id: product.id,
-            vendor_id: '',
             featured_duration_in_hours: totalHours,
         })
         .then((response) => {
             if(response.status === 201) {
-                router.push(response.data.data.pay_stack_checkout_url);
+                toast.success('Showcase created successfully')
             }
         })
         .catch(error => {
@@ -97,7 +96,6 @@ const CreateFeaturedProduct = ({product, rate}: ICreateProductFeaturePageProps) 
                                     className="bg-transparent"
                                 />
                             </div>
-                            
                         </div>
 
                         <div className='flex flex-row bg-white px-4 py-6 mt-4 relative'>
@@ -111,15 +109,13 @@ const CreateFeaturedProduct = ({product, rate}: ICreateProductFeaturePageProps) 
                                     className="bg-transparent"
                                 />
                             </div>
-                            <div className="w-[10%] absolute right-20 bottom-4 h-10">
+                            <div className="w-[7%] absolute right-28 bottom-4 h-10">
                                 <ButtonGhost
                                     action="Get Amount"
                                     onClick={getFeaturedHours}
                                 />
                             </div>
                         </div>
-
-                        
                     </div>
 
                     <div className="flex flex-col text-gray-700 bg-white px-4 pt-4">

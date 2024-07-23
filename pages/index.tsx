@@ -7,16 +7,18 @@ import ProductComponent from '../Components/ProductComponent';
 import SwiperSlider from '../Components/sliders/Swiper';
 import { sendAxiosRequest } from '../Utils/sendAxiosRequest';
 import { cataloguesDummyData } from '../data/catalogues';
+import HorizontalSlider from '../Components/lists/HorizontalSlider';
 
 interface IHomePageProps {
   products: any[];
   openOrders: any[];
   categories: any[];
   tags: any[];
+  featured: any[];
   catalogues: string[];
 }
 
-const Home = ({products, openOrders, categories, tags, catalogues}: IHomePageProps) => {
+const Home = ({products, openOrders, categories, tags, featured, catalogues}: IHomePageProps) => {
   const router = useRouter();
 
   const searchProducts = (searchStr: string) => {
@@ -28,10 +30,7 @@ const Home = ({products, openOrders, categories, tags, catalogues}: IHomePagePro
   }
 
   return (
-
-    <div 
-      className=" min-h-screen"
-    >
+    <div className=" min-h-screen">
       <Header onSearch={searchProducts}/>
 
       <div
@@ -122,6 +121,13 @@ const Home = ({products, openOrders, categories, tags, catalogues}: IHomePagePro
           ))
         }
       </div>
+
+      <div className='mb-4 w-[90%] lg:w-[80%] ml-[12%]'>
+        <HorizontalSlider
+          list_name='Showcase'
+          list={featured}
+        />
+      </div>
       
       <div 
         className='flex flex-col justify-between text-gray-800 my-16 w-full px-[5%] lg:px-[10%] py-8 mx-auto bg-gray-100'
@@ -205,25 +211,35 @@ export async function getServerSideProps() {
         '',
         ''
       );
+      const getFeaturedProducts = await sendAxiosRequest(
+        '/api/featured/product/filter/index',
+        'post',
+        {status: 'active'},
+        '',
+        ''
+      );
 
-      const [productsResult, openOrdersResult, categoriesResult, tagsResult] = await Promise.allSettled([
+      const [productsResult, openOrdersResult, categoriesResult, tagsResult, featuredResult] = await Promise.allSettled([
         getProducts,
         getOpenOrders,
         getCategories,
-        getTags
+        getTags,
+        getFeaturedProducts
       ]);
 
       const products = productsResult.status === 'fulfilled' && productsResult?.value ? productsResult?.value?.data : [];
       const openOrders = openOrdersResult.status === 'fulfilled' && openOrdersResult?.value ? openOrdersResult?.value?.data : [];
       const categories = categoriesResult.status === 'fulfilled' ? categoriesResult?.value?.data : [];
       const tags = tagsResult.status === 'fulfilled' ? tagsResult?.value?.data : [];      
+      const featured = featuredResult.status === 'fulfilled' ? featuredResult?.value?.data : [];      
     
       return {
         props: {
-          products : products.data ?? [],
-          openOrders: openOrders.data ?? [],
-          categories: categories.data,
-          tags: tags.data,
+          products : products?.data ?? [],
+          openOrders: openOrders?.data ?? [],
+          categories: categories?.data,
+          tags: tags?.data,
+          featured: featured?.data ?? [],
           catalogues: []
         },
       }
@@ -236,6 +252,7 @@ export async function getServerSideProps() {
         openOrders: [],
         categories: [],
         tags: [],
+        featured: [],
         catalogues: []
       },
     }
