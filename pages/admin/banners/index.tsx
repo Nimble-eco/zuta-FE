@@ -11,6 +11,7 @@ import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
 import TextInput from '../../../Components/inputs/MyTextInput';
 import { filterBannersAction, searchBannersAction } from '../../../requests/banners/banner.request';
+import ButtonFull from '../../../Components/buttons/ButtonFull';
 
 interface IBannersIndexPageProps {
     banners: any
@@ -162,10 +163,18 @@ const BannersIndexPage = ({banners}:IBannersIndexPageProps) => {
             />
         }
 
-        <div className="flex flex-row w-[90%] mx-auto mt-8 relative mb-10">
+        <div className="flex flex-row w-full mx-auto mt-8 relative mb-10">
             <AdminSideNavPanel />
             <div className="flex flex-col w-[80%] absolute right-0 left-[20%]">
-                <h2 className="text-2xl font-bold text-slate-700 mb-4">Banners</h2>
+                <div className='flex flex-row items-center justify-between'>
+                    <h2 className="text-2xl font-bold text-slate-700 mb-4">Banners</h2>
+                    <div className='h-14'>
+                        <ButtonFull
+                            action='Create'
+                            onClick={()=>router.push('banners/create')}
+                        />
+                    </div>
+                </div>
                 <div className="grid grid-cols-4 gap-4 mb-6">
                     <StatsCard
                         title='All Banners'

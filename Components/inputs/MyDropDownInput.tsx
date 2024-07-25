@@ -10,7 +10,6 @@ interface IMyDropDownInputProps {
 }
 
 const MyDropDownInput = ({label, name, options, value, onSelect}: IMyDropDownInputProps) => {
-    console.log({options})
   return (
     <div className='flex flex-col mb-4 w-full'>
         <label className='font-semibold mb-1 text-sm'>

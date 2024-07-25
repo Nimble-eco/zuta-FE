@@ -24,7 +24,7 @@ const SwiperSlider = ({slides, slidesToShow=1}: ISwiperProps) => {
             key={index}
             className='rounded-md bg-gray-400'
           >
-            <img src={slide} alt='image' className='w-full rounded-md bg-gray-400 object-cover'/>
+            <img src={slide} alt='image' className='w-full h-full rounded-md bg-gray-400 object-cover'/>
           </SwiperSlide>
         ))
       }

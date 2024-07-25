@@ -15,7 +15,7 @@ interface IHomePageProps {
   categories: any[];
   tags: any[];
   featured: any[];
-  catalogues: string[];
+  catalogues: any[];
 }
 
 const Home = ({products, openOrders, categories, tags, featured, catalogues}: IHomePageProps) => {
@@ -28,6 +28,7 @@ const Home = ({products, openOrders, categories, tags, featured, catalogues}: IH
   const handleClick = (tag: string) => {
     router.push(`/results?tag=${tag}`);
   }
+  console.log({catalogues})
 
   return (
     <div className=" min-h-screen">
@@ -63,6 +64,7 @@ const Home = ({products, openOrders, categories, tags, featured, catalogues}: IH
       <div className='lg:h-[50vh] my-10 w-[80%] mx-auto'>
         <SwiperSlider 
           slides={cataloguesDummyData}
+          // slides={catalogues?.map(catalogue => catalogue.image)}
           slidesToShow={2}
         />
       </div>
@@ -218,13 +220,21 @@ export async function getServerSideProps() {
         '',
         ''
       );
+      const getAdvertBanners = await sendAxiosRequest(
+        '/api/advert/banners/index?position=1',
+        'get',
+        {},
+        '',
+        ''
+      );
 
-      const [productsResult, openOrdersResult, categoriesResult, tagsResult, featuredResult] = await Promise.allSettled([
+      const [productsResult, openOrdersResult, categoriesResult, tagsResult, featuredResult, bannersResult] = await Promise.allSettled([
         getProducts,
         getOpenOrders,
         getCategories,
         getTags,
-        getFeaturedProducts
+        getFeaturedProducts,
+        getAdvertBanners
       ]);
 
       const products = productsResult.status === 'fulfilled' && productsResult?.value ? productsResult?.value?.data : [];
@@ -232,6 +242,7 @@ export async function getServerSideProps() {
       const categories = categoriesResult.status === 'fulfilled' ? categoriesResult?.value?.data : [];
       const tags = tagsResult.status === 'fulfilled' ? tagsResult?.value?.data : [];      
       const featured = featuredResult.status === 'fulfilled' ? featuredResult?.value?.data : [];      
+      const banners = bannersResult.status === 'fulfilled' ? bannersResult?.value?.data : [];      
     
       return {
         props: {
@@ -240,7 +251,7 @@ export async function getServerSideProps() {
           categories: categories?.data,
           tags: tags?.data,
           featured: featured?.data ?? [],
-          catalogues: []
+          catalogues: banners?.data ?? []
         },
       }
   }

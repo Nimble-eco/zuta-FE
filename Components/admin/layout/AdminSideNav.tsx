@@ -107,6 +107,12 @@ const AdminSideNavPanel = () => {
             Transactions
         </a>
         <a 
+            href="/admin/banners"
+            className={`cursor-pointer ${router.pathname.includes('banners') ? activeStyle : 'hover:!text-orange-500'}`}
+        >
+            Banners
+        </a>
+        <a 
             href="/admin/setting"
             className={`cursor-pointer ${router.pathname.includes('setting') ? activeStyle : 'hover:!text-orange-500'}`}
         >
