@@ -1,5 +1,5 @@
 import { FC } from "react"
-import { PropagateLoader } from "react-spinners";
+import { BeatLoader } from "react-spinners";
 
 interface IButtonFullProps {
   action: string;
@@ -10,9 +10,9 @@ interface IButtonFullProps {
 const override = {
   display: "block",
   width: '50%',
+  height: '1rem',
   margin: "auto",
-  marginBottom: '10px',
-  padding: '10px auto',
+  padding: '5px auto',
   borderColor: " #FFFFFF",
 };
 
@@ -21,14 +21,15 @@ const ButtonFull: FC<IButtonFullProps> = ({action, onClick, loading}) => {
     <button
       type="button"
       onClick={onClick}
-      className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 h- min-h-[2rem] rounded-full min-w-[8rem] w-full mx-auto whitespace-nowrap"
+      className="bg-orange-500 hover:bg-orange-700 text-white font-bold flex justify-center items-center px-4 min-h-[2.5em] rounded-full min-w-[8rem] w-full mx-auto whitespace-nowrap"
     >
       {loading ? 
-        <PropagateLoader 
+        <BeatLoader 
           cssOverride={override}
           color="#FFFFFF"
           aria-label="Loading Spinner"
           data-testid="loader"
+          className="h-2"
         /> : 
         action
       }

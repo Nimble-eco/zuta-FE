@@ -166,7 +166,14 @@ const BannersIndexPage = ({banners}:IBannersIndexPageProps) => {
         <div className="flex flex-row w-full mx-auto mt-8 relative mb-10">
             <AdminSideNavPanel />
             <div className="flex flex-col w-[80%] absolute right-0 left-[20%]">
-                <div className='flex flex-row items-center justify-between'>
+                <div className="grid grid-cols-4 gap-4 mb-6">
+                    <StatsCard
+                        title='All Banners'
+                        value={banners.data?.meta?.total ?? 0}
+                    />
+                    
+                </div>
+                <div className='flex flex-row items-center justify-between bg-white pt-4 px-4'>
                     <h2 className="text-2xl font-bold text-slate-700 mb-4">Banners</h2>
                     <div className='h-14'>
                         <ButtonFull
@@ -175,14 +182,7 @@ const BannersIndexPage = ({banners}:IBannersIndexPageProps) => {
                         />
                     </div>
                 </div>
-                <div className="grid grid-cols-4 gap-4 mb-6">
-                    <StatsCard
-                        title='All Banners'
-                        value={banners.data?.meta?.total ?? 0}
-                    />
-                    
-                </div>
-                <div className="flex flex-row text-sm font-semibold !text-gray-400 px-4 pt-5 bg-white">
+                <div className="flex flex-row text-sm font-semibold !text-gray-400 px-4 bg-white">
                     <a href="#0" className="hover:!text-orange-500 mr-3">
                         Enabled
                     </a>

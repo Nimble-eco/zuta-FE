@@ -54,50 +54,24 @@ const show = ({user}: IShowUserProps) => {
           </div>
 
           <div className='flex flex-col'>
-            <div className='flex flex-col lg:grid lg:grid-cols-2 lg:gap-4'>
-              <div className="flex flex-row w-full">
-                <div className='w-[60%] mr-[3%] md:mr-none'>
-                  <TextCard label='Name' value={user.name} />
-                </div>
-                <div className='w-[30%] md:w-auto md:mr-none'>
-                  <TextCard label='Email' value={user.email} />
-                </div>
-              </div>
-              <div className="flex flex-row">
-                <div className='w-[60%] mr-[3%] md:mr-none'>
-                  <TextCard label='Phone Number' value={user.phone} />
-                </div>
-                <div className='w-[30%] md:w-auto md:mr-none'>
-                  <TextCard label='Gender' value={user.gender} />
-                </div>
-              </div>
-            </div>
+            <div className='flex flex-col md:grid md:grid-cols-2 lg:grid-cols-4 gap-2'>
+              <TextCard label='Name' value={user.name} />
+              <TextCard label='Email' value={user.email} />
+              <TextCard label='Phone Number' value={user.phone} />
+              <TextCard label='Gender' value={user.gender} />
 
-            <div className='flex flex-col lg:grid lg:grid-cols-2 lg:gap-4'>
-              <div className="flex flex-row w-full">
-                <div className='w-[60%] md:mr-none'>
-                  <TextCard label='Orders' value={user.orders?.length} />
-                </div>
-                <div className='w-[30%] md:w-auto md:mr-none'>
-                  <TextCard label='Order Trains' value={user.openOrderSubscriptions?.length} />
-                </div>
-              </div>
-              <div className="flex flex-row">
-                <div className='w-[60%] mr-[3%] md:mr-none'>
-                  <TextCard label='Blocked' value={user.blocked ? 'True' : 'False'} />
-                </div>
-                <div className='w-[30%] md:w-auto md:mr-none'>
-                  <TextCard label='Flags' value={user.flags} />
-                </div>
-              </div>
+              <TextCard label='Orders' value={user.orders?.length} />
+              <TextCard label='Order Trains' value={user.openOrderSubscriptions?.length ?? 0} />
+              <TextCard label='Blocked' value={user.blocked ? 'True' : 'False'} />
+              <TextCard label='Flags' value={user.flags} />
             </div>
           </div>
         </div>
 
         <div className="flex flex-col gap-4 bg-white rounded-md">
-          <div className="flex flex-row gap-4 text-gray-600 mt-8 pl-4 items-center">
-            <h4 className={`font-medium ${orderTab === 'order' && 'text-orange-700 text-lg font-semibold'} cursor-pointer`} onClick={()=>setOrderTab('order')}>Orders</h4>
-            <h4 className={`font-medium ${orderTab === 'train' && 'text-orange-700 text-lg font-semibold'} cursor-pointer`} onClick={()=>setOrderTab('train')}>Order Train</h4>
+          <div className="flex flex-row gap-4 text-gray-600 mt-8 pl-4 items-center font-medium text-base">
+            <h4 className={`${orderTab === 'order' && 'text-orange-700 text-lg font-semibold'} cursor-pointer`} onClick={()=>setOrderTab('order')}>Orders</h4>
+            <h4 className={`${orderTab === 'train' && 'text-orange-700 text-lg font-semibold'} cursor-pointer`} onClick={()=>setOrderTab('train')}>Order Train</h4>
           </div>
 
           {

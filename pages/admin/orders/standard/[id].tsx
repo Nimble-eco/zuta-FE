@@ -5,14 +5,17 @@ import TextCard from "../../../../Components/texts/TextCard";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { cancelAnOrderAction, closeAnOrderAction, deliverAnOrderAction, shipAnOrderAction, unshipAnOrderAction } from "../../../../requests/order/order.request";
+import { parse } from "cookie";
+import axiosInstance from "../../../../Utils/axiosConfig";
 
 interface IShowOrderPageProps {
     order: any;
 }
 
 const ShowOrder = ({order}: IShowOrderPageProps) => {
+    console.log({order})
     const router = useRouter();
-    const [status, setStatus] = useState('');
+    const [status, setStatus] = useState(order?.status);
     const [loading, setLoading] = useState(false);
 
     const updateOrderStatus = async() => {
@@ -56,16 +59,16 @@ const ShowOrder = ({order}: IShowOrderPageProps) => {
     }
     
   return (
-    <div className="min-h-screen bg-gray-100 overflow-scroll flex flex-row relative mb-10">
+    <div className="min-h-screen bg-gray-100 overflow-scroll flex flex-row relative">
         <AdminSideNavPanel />
-        <div className="min-h-screen bg-gray-100 flex flex-col gap-6 w-full md:w-[80%] absolute right-0 md:left-[20%] rounded-md px-4">
+        <div className="min-h-screen bg-gray-100 flex flex-col gap-6 w-full md:w-[80%] absolute right-0 md:left-[20%] rounded-md">
             <div className='flex flex-col bg-white mt-6 rounded-md'>
                 <div className="flex flex-row justify-between items-center border-b border-gray-200 py-4 px-4">
-                    <h2 className="text-xl font-semibold align-center align-baseline my-auto capitalize">{order.id}</h2>
+                    <h2 className="text-xl font-semibold align-center align-baseline my-auto capitalize">{order?.id}</h2>
                     <div className="flex flex-row gap-4 items-center">
-                        <p className="text-slate-700 font-medium">Status:</p>
+                        <p className="text-orange-600 font-medium mb-0">Status:</p>
                         <select 
-                            className=""
+                            className="px-4 py-2 bg-gray-100 rounded-xl"
                             onChange={(e)=>setStatus(e.target?.value)}
                         >
                             <option value={'shipped'}>Shipped</option>
@@ -82,10 +85,10 @@ const ShowOrder = ({order}: IShowOrderPageProps) => {
                     </div>
                 </div>
 
-                <div className='flex flex-col gap-4'>
-                    <div className="flex flex-col gap-1">
-                        <p className="text-slate-600 font-semibold">Order Details</p>
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className='flex flex-col gap-4 mt-4'>
+                    <div className="flex flex-col gap-1 border-b-4 border-gray-100">
+                        <p className="text-slate-600 font-semibold px-4 text-xl">Order Details</p>
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
                             <TextCard label="Product Name" value={order?.product_name} />
                             <TextCard label="Price" value={order?.product_price_paid} />
                             <TextCard label="Discount" value={order?.product_discount} />
@@ -97,14 +100,14 @@ const ShowOrder = ({order}: IShowOrderPageProps) => {
                             <TextCard label="Delivery fee" value={order?.order_delivery_fee} />
                             <TextCard label="Coupons" value={order?.order_coupons} />
                             <TextCard label="Order paid" value={order?.order_paid} />
-                            <TextCard label="Order payment_confirmed" value={order?.order_payment_confirmed} />
+                            <TextCard label="Order payment_confirmed" value={order?.order_payment_confirmed ? 'True' : 'False'} />
                             <TextCard label="Order payment_method" value={order?.order_payment_method} />
                         </div>
                     </div>
 
-                    <div className="flex flex-col gap-1">
-                        <p className="text-slate-600 font-semibold">Customer Details</p>
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="flex flex-col gap-1 border-b-4 border-gray-100">
+                        <p className="text-slate-600 font-semibold px-4 text-xl">Customer Details</p>
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
                             <TextCard label="Recipient name" value={order?.recipient_name} />
                             <TextCard label="Recipient email" value={order?.recipient_email} />
                             <TextCard label="Recipient phone" value={order?.recipient_phone} />
@@ -118,17 +121,17 @@ const ShowOrder = ({order}: IShowOrderPageProps) => {
                         </div>
                     </div>
 
-                    <div className='flex flex-col bg-white mt-6 rounded-md p-4'>
-                        <div className="flex flex-row justify-between items-center">
-                            <h4 className="text-base text-slate-700 font-semibold">User</h4>
+                    <div className='flex flex-col bg-white mt-4 rounded-md border-b-4 border-gray-100'>
+                        <div className="flex flex-row justify-between items-center px-4">
+                            <h4 className="text-xl text-slate-700 font-semibold">User</h4>
                             <p 
                                 onClick={()=>router.push(`/admin/users/${order?.user_id}`)}
-                                className="text-sm text-gray-800 cursor-pointer hover:text-orange-500 font-medium"
+                                className="text-sm cursor-pointer hover:text-orange-500 font-medium text-orange-600 border border-orange-600 rounded-xl px-4 py-2"
                             >
                                 View
                             </p>
                         </div>
-                        <div className="gird grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                             <TextCard label="Name" value={order?.user?.name} />
                             <TextCard label="Email" value={order?.user?.email} />
                             <TextCard label="Phone Number" value={order?.user?.phone} />
@@ -138,17 +141,17 @@ const ShowOrder = ({order}: IShowOrderPageProps) => {
                         </div>
                     </div>
 
-                    <div className='flex flex-col bg-white mt-6 rounded-md p-4'>
-                        <div className="flex flex-row justify-between items-center">
-                            <h4 className="text-base text-slate-700 font-semibold">Vendor</h4>
+                    <div className='flex flex-col bg-white mt-4 rounded-md'>
+                        <div className="flex flex-row justify-between items-center px-4">
+                            <h4 className="text-xl text-slate-700 font-semibold">Vendor</h4>
                             <p 
                                 onClick={()=>router.push(`/admin/stores/${order?.vendor_id}`)}
-                                className="text-sm text-gray-800 cursor-pointer hover:text-orange-500 font-medium"
+                                className="text-sm cursor-pointer hover:text-orange-500 font-medium text-orange-600 border border-orange-600 rounded-xl px-4 py-2"
                             >
                                 View
                             </p>
                         </div>
-                        <div className="gird grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                             <TextCard label="Name" value={order?.vendor?.vendor_name} />
                             <TextCard label="Email" value={order?.vendor?.vendor_email} />
                             <TextCard label="Phone Number" value={order?.vendor?.vendor_phone} />
@@ -167,3 +170,36 @@ const ShowOrder = ({order}: IShowOrderPageProps) => {
 }
 
 export default ShowOrder
+
+export async function getServerSideProps(context: any) {
+    const { id } = context.query;
+    const cookies = parse(context.req.headers.cookie || ''); 
+    const user = JSON.parse(cookies.user || 'null');
+    const token = user?.access_token;
+  
+    try {
+        const getOrder = await axiosInstance.get('/api/order/show?id=' + id, {
+            headers: {Authorization: token}
+        });
+        const order = getOrder.data?.data;
+  
+        return {
+            props: { order }
+        }
+
+    } catch (error: any) {
+        console.log({error})
+        if(error?.response?.status === 401) {
+            return {
+                redirect: {
+                    destination: '/auth/signIn',
+                    permanent: false
+                }
+            }
+        }
+  
+        return {
+            props: {order: {}}
+        }
+    }
+}

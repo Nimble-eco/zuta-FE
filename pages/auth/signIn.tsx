@@ -68,7 +68,7 @@ export default function SignIn({ providers }: any) {
                 Cookies.set('user', JSON.stringify(response.data.data))
                 toast.success('Login successful');
                 setTimeout(() => {
-                    if (router && router.asPath && router.asPath !== '/') router.back();
+                    if (router && router.asPath && (router.asPath !== '/' && router.asPath !== '/auth/register')) router.back();
                     else router.push('/');
                 }, 5000);
             }

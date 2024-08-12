@@ -11,6 +11,7 @@ import FilterContainer from "../../../../Components/modals/containers/FilterCont
 import MyDropDownInput from "../../../../Components/inputs/MyDropDownInput"
 import TextInput from "../../../../Components/inputs/MyTextInput"
 import { filterOrderTrainByVendorAction } from "../../../../requests/orderTrain/orderTrain.request"
+import { formatAmount } from "../../../../Utils/formatAmount"
 
 interface IStandardOrdersIndexPageProps {
     orders: any
@@ -141,10 +142,9 @@ const index = ({orders}: IStandardOrdersIndexPageProps) => {
                 ]}
             />
         }
-        <div className="flex flex-row w-[90%] mx-auto mt-8 relative mb-10">
+        <div className="flex flex-row w-full mx-auto mt-8 relative mb-10">
             <AdminSideNavPanel />
             <div className="flex flex-col w-[80%] absolute right-0 left-[21%]">
-                <h2 className="text-2xl font-bold text-slate-700 mb-4">Order Train</h2>
                 <div className="grid grid-cols-4 gap-4 mb-6">
                     <StatsCard
                         title='All Orders'
@@ -152,7 +152,8 @@ const index = ({orders}: IStandardOrdersIndexPageProps) => {
                     />
                 </div>
 
-                <div className="flex flex-row text-sm font-semibold !text-gray-400 px-4 pt-5 bg-white">
+                <h2 className="text-2xl font-bold text-slate-700 pt-4 px-4 bg-white mb-0">Order Train</h2>
+                <div className="flex flex-row text-sm font-semibold !text-gray-400 px-4 pt-2 bg-white">
                     <a href="#0" className="hover:!text-orange-500 mr-3">
                         Active
                     </a>
@@ -180,13 +181,14 @@ const index = ({orders}: IStandardOrdersIndexPageProps) => {
                 {/* OORDERS TABLE */}
                 <div className="flex flex-col pb-8 bg-white overflow-y-auto">
                     <MyTable
-                        headings={['id', 'product_name', 'quantity', 'price', 'next_price', 'next_discount', 'status', 'stock', 'order_amount', 'order_paid',]}
+                        headings={['product_name', 'quantity', 'price', 'next_price', 'next_discount', 'status', 'stock',]}
                         content={ordersData?.data?.data?.map((order: any) => ({
                             ...order,
-                            id: order.id,
                             product_name: order.product_name,
-                            quantity: order.quantity,
-                            price: order.open_order_price,
+                            quantity: order.orderCount,
+                            price: formatAmount(order.open_order_price),
+                            next_price: formatAmount(order.next_price),
+                            next_discount: formatAmount(order.next_discount),
                             status: order.status,
                         }))} 
                         onRowButtonClick={(order: any) => router.push(`order-train/${order.id}`)}

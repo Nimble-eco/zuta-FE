@@ -51,12 +51,12 @@ const showVendor = ({vendor}: IShowVendorPageProps) => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-100 overflow-scroll flex flex-row relative mb-10">
+        <div className="min-h-screen bg-gray-100 overflow-scroll flex flex-row relative">
             <AdminSideNavPanel />
             <div className="min-h-screen bg-gray-100 flex flex-col gap-6 w-full md:w-[80%] absolute right-0 md:left-[20%] rounded-md px-4">
                 <div className='flex flex-col bg-white mt-6 rounded-md'>
                     <div className="flex flex-row justify-between items-center border-b border-gray-200 py-4 px-4">
-                        <h2 className="text-xl font-semibold align-center align-baseline my-auto capitalize">{vendor.name}</h2>
+                        <h2 className="text-xl font-semibold align-center align-baseline my-auto capitalize">{vendor.vendor_name}</h2>
                         <div className="flex flex-row ">
                             <div className="ml-3">
                                 {
@@ -78,76 +78,34 @@ const showVendor = ({vendor}: IShowVendorPageProps) => {
                     </div>
         
                     <div className='flex flex-col'>
-                        <div className='flex flex-col lg:grid lg:grid-cols-2 lg:gap-4'>
-                            <div className="flex flex-row w-full">
-                                <div className='w-[60%] mr-[3%] md:mr-none'>
-                                    <TextCard label='Name' value={vendor.vendor_name} />
-                                </div>
-                                <div className='w-[30%] md:w-auto md:mr-none'>
-                                    <TextCard label='Email' value={vendor.vendor_email} />
-                                </div>
-                            </div>
-                            <div className="flex flex-row">
-                                <div className='w-[60%] mr-[3%] md:mr-none'>
-                                    <TextCard label='Phone Number' value={vendor.vendor_phone} />
-                                </div>
-                                <div className='w-[30%] md:w-auto md:mr-none'>
-                                    <TextCard label='Product(s)' value={vendor?.product?.length} />
-                                </div>
-                            </div>
-                        </div>
-        
-                        <div className='flex flex-col lg:grid lg:grid-cols-2 lg:gap-4'>
-                            <div className="flex flex-row w-full">
-                                <div className='w-[60%] mr-[3%] md:mr-none'>
-                                    <TextCard label='address' value={vendor.vendor_address} />
-                                </div>
-                                <div className='w-[30%] md:w-auto md:mr-none'>
-                                    <TextCard label='City' value={vendor.vendor_city} />
-                                </div>
-                            </div>
-                            <div className="flex flex-row">
-                                <div className='w-[60%] mr-[3%] md:mr-none'>
-                                    <TextCard label='State' value={vendor.vendor_state} />
-                                </div>
-                                <div className='w-[30%] md:w-auto md:mr-none'>
-                                    <TextCard label='Country' value={vendor.vendor_country} />
-                                </div>
-                            </div>
-                        </div>
-        
-                        <div className='flex flex-col lg:grid lg:grid-cols-2 lg:gap-4'>
-                            <div className="flex flex-row w-full">
-                                <div className='w-[60%] md:mr-none'>
-                                    <TextCard label='Orders' value={vendor.order?.length} />
-                                </div>
-                                <div className='w-[30%] md:w-auto md:mr-none'>
-                                    <TextCard label='Order Trains' value={vendor.openOrder?.length} />
-                                </div>
-                            </div>
-                            <div className="flex flex-row">
-                                <div className='w-[60%] mr-[3%] md:mr-none'>
-                                    <TextCard label='Flag(s)' value={vendor.flags} />
-                                </div>
-                                <div className='w-[60%] mr-[3%] md:mr-none'>
-                                    <TextCard label='Management Approved' value={vendor.management_approved ? 'True' : 'False'} />
-                                </div>
-                            </div>
+                        <div className='flex flex-col md:grid md:grid-cols-2 lg:grid-cols-4 gap-2'>
+                            <TextCard label='Name' value={vendor.vendor_name} />
+                            <TextCard label='Email' value={vendor.vendor_email} />
+                            <TextCard label='Phone Number' value={vendor.vendor_phone} />
+                            <TextCard label='Product(s)' value={vendor?.product?.length} />
+                            <TextCard label='address' value={vendor.vendor_address} />
+                            <TextCard label='City' value={vendor.vendor_city} />
+                            <TextCard label='State' value={vendor.vendor_state} />
+                            <TextCard label='Country' value={vendor.vendor_country} />
+                            <TextCard label='Orders' value={vendor.order?.length} />
+                            <TextCard label='Order Trains' value={vendor.openOrder?.length} />
+                            <TextCard label='Flag(s)' value={vendor.flags} />
+                            <TextCard label='Management Approved' value={vendor.management_approved ? 'True' : 'False'} />
                         </div>
                     </div>
                 </div>
 
-                <div className='flex flex-col bg-white mt-6 rounded-md p-4'>
-                    <div className="flex flex-row justify-between items-center">
-                        <h4 className="text-base text-slate-700 font-semibold">User</h4>
+                <div className='flex flex-col bg-white mt-4 rounded-md p-4'>
+                    <div className="flex flex-row justify-between items-center px-4">
+                        <h4 className="text-xl text-slate-700 font-semibold">User</h4>
                         <p 
                             onClick={()=>router.push(`/admin/user/${vendor.user_id}`)}
-                            className="text-sm text-gray-800 cursor-pointer hover:text-orange-500 font-medium"
+                            className="text-sm text-orange-600 cursor-pointer hover:text-orange-500 font-medium px-4 py-1 border-orange-600 border rounded-xl"
                         >
                             View
                         </p>
                     </div>
-                    <div className="gird grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                         <TextCard label="Name" value={vendor?.user?.name} />
                         <TextCard label="Email" value={vendor?.user?.email} />
                         <TextCard label="Phone Number" value={vendor?.user?.phone} />
@@ -233,7 +191,9 @@ export async function getServerSideProps(context: any) {
         const getMyVendor = await axiosInstance.get('/api/vendor/show?id=' + id, {
             headers: {Authorization: token}
         });
+        console.log({getMyVendor})
         const vendor = getMyVendor.data?.data;
+        console.log({vendor})
   
         return {
             props: { vendor }

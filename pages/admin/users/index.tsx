@@ -287,6 +287,15 @@ export async function getServerSideProps(context: any) {
     const user = JSON.parse(cookies.user || 'null');
     const token = user?.access_token;
 
+    if(!token) {
+        return {
+            redirect: {
+              destination: '/auth/signIn',
+              permanent: false
+            }
+        }
+    }
+
     try {
         const getAllUsers = await axiosInstance.get('/api/user/index?properties=1', {
             headers: {

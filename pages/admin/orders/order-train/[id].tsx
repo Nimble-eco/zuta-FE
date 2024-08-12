@@ -26,44 +26,42 @@ const ShowOrder = ({order, subscribers}: IShowOrderPageProps) => {
         setLoading(true);
         if(!status) return toast.error('Select a status');
         
-        let res: any;
+        let req: any;
 
         switch (status) {
             case 'completed':
-                res = await markOpenOrderAsCompletedAction(order.id);
+                req = markOpenOrderAsCompletedAction(order.id);
             break;
             case 'cancelled':
-                res = await markOpenOrderAsCancelledAction(order.id);
+                req = markOpenOrderAsCancelledAction(order.id);
             break;
             case 'rejected':
-                res = await markOpenOrderAsRejectedAction(order.id);
+                req = markOpenOrderAsRejectedAction(order.id);
             break;
             case 'ready':
-                res = await markOpenOrderAsReadyByVendorAction(order.id, '');
+                req = markOpenOrderAsReadyByVendorAction(order.id, '');
             break;
             case 'closed':
-                res = await closeOpenOrderByVendorAction(order.id, '');
+                req = closeOpenOrderByVendorAction(order.id, '');
             break;
             default:
                 break;
         }
         
-        if(res) {
-            await res.then((response: any) => {
-                if(response.status === 202) {
-                    toast.success('Status updated');
-                }
-            })
-            .catch((error: any) => {
-                console.log({error});
-                toast.error(error?.response?.data?.message || 'Error try again later');
-            })
-            .finally(() => setLoading(false));
-        }
+        await req.then((response: any) => {
+            if(response.status === 202) {
+                toast.success('Status updated');
+            }
+        })
+        .catch((error: any) => {
+            console.log({error});
+            toast.error(error?.response?.data?.message || 'Error try again later');
+        })
+        .finally(() => setLoading(false));
     }
     
   return (
-    <div className="min-h-screen bg-gray-100 overflow-scroll flex flex-row relative mb-10">
+    <div className="min-h-screen bg-gray-100 overflow-scroll flex flex-row relative">
         {
             showOrderDataModal && <OrderTrainSubscriberDataModal 
                 data={selectedSubscriberOrder}
@@ -71,14 +69,14 @@ const ShowOrder = ({order, subscribers}: IShowOrderPageProps) => {
             />
         }
         <AdminSideNavPanel />
-        <div className="min-h-screen bg-gray-100 flex flex-col gap-6 w-full md:w-[80%] absolute right-0 md:left-[20%] rounded-md px-4">
+        <div className="min-h-screen bg-gray-100 flex flex-col gap-6 w-full md:w-[80%] absolute right-0 md:left-[20%] rounded-md">
             <div className='flex flex-col bg-white mt-6 rounded-md'>
                 <div className="flex flex-row justify-between items-center border-b border-gray-200 py-4 px-4">
-                    <h2 className="text-xl font-semibold align-center align-baseline my-auto capitalize">{order.id}</h2>
+                    <h2 className="text-xl font-semibold align-center align-baseline my-auto capitalize">{order?.id}</h2>
                     <div className="flex flex-row gap-4 items-center">
-                        <p className="text-slate-700 font-medium">Status:</p>
+                        <p className="text-orange-700 font-medium mb-0">Status:</p>
                         <select 
-                            className=""
+                            className="bg-gray-100 px-4 py-2 rounded-xl"
                             onChange={(e)=>setStatus(e.target?.value)}
                         >
                             <option value={'ready'}>Ready</option>
@@ -96,8 +94,8 @@ const ShowOrder = ({order, subscribers}: IShowOrderPageProps) => {
                 </div>
 
                 <div className='flex flex-col gap-4'>
-                    <div className="flex flex-col gap-1">
-                        <p className="text-slate-600 font-semibold">Order Details</p>
+                    <div className="flex flex-col gap-1 border-b-4 border-gray-100">
+                        <p className="text-slate-600 font-semibold px-4">Order Details</p>
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                             <TextCard label="Product Name" value={order?.product_name} />
                             <TextCard label="Price" value={order?.open_order_price} />
@@ -113,17 +111,17 @@ const ShowOrder = ({order, subscribers}: IShowOrderPageProps) => {
                         </div>
                     </div>
 
-                    <div className='flex flex-col bg-white mt-6 rounded-md p-4'>
-                        <div className="flex flex-row justify-between items-center">
+                    <div className='flex flex-col bg-white mt-6 rounded-md border-b-4 border-gray-100'>
+                        <div className="flex flex-row justify-between items-center px-4">
                             <h4 className="text-base text-slate-700 font-semibold">Vendor</h4>
                             <p 
                                 onClick={()=>router.push(`/admin/stores/${order?.vendor_id}`)}
-                                className="text-sm text-gray-800 cursor-pointer hover:text-orange-500 font-medium"
+                                className="text-smcursor-pointer hover:text-orange-500 font-medium px-4 py-2 border border-orange-600 text-orange-600 rounded-xl"
                             >
                                 View
                             </p>
                         </div>
-                        <div className="gird grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
                             <TextCard label="Name" value={order?.vendor?.vendor_name} />
                             <TextCard label="Email" value={order?.vendor?.vendor_email} />
                             <TextCard label="Phone Number" value={order?.vendor?.vendor_phone} />
@@ -135,8 +133,8 @@ const ShowOrder = ({order, subscribers}: IShowOrderPageProps) => {
                         </div>
                     </div>
 
-                    <div className="flex flex-col gap-1 bg-white">
-                        <p className="text-slate-600 font-semibold">Customers</p>
+                    <div className="flex flex-col gap-1 bg-white  border-b-4 border-gray-100">
+                        <p className="text-slate-600 font-semibold px-4">Customers</p>
                         <div className="mt-4">
                             <MyTable
                                 headings={['id', 'customer_name', 'quantity', 'open_order_price_paid', 'order_delivery_fee', 'order_amount', 'order_service_fee', 'status', 'created_at']}
@@ -166,16 +164,17 @@ const ShowOrder = ({order, subscribers}: IShowOrderPageProps) => {
 export default ShowOrder
 
 export async function getServerSideProps(context: any) {
+    const { id } = context.query;
     const cookies = parse(context.req.headers.cookie || ''); 
     const user = JSON.parse(cookies.user || 'null');
     const token = user?.access_token;
 
     try {
-        const getOrder = await axiosInstance.get('/api/open-order/show?properties=1', {
+        const getOrder = await axiosInstance.get(`/api/open-order/show?id=${id}&properties=1`, {
             headers: { Authorization: token }
         });
 
-        const getOrderSubscribers = await axiosInstance.get('/api/open-order/subscribers', {
+        const getOrderSubscribers = await axiosInstance.get(`/api/open-order/subscribers?id=${id}`, {
             headers: { Authorization: token }
         });
 
@@ -189,8 +188,8 @@ export async function getServerSideProps(context: any) {
         
         return {
             props: {
-                order,
-                subscribers
+                order: order?.data,
+                subscribers: subscribers?.data?.subscribers_list
             }
         }
 

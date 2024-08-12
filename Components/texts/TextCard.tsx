@@ -9,7 +9,7 @@ const TextCard = ({label, value}: ITextCardProps) => {
         <p className="text-sm text-gray-600 whitespace-nowrap capitalize">
             {label}
         </p>
-        <p className="text-base text-black font-semibold max-w-full w-full text-justify">
+        <p className="text-base text-black font-semibold max-w-full w-full text-justify capitalize">
             {value}
         </p>
     </div>

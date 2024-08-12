@@ -259,19 +259,20 @@ const StoresIndexPage = ({stores}:IStoresIndexPageProps) => {
                 {/* StoreS TABLE */}
                 <div className="flex flex-col pb-8 bg-white overflow-y-auto">
                     <MyTable
-                        headings={['id', 'name', 'category', 'orders', 'open_orders', 'management_approved', 'vendor_approved', 'flag']}
-                        content={storesData?.data?.data?.map((product: any) => ({
-                            id: product.id,
-                            name: product.product_name,
-                            category: product.product_categories,
-                            orders: product.orders?.length,
-                            open_orders: product.openOrders?.length,
-                            status: product.status,
-                            management_approved: product.management_approved ? 'True' : 'False',
-                            vendor_approved: product.vendor_approved ? 'True' : 'False',
-                            flag: product.flag
+                        headings={['name', 'email', 'state', 'country', 'orders', 'open_orders', 'management_approved', 'user_approved', 'flag']}
+                        content={storesData?.data?.data?.map((vendor: any) => ({
+                            id: vendor.id,
+                            name: vendor.vendor_name,
+                            email: vendor.vendor_email,
+                            state: vendor.vendor_state,
+                            country: vendor.vendor_country,
+                            orders: vendor.order?.length,
+                            open_orders: vendor.openOrder?.length,
+                            management_approved: vendor.management_approved ? 'True' : 'False',
+                            user_approved: vendor.user_approved ? 'True' : 'False',
+                            flag: vendor.flag
                         }))} 
-                        onRowButtonClick={(user: any) => router.push(`Stores/${user.id}`)}
+                        onRowButtonClick={(user: any) => router.push(`stores/${user.id}`)}
                     />
                     <div className='flex flex-row justify-end text-sm w-[80%] mx-auto'>
                         <button onClick={() => paginateData(storesData?.data?.meta, 'prev')} className='mr-3 cursor-pointer'>Previous</button>
@@ -295,10 +296,7 @@ export async function getServerSideProps(context: any) {
 
     try {
         const getAllStores = await axiosInstance.get('/api/vendor/index?properties=1', {
-            headers: {
-                Authorization: token,
-                // team: user?.vendor
-            }
+            headers: { Authorization: token }
         });
 
         const [storesResult] = await Promise.allSettled([

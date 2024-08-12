@@ -1,5 +1,6 @@
 import { useRouter } from "next/router";
 import { useState } from "react"
+import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 
 const AdminSideNavPanel = () => {
     const router = useRouter();
@@ -19,7 +20,7 @@ const AdminSideNavPanel = () => {
     }
 
   return (
-    <div className='hidden md:flex flex-col bg-white py-4 w-[19%] mr-[1%] fixed left-0 top-0 bottom-0 overflow-auto gap-6 text-center'>
+    <div className='hidden md:flex flex-col bg-white py-4 w-[19%] mr-[1%] fixed left-0 top-0 bottom-0 overflow-scroll gap-6 text-center'>
         <div className="mb-2 text-orange-500 text-xl font-serif">Zuta</div>
         <a 
             href="/admin/users"
@@ -30,9 +31,16 @@ const AdminSideNavPanel = () => {
         <a 
             href="#0"
             onClick={() => toggleDropdown('stores')}
-            className={`cursor-pointer ${router.pathname.includes('stores')  ? activeStyle : 'hover:!text-orange-500'}`}
+            className={`cursor-pointer flex justify-center ${router.pathname.includes('stores')  ? activeStyle : 'hover:!text-orange-500'}`}
         >
-            Stores
+            <div className="flex flex-row gap-2 items-center">
+                Stores
+                {
+                    (showDropdown.stores || router.pathname.includes('stores')) ? 
+                    <IoIosArrowUp className="w-5 h-5" /> :
+                    <IoIosArrowDown className="w-5 h-5"/>
+                }
+            </div>
         </a>
         {
             (showDropdown.stores || router.pathname.includes('stores')) && (
@@ -51,9 +59,16 @@ const AdminSideNavPanel = () => {
         <a 
             href="#0"
             onClick={() => toggleDropdown('products')}
-            className={`cursor-pointer ${router.pathname.includes('product')  ? activeStyle : 'hover:!text-orange-500'}`}
+            className={`cursor-pointer flex justify-center ${router.pathname.includes('product')  ? activeStyle : 'hover:!text-orange-500'}`}
         >
-            Products
+            <div className="flex flex-row gap-2 items-center">
+                Products
+                {
+                    (showDropdown.products || router.pathname.includes('products')) ? 
+                    <IoIosArrowUp className="w-5 h-5" /> :
+                    <IoIosArrowDown className="w-5 h-5"/>
+                }
+            </div>
         </a>
         {
             (showDropdown.products || router.pathname.includes('products')) && (
@@ -72,9 +87,16 @@ const AdminSideNavPanel = () => {
         <a 
             href="#0"
             onClick={() => toggleDropdown('orders')}
-            className={`cursor-pointer ${router.pathname.includes('orders') ? activeStyle : 'hover:!text-orange-500'}`}
+            className={`cursor-pointer flex justify-center ${router.pathname.includes('orders') ? activeStyle : 'hover:!text-orange-500'}`}
         >
-            Orders
+            <div className="flex flex-row gap-2 items-center">
+                Orders
+                {
+                    (showDropdown.orders || router.pathname.includes('orders')) ? 
+                    <IoIosArrowUp className="w-5 h-5" /> :
+                    <IoIosArrowDown className="w-5 h-5"/>
+                }
+            </div>
         </a>
         {
             (showDropdown.orders || router.pathname.includes('orders')) && (
