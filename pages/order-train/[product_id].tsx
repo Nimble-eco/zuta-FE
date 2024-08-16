@@ -17,6 +17,7 @@ import { useRouter } from "next/router";
 import { formatAmount } from "../../Utils/formatAmount";
 import NewAddressModal from "../../Components/modals/address/NewAddressModal";
 import { RiCoupon2Line } from "react-icons/ri";
+import { couponValidateAction } from "../../requests/coupons/coupons.requests";
 
 interface ICreateOrderTrainPageProps {
     product: {
@@ -50,6 +51,7 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
     const [totalAmount, setTotalAmount] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const [couponCode, setCouponCode] = useState('');
+    const [validatingCoupon, setValidatingCoupon] = useState(false);
 
     const [paymentReference, setPaymentReference] = useState('');
     const pay_stack_key = process.env.NEXT_PUBLIC_PAY_STACK_KEY!;
@@ -142,6 +144,24 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
             setIsLoading(false)
             toast.error(error.response?.message ?? 'Error try agin later');
         });
+    }
+    
+    const vailidateCoupon = async () => {
+        setValidatingCoupon(true);
+        couponValidateAction(couponCode)
+        .then(response => {
+            console.log({response})
+            if(response.status === 200) {
+                const coupon = response?.data?.data;
+                setTotalAmount(totalAmount - coupon?.amount);
+                toast.success('Coupon validated');
+            }
+        })
+        .catch(error =>{
+            console.log({error})
+            toast.error('Invalid coupon');
+        })
+        .finally(()=>setValidatingCoupon(false))
     }
 
 
@@ -272,7 +292,7 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
                     </div>
                     <div className="flex flex-row gap-1 justify-center lg:justify-end text-sm md:text-base">
                         <p className="mb-0">=</p>
-                        <p className="text-green-400 mb-0 block lg:flex">{formatAmount(Number(quantity) * product?.product_price)}</p>
+                        <p className="text-green-400 mb-0 block lg:flex">{formatAmount(totalAmount)}</p>
                     </div>
                 </div>
 
@@ -291,8 +311,12 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
                         <RiCoupon2Line className="text-lg text-gray-500" />
                         <input className="bg-transparent border-0 outline-none" placeholder="Enter coupon code here" onChange={(e)=>setCouponCode(e.target.value)}/>
                     </div>
-                    <button className={`border-0 font-semibold w-fit ${couponCode ? 'text-orange-600' : 'text-gray-400'}`}>
-                        Apply
+                    <button 
+                        className={`border-0 font-semibold w-fit ${couponCode ? 'text-orange-600' : 'text-gray-400'}`}
+                        onClick={vailidateCoupon}
+                        disabled={validatingCoupon}
+                    >
+                        {validatingCoupon ? 'Validatin...' : 'Apply'}
                     </button>
                 </div>
 

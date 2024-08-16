@@ -28,3 +28,12 @@ export const deleteCouponAction = async (id: number) => {
         }
     })
 }
+
+export const couponValidateAction = async (slug: string) => {
+    const user = JSON.parse(Cookies.get('user')!);
+    return axiosInstance.post('/api/coupons/validate', {slug}, {
+        headers: {
+            Authorization: user.access_token
+        }
+    });
+}

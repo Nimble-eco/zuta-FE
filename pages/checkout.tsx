@@ -13,6 +13,7 @@ import { formatAmount } from "../Utils/formatAmount";
 import axiosInstance from "../Utils/axiosConfig";
 import NewAddressModal from "../Components/modals/address/NewAddressModal";
 import { RiCoupon2Line } from "react-icons/ri";
+import { couponValidateAction } from "../requests/coupons/coupons.requests";
 
 interface ICheckoutProps {
     user: any;
@@ -27,6 +28,8 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
     const [isLoading, setIsLoading] = useState(false);
     const [showAddAddressModal, setShowAddAddressModal] = useState(false);
     const [couponCode, setCouponCode] = useState('');
+    const [validatingCoupon, setValidatingCoupon] = useState(false);
+    const [totalAmount, setTotalAmount] = useState(0)
 
     let userCookie: any = {};
 
@@ -60,6 +63,24 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
 
     // SET GET PREDICTED ADDRESS DETAILS
     const [userAddressDetails, setUserAddressDetails] = useState<any>({});
+
+    const vailidateCoupon = async () => {
+        setValidatingCoupon(true);
+        couponValidateAction(couponCode)
+        .then(response => {
+            console.log({response})
+            if(response.status === 200) {
+                const coupon = response?.data?.data;
+                setTotalAmount(totalAmount - coupon?.amount);
+                toast.success('Coupon validated');
+            }
+        })
+        .catch(error =>{
+            console.log({error})
+            toast.error('Invalid coupon');
+        })
+        .finally(()=>setValidatingCoupon(false))
+    }
 
     const checkOut = async () => {
         if(addresses?.length !== 0 && !selectedAddress?.id) {
@@ -113,6 +134,7 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
         const open_order_total: number = cart.subscriptions?.reduce((acc: number, item: any) => acc + item.open_order_price * item.quantity, 0);
         const bundles_total: number = cart.bundles?.reduce((acc: number, item: any) => acc + item.product_price * item.order_count, 0);
         setSubTotal(products_total + open_order_total + bundles_total);
+        setTotalAmount(deliveryFee + products_total + open_order_total + bundles_total);
     }, []);
 
     useEffect(() => {
@@ -147,7 +169,7 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
                 className="bg-orange-500 px-4 py-3 text-white rounded cursor-pointer text-lg"
                 onClick={checkOut}
             >
-                {isLoading ? 'Loading...' : `Pay ${formatAmount((subTotal + deliveryFee))}`}
+                {isLoading ? 'Loading...' : `Pay ${formatAmount(totalAmount)}`}
             </button>
         </div>
 
@@ -247,15 +269,19 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
                     <h3 className="lg:text-center text-lg mb-0">Proceed to payment</h3>
                     <p className="lg:text-center mb-0">Deliver fee: {formatAmount(deliveryFee)}</p>
                     <p className="hidden lg:flex lg:text-center text-lg font-semibold text-orange-500 mb-0">
-                        Total: {formatAmount((subTotal + deliveryFee)) ? formatAmount((subTotal + deliveryFee)) : 0}
+                        Total: {formatAmount(totalAmount) ? formatAmount(totalAmount) : 0}
                     </p>
                     <div className='flex flex-row gap-2 items-center'>
                         <div className="flex flex-row gap-2 items-center py-2 px-4 border-gray-200 border rounded-md w-full">
                             <RiCoupon2Line className="text-lg text-gray-500" />
                             <input className="bg-transparent border-0 outline-none" placeholder="Enter coupon code here" onChange={(e)=>setCouponCode(e.target.value)}/>
                         </div>
-                        <button className={`border-0 font-semibold w-fit ${couponCode ? 'text-orange-600' : 'text-gray-400'}`}>
-                            Apply
+                        <button 
+                            className={`border-0 font-semibold w-fit ${couponCode ? 'text-orange-600' : 'text-gray-400'}`} 
+                            onClick={vailidateCoupon}
+                            disabled={validatingCoupon}
+                        >
+                            {validatingCoupon ? 'Validatin...' : 'Apply'}
                         </button>
                     </div>
                     <button 
