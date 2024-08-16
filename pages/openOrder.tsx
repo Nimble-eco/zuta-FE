@@ -102,35 +102,37 @@ const openOrder = ({product, similar_products}: IOpenOrderProductPageProps) => {
             />
 
             <Header />
-
-            <MyGallery 
-                show={showImageGallery}
-                setShow={toggleImageGallery}
-                slides={product?.product?.product_images}
-            />
-            <ToastContainer />
+            {
+                product?.product?.product_images && (
+                    <MyGallery 
+                        show={showImageGallery}
+                        setShow={toggleImageGallery}
+                        slides={product?.product?.product_images}
+                    />
+                )
+            }
 
             <div 
-                className="flex flex-col md:flex-row justify-between w-full px-5 py-4 mt-10"
+                className="flex flex-col md:flex-row justify-between w-full px-4 py-4 mt-10 relative"
             >
-                <div className='w-full md:w-1/3 md:!mr-3 cursor-pointer max-w-1/3 h-fit' onClick={toggleImageGallery}>
+                <div className='w-full md:w-1/3 md:!mr-3 cursor-pointer max-w-1/3 h-fit lg:h-60' onClick={toggleImageGallery}>
                     <SwiperSlider 
                         slides={product?.product?.product_images}
                     />
                 </div>
                 <div className="w-[95%] mx-auto md:w-2/3 flex flex-col mt-10 md:mt-0 md:!ml-8">
-                    <h1 className="text-xl md:text-3xl justify-center">
+                    <h1 className="text-xl md:text-xl justify-center">
                         {product.product?.product_name}
                     </h1>
                     <p className="w-full text-gray-600 mb-2 lg:mb-0 line-clamp-4 lg:line-clamp-3 flex flex-row">
                         {product.product?.product_description}
                         <span className="text-orange-500 text-sm cursor-pointer ml-1" onClick={() => ProductDetailsSideDrawerRef.current?.open()}>...more</span>
                     </p>
-                    <div className="flex flex-row gap-8 w-full mb-4">
+                    <div className="grid grid-cols-2 lg:flex lg:flex-row gap-8 w-full mb-2">
                         <div 
                             className='flex flex-col lg:flex-row lg:gap-2'
                         >
-                            <p className="text-gray-600 flex flex-col md:flex-row">
+                            <p className="text-gray-600 flex flex-col md:flex-row mb-0">
                                 Price:
                             </p>
                             <span className='font-bold text-green-500'>
@@ -140,7 +142,7 @@ const openOrder = ({product, similar_products}: IOpenOrderProductPageProps) => {
                         <div 
                             className='flex flex-col lg:flex-row lg:gap-2'
                         >
-                            <p className="text-gray-600">
+                            <p className="text-gray-600 mb-0">
                                 Current discount: 
                             </p>
                             <span className='font-semibold line-through'>
@@ -150,12 +152,12 @@ const openOrder = ({product, similar_products}: IOpenOrderProductPageProps) => {
                           
                     </div>
                     <div
-                        className='flex flex-row gap-8'
+                        className='grid grid-cols-2 lg:flex lg:flex-row gap-8'
                     >
                         <div 
                             className='flex flex-col lg:flex-row lg:gap-2'
                         >
-                            <p className="text-gray-600">
+                            <p className="text-gray-600 mb-0">
                                 Next price: {" "}
                             </p>
                             <span className='text-orange-500 font-semibold'>
@@ -165,7 +167,7 @@ const openOrder = ({product, similar_products}: IOpenOrderProductPageProps) => {
                         <div 
                             className='flex flex-col lg:flex-row lg:gap-2'
                         >
-                            <p className="text-gray-600 flex flex-col md:flex-row">
+                            <p className="text-gray-600 flex flex-col md:flex-row mb-0">
                                 Next discount:
                             </p>
                             <span className='text-orange-500 font-medium line-through'>
@@ -174,17 +176,21 @@ const openOrder = ({product, similar_products}: IOpenOrderProductPageProps) => {
                         </div>   
                     </div>
 
-                    <div className='flex flex-col md:flex-row gap-6 mt-6'>
-                        <div className='lg:max-w-[50%] !mx-auto md:!mx-0'>
-                            <VerticalTextSlider 
-                                list={getRecentOrderList()}
-                                list_name='Recent orders'
-                            />
-                        </div>
+                    <div className='flex flex-col md:flex-row lg:items-center gap-6 mt-4'>
+                        {
+                            getRecentOrderList().length > 0 && (
+                                <div className='lg:max-w-[50%] !mx-auto md:!mx-0'>
+                                    <VerticalTextSlider 
+                                        list={getRecentOrderList()}
+                                        list_name='Recent orders'
+                                    />
+                                </div>
+                            )
+                        }
 
                         <button
                             onClick={() => addToCart(product)}
-                            className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded w-full !mx-auto md:w-[40%] md:!mx-0 lg:w-[30%] md:ml-4 mt-3 whitespace-nowrap"
+                            className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded w-[60%] !mx-auto md:w-[40%] md:!mx-0 lg:w-[30%] md:ml-4 mt-3 whitespace-nowrap fixed bottom-4 left-4 right-4 lg:static"
                         >
                             Add to Cart
                         </button>
@@ -192,7 +198,7 @@ const openOrder = ({product, similar_products}: IOpenOrderProductPageProps) => {
                 </div>
             </div>
 
-            <div className='mt-10 w-[95%] ml-[5%]'>
+            <div className='mt-10 px-4'>
                 <SimilarProductsHorizontalSlider 
                     list={similar_products}
                     list_name='Similar items'
@@ -200,7 +206,7 @@ const openOrder = ({product, similar_products}: IOpenOrderProductPageProps) => {
             </div>
 
             { reviewPages.length > 0 ?
-                <div className="my-10 flex flex-col w-[90%] mx-auto mb-10">
+                <div className="my-10 flex flex-col px-4 mb-10">
                     <h2 className="text-2xl font-mono text-orange-500 text-left mb-6">
                         Reviews
                     </h2> 
@@ -240,7 +246,13 @@ export async function getServerSideProps(context: any) {
         }
     }
     catch(err: any) {
-        throw new Error(err.message);
+        console.log({err})
+        return {
+            props: {
+                product: {},
+                similar_products: []
+            }
+        }
     }
     
 }

@@ -12,6 +12,7 @@ import Cookies from "js-cookie";
 import { formatAmount } from "../Utils/formatAmount";
 import axiosInstance from "../Utils/axiosConfig";
 import NewAddressModal from "../Components/modals/address/NewAddressModal";
+import { RiCoupon2Line } from "react-icons/ri";
 
 interface ICheckoutProps {
     user: any;
@@ -25,6 +26,7 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
     const [subTotal, setSubTotal] = useState<number>(0);
     const [isLoading, setIsLoading] = useState(false);
     const [showAddAddressModal, setShowAddAddressModal] = useState(false);
+    const [couponCode, setCouponCode] = useState('');
 
     let userCookie: any = {};
 
@@ -150,9 +152,9 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
         </div>
 
         <div 
-            className="w-[95%] flex flex-col lg:flex-row mx-auto mt-12"
+            className="w-full flex flex-col lg:flex-row mx-auto mt-12"
         >
-            <div className="flex flex-col w-[90%] mx-auto lg:w-[70%] lg:mr-[2%] mb-4 bg-white rounded-md px-4 py-4">
+            <div className="hidden lg:flex flex-col w-[90%] mx-auto lg:w-[67%] lg:mr-[2%] mb-4 bg-white rounded-md px-4 py-4">
                 <div className="flex flex-col">
                     <h1
                         className="text-xl text-orange-500 mb-4"
@@ -240,14 +242,25 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
                 </div>
             </div>
 
-            <div className="flex flex-col w-[90%] mx-auto lg:w-[25%]">
-                <div className="hidden lg:flex flex-col bg-white py-4 px-3 h-fit mb-4 rounded-md">
-                    <h3 className="mb-2 text-center text-lg">Proceed to payment</h3>
-                    <p className="mb-2 text-center">Deliver fee: {formatAmount(deliveryFee)}</p>
-                    <p className="text-center text-lg font-semibold text-orange-500 mb-6">Total: {formatAmount((subTotal + deliveryFee))}</p>
+            <div className="flex flex-col w-[90%] mx-auto lg:w-[30%]">
+                <div className="flex flex-col gap-2 bg-white py-4 px-3 h-fit mb-4 rounded-md">
+                    <h3 className="lg:text-center text-lg mb-0">Proceed to payment</h3>
+                    <p className="lg:text-center mb-0">Deliver fee: {formatAmount(deliveryFee)}</p>
+                    <p className="hidden lg:flex lg:text-center text-lg font-semibold text-orange-500 mb-0">
+                        Total: {formatAmount((subTotal + deliveryFee)) ? formatAmount((subTotal + deliveryFee)) : 0}
+                    </p>
+                    <div className='flex flex-row gap-2 items-center'>
+                        <div className="flex flex-row gap-2 items-center py-2 px-4 border-gray-200 border rounded-md w-full">
+                            <RiCoupon2Line className="text-lg text-gray-500" />
+                            <input className="bg-transparent border-0 outline-none" placeholder="Enter coupon code here" onChange={(e)=>setCouponCode(e.target.value)}/>
+                        </div>
+                        <button className={`border-0 font-semibold w-fit ${couponCode ? 'text-orange-600' : 'text-gray-400'}`}>
+                            Apply
+                        </button>
+                    </div>
                     <button 
                         onClick={() => checkOut()}
-                        className="text-center font-medium text-[#0ba4db] cursor-pointer border-2 border-[#0ba4db] rounded-md py-3"
+                        className="hidden lg:flex text-center font-medium text-[#0ba4db] cursor-pointer border-2 border-[#0ba4db] rounded-md py-2 mt-4"
                     >
                         {isLoading ? 'Loading...' : `Pay with PayStack`}
                     </button>

@@ -299,16 +299,16 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                         {
                             currentNav === 'profile' && (
                                 <div
-                                    className="flex flex-col md:flex-row justify-between w-[90%] md:w-[80%] mx-auto min-h-screen"
+                                    className="flex flex-col md:flex-row md:justify-between w-[90%] md:w-[80%] mx-auto min-h-screen"
                                 >
                                     <div 
-                                        className="flex flex-col md:w-[40%] mx-auto my-6"
+                                        className="flex flex-col md:w-[40%] mx-auto md:my-6"
                                     >
-                                        <div className="rounded-full h-40 w-40 mx-auto relative group">
+                                        <div className="rounded-full h-24 w-24 mx-auto relative group">
                                             <img 
                                                 src={user?.picture ?? 'https://via.placeholder.com/100'}
                                                 alt="profile" 
-                                                className="h-full w-full rounded-full" 
+                                                className="h-full w-full rounded-full object-fill" 
                                             />
                                             <div className="bg-gray-500 absolute bottom-0 top-0 left-0 right-0 rounded-full bg-opacity-50 z-20 group" />
                                             <label className="cursor-pointer absolute bottom-[40%] right-[40%] z-30 hidden group group-hover:flex">

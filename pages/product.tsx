@@ -132,25 +132,25 @@ function product({product, similar_products, featured_similar_products}: IProduc
             />
 
             <div 
-                className="flex flex-col md:flex-row w-full px-3 lg:px-8 py-4 mt-10 relative"
+                className="flex flex-col gap-6 md:flex-row w-full px-3 lg:px-8 py-4 mt-10 relative"
             >
-                <div className='w-[80%] max-w-full md:w-1/3 !mx-auto md:!mx-0 lg:!mx-0 md:!mr-3 cursor-pointer h-full flex align-middle overflow-auto' onClick={toggleImageGallery}>
+                <div className='w-[90%] max-w-full md:w-1/3 !mx-auto md:!mx-0 lg:!mx-0 md:!mr-3 cursor-pointer h-full lg:h-60' onClick={toggleImageGallery}>
                     <SwiperSlider 
                         slides={product?.product_images}
                     />
                 </div>
-                <div className="w-full md:w-[35%] !mx-auto md:!mx-0 lg:!mx-[20px] flex flex-col mt-10 md:mt-0">
+                <div className="w-[90%] md:w-[35%] !mx-auto md:!mx-0 lg:!mx-[20px] flex flex-col">
                     <h1 className="text-xl md:text-2xl justify-center mb-0 !text-center lg:!text-left">
-                        {capitalizeFirstLetter(product.product_name)}
+                        {capitalizeFirstLetter(product?.product_name)}
                     </h1>
                     
-                    <p className="w-[80%] !mx-auto lg:!mx-0 text-gray-600 mb-2 lg:mb-0 line-clamp-4 lg:line-clamp-3 flex flex-row">
-                        {product.product_description}
+                    <p className="text-gray-600 mb-2 lg:mb-0 line-clamp-4 lg:line-clamp-3 flex flex-row">
+                        {product?.product_description}
                         <span className="text-orange-500 text-sm cursor-pointer ml-1" onClick={() => ProductDetailsSideDrawerRef.current?.open()}>...more</span>
                     </p>
                     {
                         product.openOrders && (
-                            <div className="flex flex-row gap-8 w-full mr-2 my-1 justify-center lg:justify-between">
+                            <div className="flex flex-row gap-8 w-full my-1 lg:justify-between">
                                 <div 
                                     className='flex flex-col lg:flex-row lg:gap-1'
                                 >
@@ -158,7 +158,7 @@ function product({product, similar_products, featured_similar_products}: IProduc
                                         Open Price:
                                     </p>
                                     <span className='font-semibold text-red-600 pulse'>
-                                        {formatAmount(product.openOrders.open_order_price)}
+                                        {formatAmount(product?.openOrders.open_order_price)}
                                     </span>
                                 </div>
                                 <div 
@@ -168,51 +168,51 @@ function product({product, similar_products, featured_similar_products}: IProduc
                                         Open discount: 
                                     </p>
                                     <span className='font-semibold line-through'>
-                                        {formatAmount(product.openOrders.open_order_discount)}
+                                        {formatAmount(product?.openOrders.open_order_discount)}
                                     </span>
                                 </div>
                             </div>
                         )
                     }
 
-                    <div className="flex flex-row gap-4 lg:gap-8 w-full mr-2 my-1 justify-center lg:justify-between">
+                    <div className="flex flex-row gap-4 lg:gap-8 w-full my-1 justify-between">
                         <div 
-                            className='flex flex-col lg:flex-row gap-1'
+                            className='flex flex-col lg:flex-row lg:gap-1'
                         >
-                            <p className="text-gray-600 flex flex-col md:flex-row">
+                            <p className="text-gray-600 flex flex-col md:flex-row mb-0">
                                 Price:
                             </p>
                             <span className='font-semibold text-green-600'>
-                                {formatAmount(product.product_price)}
+                                {formatAmount(product?.product_price)}
                             </span>
                         </div>
                         <div 
-                            className='flex flex-col lg:flex-row gap-1'
+                            className='flex flex-col lg:flex-row lg:gap-1'
                         >
-                            <p className="text-gray-600 flex flex-col md:flex-row">
+                            <p className="text-gray-600 flex flex-col md:flex-row mb-0">
                                 Current discount: 
                             </p>
                             <span className='font-semibold line-through'>
-                                {formatAmount(calculateNextDiscount(4, product.product_discount, product.product_price))}
+                                {formatAmount(calculateNextDiscount(4, product?.product_discount, product?.product_price))}
                             </span>
                         </div>
                     </div>
                     
                     <button
                         onClick={() => addToCart(product)}
-                        className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded w-[60%] md:w-[40%] !mx-auto lg:!mx-0 mt-3"
+                        className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded w-[60%] md:w-[40%] !mx-auto lg:!mx-0 mt-3 fixed bottom-6 left-4 right-4 lg:static"
                     >
                         Add to Cart
                     </button>
                 </div>
 
-                <div className='bg-white shadow-2xl rounded-[20px] px-4 py-2 w-[240px] lg:w-fit !mx-auto flex flex-col gap-2 text-sm lg:text-base mt-4 lg:absolute lg:top-1 lg:right-4 lg:mx-0 lg:mt-0'>
-                    <p className='text-black mb-0 whitespace-nowrap'>Buy this product at {" "}
-                        <span className='text-orange-600'>{formatAmount(product.product_price - ((product.product_discount/100) * product.product_price))}</span>
+                <div className='bg-white shadow-2xl rounded-[20px] px-4 py-2 w-[300px] lg:w-fit !mx-auto flex flex-col gap-2 text-sm lg:text-base mt-4 lg:absolute lg:top-1 lg:right-4 lg:mx-0 lg:mt-0'>
+                    <p className='text-slate-600 mb-0 whitespace-nowrap font-medium text-sm'>Buy this product at {" "}
+                        <span className='text-orange-600 font-semibold'>{formatAmount(product.product_price - ((product.product_discount/100) * product.product_price))}</span>
                     </p>
                     <button
-                        onClick={() => router.push(`/order-train/${product.id}`)}
-                        className="border-orange-500 border-2 lg:border-0 lg:bg-orange-500 hover:bg-orange-700 text-orange-500 lg:text-white flex text-center justify-center font-bold py-2 px-4 rounded w-full mx-auto whitespace-nowrap"
+                        onClick={() => router.push(`/order-train/${product?.id}`)}
+                        className="border-orange-500 border-2 hover:bg-orange-700 text-orange-500 hover:text-white flex text-center justify-center font-bold py-2 px-4 rounded-md w-full mx-auto whitespace-nowrap"
                     >
                         Open Order Train
                     </button>
@@ -261,7 +261,7 @@ function product({product, similar_products, featured_similar_products}: IProduc
             }
 
             { reviewPages.length > 0 ?
-                <div className="my-10 flex flex-col w-[80%] lg:w-[90%] mx-auto mb-10">
+                <div className="my-10 flex flex-col w-[90%] lg:w-[90%] mx-auto mb-10">
                     <h2 className="text-2xl font-mono text-orange-500 text-left mb-6">
                         Reviews
                     </h2> 
@@ -301,14 +301,20 @@ export async function getServerSideProps(context: any) {
        
         return {
             props: {
-                product: getProduct.data.product,
-                similar_products: getProduct.data.similar_products,
-                featured_similar_products: getProduct.data.featured_similar_products,
+                product: getProduct?.data?.product,
+                similar_products: getProduct?.data?.similar_products,
+                featured_similar_products: getProduct?.data?.featured_similar_products,
             }
         }
     }
     catch(err: any) {
         console.log({err})
-        throw new Error(err.message);
+        return { 
+            props: {
+                product: {}, 
+                similar_products: [], 
+                featured_similar_products: []
+            }
+        }
     }
 }

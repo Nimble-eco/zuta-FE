@@ -49,7 +49,7 @@ const MyGallery = ({show, setShow, slides}: IMyGalleryProps) => {
                     <IoIosCloseCircleOutline className='text-3xl text-red-600 cursor-pointer absolute top-3 right-3' onClick={setShow} />
                     <div className='h-[50%] lg:h-[65%] w-full'>
                         <img 
-                            src={slides[currentIndex]} 
+                            src={slides![currentIndex]} 
                             alt='product image'
                             className='w-full h-full !rounded-t-md' 
                         /> 

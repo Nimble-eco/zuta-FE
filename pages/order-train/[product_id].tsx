@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Cookies from 'js-cookie'
 import { toast, ToastContainer } from 'react-toastify';
 import { injectStyle } from "react-toastify/dist/inject-style";
@@ -16,6 +16,7 @@ import ButtonGhost from "../../Components/buttons/ButtonGhost";
 import { useRouter } from "next/router";
 import { formatAmount } from "../../Utils/formatAmount";
 import NewAddressModal from "../../Components/modals/address/NewAddressModal";
+import { RiCoupon2Line } from "react-icons/ri";
 
 interface ICreateOrderTrainPageProps {
     product: {
@@ -48,6 +49,7 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
     const [deliveryFee, setDeliveryFee] = useState(1000);
     const [totalAmount, setTotalAmount] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
+    const [couponCode, setCouponCode] = useState('');
 
     const [paymentReference, setPaymentReference] = useState('');
     const pay_stack_key = process.env.NEXT_PUBLIC_PAY_STACK_KEY!;
@@ -114,7 +116,7 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
     
       
     const onClose = () => {
-
+        console.log('çlosed');
     }
 
     const initializePayment = usePaystackPayment(config);
@@ -156,11 +158,15 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
 
         <ToastContainer />
 
-        <MyGallery 
-            show={showImageGallery}
-            setShow={toggleImageGallery}
-            slides={product?.product_images}
-        />
+        {
+            product?.product_images && (
+                <MyGallery 
+                    show={showImageGallery}
+                    setShow={toggleImageGallery}
+                    slides={product?.product_images}
+                />
+            )
+        }
 
         {
             showSelectAddressModal && <SelectAddressModal
@@ -195,13 +201,13 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
         >
             <div className="w-full md:w-[60%] flex flex-col lg:px-4">
                 <h1 className="text-xl md:text-2xl justify-center mb-0 !text-center lg:!text-left">
-                    {product.product_name}
+                    {product?.product_name}
                 </h1>
                 <p className="text-gray-600 py-2 mb-0 line-clamp-4 !text-center lg:!text-left">
-                    {product.product_description}
+                    {product?.product_description}
                 </p>
 
-                <div className="grid grid-cols-2 lg:flex lg:flex-row gap-8 w-full mr-2 my-1 lg:justify-start">
+                <div className="grid grid-cols-2 gap-8 w-full mr-2 my-1 lg:justify-start">
                     <div 
                         className='flex flex-col lg:flex-row lg:gap-1'
                     >
@@ -209,7 +215,7 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
                             Price:
                         </p>
                         <span className='font-semibold text-green-600'>
-                            {formatAmount(product.product_price)}
+                            {formatAmount(product?.product_price)}
                         </span>
                     </div>
                     <div 
@@ -219,12 +225,12 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
                             Current discount: 
                         </p>
                         <span className='font-semibold line-through'>
-                            {formatAmount(calculateNextDiscount(4, product.product_discount, product.product_price))}
+                            {formatAmount(calculateNextDiscount(4, product?.product_discount, product?.product_price))}
                         </span>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 lg:flex lg:flex-row gap-8 w-full mr-2 my-1 lg:justify-start">
+                <div className="grid grid-cols-2 gap-8 w-full mr-2 my-1 lg:justify-start">
                     <div 
                         className='flex flex-col lg:flex-row lg:gap-1'
                     >
@@ -232,7 +238,7 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
                             Next Price:
                         </p>
                         <span className='font-semibold text-orange-600 animate-pulse'>
-                            {formatAmount(product.product_price - nextDiscount)}
+                            {formatAmount(product?.product_price - nextDiscount)}
                         </span>
                     </div>
                     <div 
@@ -242,47 +248,58 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
                             Next discount: 
                         </p>
                         <span className='font-semibold line-through'>
-                            {formatAmount(calculateNextDiscount(3, product.product_discount, product.product_price))}
+                            {formatAmount(calculateNextDiscount(3, product?.product_discount, product?.product_price))}
                         </span>
                     </div>
                 </div>
             </div>
 
-            <div className="flex flex-col gap-2 lg:px-4 w-full md:w-[40%] px-4 py-3 border-[1px] border-gray-200 shadow-sm">
-                <p className="text-sm">
-                    Buy this product now at the current price and share with others. The more people buy, the cheaper the product becomes.<br />
-                    The difference between the amount you pay for this item and the final amount when the order is closed will be refunded back to you. 
+            <div className="flex flex-col gap-3 lg:px-4 w-full md:w-[40%] md:px-4 py-3 md:border-[1px] border-gray-200 shadow-sm">
+                <p className="text-sm mb-0">
+                    Buy this product at the current price and encourage others to do the same. As more people buy, the price lowers. <br />
+                    You'll receive a refund for the price difference upon order completion.
                 </p>
 
-                <div className="flex flex-col lg:flex-row gap-2">
-                    <div className="flex flex-row gap-2">
-                        <p className="mr-4 lg:mr-0">Quantity:</p>
+                <div className="flex flex-row items-center gap-2">
+                    <div className="flex flex-row items-center gap-2">
+                        <p className="mr-4 lg:mr-0 mb-0 text-sm md:text-base">Quantity:</p>
                         <input
                             type="number"
                             value={quantity}
                             onChange={event => setQuantity(Number(event.target.value))}
-                            className='outline-none bg-gray-100 border-gray-200 rounded-md w-fit mb-4 py-2 pl-3 text-sm md:mr-4'
+                            className='outline-none bg-gray-100 border-gray-200 rounded-md w-fit py-2 pl-3 text-sm md:mr-4'
                         />
                     </div>
-                    <div className="flex flex-row gap-1 justify-center lg:justify-start">
-                        <p>=</p>
-                        <p className="text-green-400 block lg:flex">{formatAmount(Number(quantity) * product.product_price)}</p>
+                    <div className="flex flex-row gap-1 justify-center lg:justify-end text-sm md:text-base">
+                        <p className="mb-0">=</p>
+                        <p className="text-green-400 mb-0 block lg:flex">{formatAmount(Number(quantity) * product?.product_price)}</p>
                     </div>
                 </div>
 
                 {
                     deliveryFee && (
-                        <div className="flex flex-row gap-1 justify-center lg:justify-start">
-                            <p className="font-medium">Delivery Fee:</p>
-                            <p className="text-orange-500 font-semibold">{formatAmount(deliveryFee)}</p>
+                        <div className="flex flex-row gap-1 lg:justify-start">
+                            <p className="font-medium mb-0">Delivery Fee:
+                                <span className="text-orange-500 font-semibold ml-1">{formatAmount(deliveryFee)}</span>
+                            </p>
                         </div>
                     )
                 }
 
+                <div className='flex flex-row gap-2 items-center'>
+                    <div className="flex flex-row gap-2 items-center py-2 px-4 border-gray-200 border rounded-md w-full">
+                        <RiCoupon2Line className="text-lg text-gray-500" />
+                        <input className="bg-transparent border-0 outline-none" placeholder="Enter coupon code here" onChange={(e)=>setCouponCode(e.target.value)}/>
+                    </div>
+                    <button className={`border-0 font-semibold w-fit ${couponCode ? 'text-orange-600' : 'text-gray-400'}`}>
+                        Apply
+                    </button>
+                </div>
+
                 <div className="flex flex-row gap-2">
                     {
                         selectedAddress?.address && (
-                            <div className="h-12 w-fit">
+                            <div className="h-12 w-fit mx-auto">
                                 <ButtonGhost
                                     action="Change address"
                                     onClick={() => setShowSelectAddressModal(true)}
@@ -297,7 +314,7 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
                             }
                             else createPayment().then(() => initializePayment(onSuccess, onClose))
                         }}
-                        className="bg-orange-500 hover:bg-orange-700 text-white font-medium py-2 px-4 h-12 rounded-full w-[60%] !mx-auto md:!mx-0 lg:!mx-0 whitespace-nowrap"
+                        className="bg-orange-500 hover:bg-orange-700 text-white font-medium py-2 px-4 h-12 rounded-full w-[60%] !mx-auto whitespace-nowrap fixed bottom-4 left-4 right-4 lg:static"
                     >
                         {selectedAddress?.address ? `Checkout ${formatAmount(totalAmount) }` : 'Start Order Train'}
                     </button>

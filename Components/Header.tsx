@@ -17,7 +17,6 @@ export type HeaderRef = {
 
 const Header = ({search = true, onSearch}: INavBarProps) => {
     const router = useRouter();
-    let token: string = '';
     const [mobileMenu, showMobileMenu] = useState<boolean>(false);
     const [searchStr, setSearchStr] = useState<string>('');
     const [user, setUser] = useState<any>({});
@@ -33,12 +32,11 @@ const Header = ({search = true, onSearch}: INavBarProps) => {
     useEffect(() => {
         let userCookie = Cookies.get('user') ? JSON.parse(Cookies.get('user')!) : null;
         setUser(userCookie);
-        token = userCookie?.access_token;
 
         const cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')!) : [];
         setCartCount((cart?.products?.length + cart?.subscriptions?.length) || 0);
     }, []);
-
+    console.log({user})
 
     return (
         <div
@@ -98,7 +96,7 @@ const Header = ({search = true, onSearch}: INavBarProps) => {
                             </a>
                         )
                     }
-                    {token ? (
+                    {user?.access_token ? (
                         <div className="flex flex-row gap-4">   
                             <a 
                                 href="/profile"
@@ -180,9 +178,15 @@ const Header = ({search = true, onSearch}: INavBarProps) => {
                         <a className='mb-6'>
                             Customer Service
                         </a>
-                        <a className='mb-6'>
-                            Sign In
-                        </a>
+                        {
+                            user?.access_token ? 
+                            <a className='mb-6' href='/profile'>
+                                Profile
+                            </a> :
+                            <a className='mb-6' href='/auth/signIn'>
+                                Sign In
+                            </a>
+                        }
                     </div>
                 </div>
             }

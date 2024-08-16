@@ -23,7 +23,7 @@ const VendorSideNavPanel = () => {
 
   return (
     <div className='hidden md:flex flex-col bg-white py-4 w-[18%] mr-[2%] fixed left-0 top-0 bottom-0 overflow-auto gap-6 text-center'>
-        <div className="mb-12 mt-8 text-orange-500 text-xl font-serif">Zuta</div>
+        <a href="/" className="mb-12 mt-8 text-orange-500 text-xl font-serif">Zuta</a>
         <a 
             href="/vendor/product"
             className={`hover:!text-orange-500 cursor-pointer ${router.pathname.includes('product') && activeStyle}`}

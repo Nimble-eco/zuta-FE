@@ -28,10 +28,9 @@ const Home = ({products, openOrders, categories, tags, featured, catalogues}: IH
   const handleClick = (tag: string) => {
     router.push(`/results?tag=${tag}`);
   }
-  console.log({catalogues})
 
   return (
-    <div className=" min-h-screen">
+    <div className=" min-h-screen w-full overflow-x-hidden">
       <Header onSearch={searchProducts}/>
 
       <div
@@ -221,9 +220,9 @@ export async function getServerSideProps() {
         ''
       );
       const getAdvertBanners = await sendAxiosRequest(
-        '/api/advert/banners/index?position=1',
-        'get',
-        {},
+        '/api/advert/banners/filter/index',
+        'post',
+        {enabled: 1},
         '',
         ''
       );
@@ -251,7 +250,7 @@ export async function getServerSideProps() {
           categories: categories?.data,
           tags: tags?.data,
           featured: featured?.data ?? [],
-          catalogues: banners?.data ?? []
+          catalogues: banners?.data ??  []
         },
       }
   }
