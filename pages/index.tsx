@@ -247,8 +247,8 @@ export async function getServerSideProps() {
         props: {
           products : products?.data ?? [],
           openOrders: openOrders?.data ?? [],
-          categories: categories?.data,
-          tags: tags?.data,
+          categories: categories?.data ?? [],
+          tags: tags?.data ?? [],
           featured: featured?.data ?? [],
           catalogues: banners?.data ??  []
         },

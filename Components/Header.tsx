@@ -36,7 +36,6 @@ const Header = ({search = true, onSearch}: INavBarProps) => {
         const cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')!) : [];
         setCartCount((cart?.products?.length + cart?.subscriptions?.length) || 0);
     }, []);
-    console.log({user})
 
     return (
         <div
@@ -108,7 +107,7 @@ const Header = ({search = true, onSearch}: INavBarProps) => {
                                 href="#"
                                 onClick={() => {
                                     Cookies.remove('user')
-                                    router.push('/')
+                                    window.location.reload();
                                 }}
                             >
                                 <HiOutlineLogout className="text-3xl text-white" />
@@ -116,8 +115,7 @@ const Header = ({search = true, onSearch}: INavBarProps) => {
                         </div>
                     ) : (
                         <a 
-                            href="#"
-                            onClick={() => router.push('/auth/signIn')}
+                            href="/auth/signIn"
                         >
                             <HiUserAdd className="text-3xl text-white" />
                         </a>

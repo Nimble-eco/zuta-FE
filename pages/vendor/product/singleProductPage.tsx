@@ -10,10 +10,10 @@ interface ISingleProductPageProps {
 const singleProductPage = ({product}: ISingleProductPageProps) => {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col overflow-auto">
-        <div className="flex flex-row w-[95%] mx-auto mt-8 relative mb-10">
-            <VendorSideNavPanel />
-            <SingleProduct product={product}/>
-        </div>
+      <div className="flex flex-row w-full mt-8 relative mb-10">
+        <VendorSideNavPanel />
+        <SingleProduct product={product}/>
+      </div>
     </div>
   )
 }

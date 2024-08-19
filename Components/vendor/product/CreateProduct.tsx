@@ -17,6 +17,7 @@ import { injectStyle } from "react-toastify/dist/inject-style";
 import { useRouter } from 'next/router'
 import Cookies from 'js-cookie'
 import { formatAmount } from '../../../Utils/formatAmount'
+import TextAreaInput from '../../inputs/TextAreaInput'
 
 const CreateProduct = () => {
     const router = useRouter();
@@ -167,11 +168,11 @@ const CreateProduct = () => {
     }, []);
 
   return (
-    <div className="flex flex-col w-[80%] absolute right-0 left-[23%]">
+    <div className="flex flex-col w-[80%] absolute right-0 left-[20%]">
         <ToastContainer />
-        <div className="flex flex-row relative px-2 py-4 mb-3 border-b border-gray-200">
+        <div className="flex flex-row justify-between items-center relative py-4 bg-white mb-1">
             <h2 className="text-lg font-bold">Product Details</h2>
-            <div className="w-fit absolute right-1 bottom-2">
+            <div className="w-fit">
                 <ButtonFull 
                     action="Create Product"
                     loading={isLoading}
@@ -188,7 +189,7 @@ const CreateProduct = () => {
             onInputChange={handleChange}
         />
 
-        <TextInput 
+        <TextAreaInput 
             label="Shot Description"
             name='product_description'
             value={newProduct.product_description}
@@ -196,7 +197,7 @@ const CreateProduct = () => {
             onInputChange={handleChange}
         />
 
-        <div className="flex flex-col md:grid md:grid-cols-2 gap-4">
+        <div className="flex flex-col md:grid md:grid-cols-2 gap-6">
             <div className="w-full">
                 <MyNumberInput 
                     label="Price"
@@ -206,7 +207,7 @@ const CreateProduct = () => {
                 />
             </div>
             <div className="w-full">
-                <div className='flex flex-row gap-2'>
+                <div className='flex flex-row items-center gap-2'>
                     <div className='w-full md:w-[60%]'>
                         <MyNumberInput 
                             label="Discount %"
@@ -222,43 +223,24 @@ const CreateProduct = () => {
             </div>
         </div>
 
-        <div className="flex flex-col md:grid md:grid-cols-2 gap-4">
-            <div className="w-full">
+        <div className="flex flex-col md:grid md:grid-cols-2 gap-6">
+            <div className="w-full flex flex-col gap-1">
                 <MyDropDownInput
-                    label="How long to package"
-                    name="duration_to_prepare"
-                    onSelect={() => {}}
+                    label="Staus"
+                    name="status"
+                    onSelect={handleChange}
                     options={[
                         {
-                            title: 'Less than a day',
-                            value: '1day'
+                            title: 'Public',
+                            value: 'public'
                         },
                         {
-                            title: '2 days',
-                            value: '2days'
+                            title: 'Private',
+                            value: 'private'
                         },
-                        {
-                            title: '3 days',
-                            value: '3days'
-                        },
-                        {
-                            title: '4 days',
-                            value: '4days'
-                        },
-                        {
-                            title: '5 days',
-                            value: '5days'
-                        },
-                        {
-                            title: '6 days',
-                            value: '6days'
-                        },
-                        {
-                            title: '7 days',
-                            value: '7days'
-                        }
                     ]}
                 />
+                <p className='text-xs text-gray-500 font-medium'>Show this item in the marketplace</p>
             </div>
             <div className="w-full">
                 <MyNumberInput 
@@ -270,7 +252,7 @@ const CreateProduct = () => {
             </div>
         </div>
 
-        <div className="flex flex-col md:grid md:grid-cols-2 gap-4 justify-between">
+        <div className="flex flex-col md:grid md:grid-cols-2 gap-6 justify-between">
             <div className="w-full flex flex-col relative">
                 <p className="text-sm font-semibold mb-2">Category</p>
                 <MySearchInput 

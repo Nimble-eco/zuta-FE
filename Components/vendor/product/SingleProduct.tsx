@@ -54,7 +54,7 @@ export const SingleProduct = ({product} : ISingleProductProps) => {
     const approveProduct = async () => {
         setIsApproving(true)
 
-        await updateProductVendorApprovedAction(product.id, vendorId)
+        await updateProductVendorApprovedAction(product?.id, vendorId)
         .then((response) => {
             if(response.status === 202) {
                 setVendorApprovedStatus(!vendorApprovedStatus);
@@ -72,7 +72,7 @@ export const SingleProduct = ({product} : ISingleProductProps) => {
     const unApproveProduct = async () => {
         setIsApproving(true)
 
-        await updateProductVendorUnApprovedAction(product.id, vendorId)
+        await updateProductVendorUnApprovedAction(product?.id, vendorId)
         .then((response) => {
             if(response.status === 202) {
                 setVendorApprovedStatus(!vendorApprovedStatus);
@@ -89,7 +89,7 @@ export const SingleProduct = ({product} : ISingleProductProps) => {
     const deleteAProduct = async () => {
         setIsLoading(true)
 
-        await deleteProductByVendorAction(product.id, vendorId)
+        await deleteProductByVendorAction(product?.id, vendorId)
         .then((response) => {
             if(response.status === 202) {
                 toast.success('Product deleted');
@@ -107,7 +107,7 @@ export const SingleProduct = ({product} : ISingleProductProps) => {
     const activateProductFeature = async () => {
 
         setIsLoading(true);
-        await activateProductShowcaseAction(product.featured?.id, vendorId)
+        await activateProductShowcaseAction(product?.featured?.id, vendorId)
         .then((response) => {
             if(response.status === 201) {
                 router.push(response.data.data.pay_stack_checkout_url);
@@ -120,7 +120,7 @@ export const SingleProduct = ({product} : ISingleProductProps) => {
     }
  
     return (
-        <div className="min-h-screen bg-gray-100 flex flex-col w-full md:w-[80%] absolute right-0 md:left-[21%] rounded-md px-4">
+        <div className="min-h-screen bg-gray-100 flex flex-col w-full md:w-[80%] absolute right-0 md:left-[20%] rounded-md px-4">
             <ToastContainer />
             {
                 showDeleteProductModal && (
@@ -132,19 +132,19 @@ export const SingleProduct = ({product} : ISingleProductProps) => {
                 )
             }
             <div className='flex flex-col bg-white'>
-                <div className="flex flex-row justify-between border-b border-gray-200 py-2 px-4">
-                    <h2 className="text-xl font-semibold align-center align-baseline my-auto">{product.product_name}</h2>
+                <div className="flex flex-row justify-between border-b border-gray-200 p-4">
+                    <h2 className="text-xl font-semibold align-center align-baseline my-auto capitalize">{product?.product_name}</h2>
                     <div className="flex flex-row ">
-                        <div className="hidden md:flex">
+                        <div className="hidden md:flex h-10">
                             <ButtonGhost
                                 action="Delete Product"
                                 onClick={() => setShowDeleteProductModal(!showDeleteProductModal)}
                             />
                         </div>
-                        <div className="ml-3">
+                        <div className="ml-3 h-10">
                             <ButtonFull
                                 action="Edit Product"
-                                onClick={() => router.push(`editProductPage?id=${product.id}`)}
+                                onClick={() => router.push(`editProductPage?id=${product?.id}`)}
                             />
                         </div>
                     </div>
@@ -153,18 +153,18 @@ export const SingleProduct = ({product} : ISingleProductProps) => {
                     <div className='flex flex-col lg:flex-row'>
                         <div className="flex flex-row w-full lg:w-[50%]">
                             <div className='w-[60%] mr-[3%] md:mr-none'>
-                                <TextCard label='Product ID' value={product.id} />
+                                <TextCard label='Product ID' value={product?.id} />
                             </div>
                             <div className='w-[30%] md:w-auto md:mr-none'>
-                                <TextCard label='Price' value={formatAmount(product.product_price)} />
+                                <TextCard label='Price' value={formatAmount(product?.product_price)} />
                             </div>
                         </div>
                         <div className="flex flex-row lg:w-[50%]">
                             <div className='w-[60%] mr-[3%] md:mr-none'>
-                                <TextCard label='Stock' value={product.quantity} />
+                                <TextCard label='Discount %' value={product?.product_discount ?? 0} />
                             </div>
                             <div className='w-[30%] md:w-auto md:mr-none'>
-                                <TextCard label='Flag' value={product.flag ?? 0} />
+                                <TextCard label='Stock' value={product?.quantity} />
                             </div>
                         </div>
                     </div>
@@ -172,18 +172,17 @@ export const SingleProduct = ({product} : ISingleProductProps) => {
                     <div className='flex flex-col lg:flex-row'>
                         <div className="flex flex-row lg:w-[50%]">
                             <div className='w-[60%] mr-[3%] md:mr-none'>
-                                <TextCard label='Created On' value={getDateAndTimeFromISODate(product.created_at)} />
+                                <TextCard label='Created On' value={getDateAndTimeFromISODate(product?.created_at)} />
                             </div>
                             <div className='w-[30%] md:mr-none'>
                                 <div className='w-[60%] mr-[3%] md:mr-none'>
-                                    <TextCard label='Discount %' value={product.product_discount ?? 0} /> 
+                                    <TextCard label='Flag' value={product?.flag ?? 0} />
                                 </div>
-                                
                             </div>
                         </div>
                         <div className="flex flex-row lg:w-[50%]">
                             <div className='w-[60%] whitespace-nowrap mr-[3%] md:mr-none'>
-                                { product.management_approved &&  <TextCard label='Management Approved' value={product.management_approved ? 'Approved' : 'Unapproved'} /> }
+                                <TextCard label='Management Approved' value={product?.management_approved ? 'Approved' : 'Unapproved'} />
                             </div>
                            
                             <div className="flex flex-col w-[30%] py-3 px-5 gap-2">
@@ -191,21 +190,21 @@ export const SingleProduct = ({product} : ISingleProductProps) => {
                                     vendorApprovedStatus ?
                                     <>
                                         <p className="text-sm text-gray-600 whitespace-nowrap">Hide Product</p> 
-                                        {isApproving && <p className="text-orange-500">Updating...</p>}
                                         <SliderInput
                                             name="vendor_approved"
                                             value={vendorApprovedStatus}
                                             handleChange={unApproveProduct}
                                         />
+                                        {isApproving && <p className="text-orange-500">Updating...</p>}
                                     </> : 
                                     <>
                                         <p className="text-sm text-gray-600 whitespace-nowrap">Publish Product</p> 
-                                        {isApproving && <p className="text-orange-500">Updating...</p>}
                                         <SliderInput
                                             name="vendor_approved"
                                             value={vendorApprovedStatus}
                                             handleChange={approveProduct}
                                         />
+                                        {isApproving && <p className="text-orange-500">Updating...</p>}
                                     </> 
                                 }
                             </div>
@@ -217,7 +216,7 @@ export const SingleProduct = ({product} : ISingleProductProps) => {
             <div className="flex flex-col px-4 mt-8 bg-white py-6">
                 <h3 className="font-semibold text-left border-b border-gray-200 mb-4 !text-lg">Product Description</h3>
                 <div className="">
-                    <p className="text-gray-700">{product.product_description}</p>
+                    <p className="text-gray-700">{product?.product_description}</p>
                 </div>
             </div>
 
@@ -256,13 +255,13 @@ export const SingleProduct = ({product} : ISingleProductProps) => {
                 <div className="flex flex-row justify-between pb-3 mb-4 border-b border-gray-100 px-4 relative">
                     <h3 className="font-semibold !text-lg">Feature Details</h3>
                     <div className="absolute right-2 bottom-1">
-                        {product.featured?.status && product.featured?.status === 'active' ? (
+                        {product?.featured?.status && product?.featured?.status === 'active' ? (
                             <ButtonFull
                                 action='Stop product'
                                 onClick={() => {}}
                             />
                             ) :
-                            product.featured?.status === 'inactive' ? (
+                            product?.featured?.status === 'inactive' ? (
                                 <ButtonFull
                                     action='Activate'
                                     loading={isLoading}
@@ -271,7 +270,7 @@ export const SingleProduct = ({product} : ISingleProductProps) => {
                             ) : (
                             <ButtonGhost
                                 action='Feature Product'
-                                onClick={() => router.push(`/vendor/showcase/store?product_id=${product.id}`)}
+                                onClick={() => router.push(`/vendor/showcase/store?product_id=${product?.id}`)}
                             />
                         )}
                     </div>
@@ -280,19 +279,19 @@ export const SingleProduct = ({product} : ISingleProductProps) => {
                     <div className="flex flex-col md:flex-row">
                         <div className="flex flex-row md:w-[50%] lg:w-auto">
                             <div className="w-[60%] lg:w-auto">
-                                <TextCard label="Cost" value={product.featured.featured_amount} />
+                                <TextCard label="Cost" value={product?.featured.featured_amount} />
                             </div>
                             <div className="w-[40%] lg:w-auto">
-                                <TextCard label="Status" value={product.featured.status} />
+                                <TextCard label="Status" value={product?.featured.status} />
                             </div>
                         </div>
 
                         <div className="flex flex-row md:w-[50%] lg:w-auto">
                             <div className="w-[60%] lg:w-auto">
-                                <TextCard label="Duration" value={product.featured.duration_in_hours} />
+                                <TextCard label="Duration" value={product?.featured.duration_in_hours} />
                             </div>
                             <div className="w-[40%] lg:w-auto"> 
-                                <TextCard label="Time left" value={product.featured.time_left} />
+                                <TextCard label="Time left" value={product?.featured.time_left} />
                             </div>
                         </div>
                     </div> : (

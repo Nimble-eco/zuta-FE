@@ -180,7 +180,8 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
             Cookies.get('currentNav') ? setCurrentNav(Cookies.get('currentNav')!) : null;
             Cookies.get('orderType') ? setOrderType(Cookies.get('orderType')!) : null;
 
-            const userCookie = JSON.parse(Cookies.get('user')!);
+            const userCookie = Cookies.get('user') ? JSON.parse(Cookies.get('user')!): null;
+            if(!userCookie) router.push('/');
             if(userCookie?.vendor) setIsVendor(true);
         }
 

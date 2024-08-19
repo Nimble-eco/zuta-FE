@@ -163,7 +163,7 @@ const index = ({products, categories, tags}: IProductsIndexPageProps) => {
                             label="Category"
                             onSelect={handleFilterByDetailsChange}
                             name="product_categories"
-                            options={categories}
+                            options={categories ?? []}
                             value={filterByDetails.product_categories}
                         />
 
@@ -171,7 +171,7 @@ const index = ({products, categories, tags}: IProductsIndexPageProps) => {
                             label="Tags"
                             onSelect={handleFilterByDetailsChange}
                             name="product_tags"
-                            options={tags}
+                            options={tags ?? []}
                             value={filterByDetails.product_tags}
                         />
 
@@ -200,10 +200,19 @@ const index = ({products, categories, tags}: IProductsIndexPageProps) => {
                 ]}
             />
         }
-        <div className="flex flex-row w-[90%] mx-auto mt-8 relative mb-10">
+        <div className="flex flex-row w-full mx-auto mt-8 relative mb-10">
             <VendorSideNavPanel />
-            <div className="flex flex-col w-[80%] absolute right-0 left-[21%]">
-                <h2 className="text-2xl font-bold text-slate-700 mb-4">Products</h2>
+            <div className="flex flex-col w-[80%] absolute right-0 left-[20%]">
+                <div className="flex flex-row justify-between items-center bg-white py-2 px-4 mb-1">
+                    <h2 className="text-2xl font-bold text-slate-700 mb-4">Products</h2>
+                    <div className="w-fit h-12">
+                        <ButtonFull 
+                            action="Create Product"
+                            onClick={() => router.push('product/createProductPage')}
+                        />
+                    </div>
+                </div>
+                
                 <div className="flex flex-row text-sm font-semibold !text-gray-400 px-4 py-5 bg-white">
                     <a href="#0" className="hover:!text-orange-500 mr-3">
                         Active
@@ -226,12 +235,6 @@ const index = ({products, categories, tags}: IProductsIndexPageProps) => {
                         onFilterButtonClick={() => setShowFilterInput(!showFilterInput)}
                         isSearching={loading}
                     />
-                    <div className="w-fit">
-                        <ButtonFull 
-                            action="Create Product"
-                            onClick={() => router.push('product/createProductPage')}
-                        />
-                    </div>
                 </div>
                 {/* PRODUCTS TABLE */}
                 <div className="flex flex-col pb-8 bg-white overflow-y-auto">
@@ -301,9 +304,9 @@ export async function getServerSideProps(context: any) {
     
         return {
             props: {
-                products: myProducts.data ?? [],
-                categories: categories.data,
-                tags: tags.data,
+                products: myProducts?.data ?? [],
+                categories: categories?.data ?? [],
+                tags: tags?.data ?? [],
             }
         }
     } catch(error: any) {

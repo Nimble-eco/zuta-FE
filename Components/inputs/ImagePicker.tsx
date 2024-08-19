@@ -27,8 +27,8 @@ const ImagePicker = ({label, onSelect, files, onRemove}: ImagePickerProps) => {
       {
         !files || files?.length === 0 ? (
           <div className='flex flex-col bg-orange-50 rounded-md border-dashed justify-center text-center py-10 cursor-pointer'>
-            <BsFileImage className="text-3xl text-orange-300 mb-3 mx-auto" />
             <label className="text-sm font-semibold cursor-pointer">
+              <BsFileImage className="text-3xl text-orange-300 mb-3 mx-auto" />
               Click here to select image
               <input type="file" onChange={onSelect} className="hidden" />
             </label>

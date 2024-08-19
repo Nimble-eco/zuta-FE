@@ -9,6 +9,7 @@ export interface IStoreProductActionProps {
     product_tags?: string[];
     base64_images?: string[];
     images?: File[];
+    status?: string;
 }
 
 export interface IUpdateProductActionProps {

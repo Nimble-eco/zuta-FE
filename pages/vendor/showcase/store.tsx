@@ -196,8 +196,8 @@ export async function getServerSideProps(context: any) {
        
         return {
             props: {
-                rate: myProductShowcaseRate.data ?? [],
-                product: myProductShowcaseRate.data?.product
+                rate: myProductShowcaseRate?.data ?? [],
+                product: myProductShowcaseRate?.data?.product
             }
         }
     } catch(error: any) {

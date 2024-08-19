@@ -68,7 +68,10 @@ export default function SignIn({ providers }: any) {
                 Cookies.set('user', JSON.stringify(response.data.data))
                 toast.success('Login successful');
                 setTimeout(() => {
-                    if (router && router.asPath && (router.asPath !== '/' && router.asPath !== '/auth/register')) router.back();
+                    if (router && router.asPath && 
+                        (router.asPath !== '/' && router.asPath !== '/auth/register') &&
+                        (router.asPath !== '/' && router.asPath !== '/auth/signIn')
+                    ) router.back();
                     else router.push('/');
                 }, 5000);
             }
@@ -87,12 +90,12 @@ export default function SignIn({ providers }: any) {
 
         </div>
 
-        <div className="flex flex-col w-full md:w-[80%] md:mx-auto lg:w-[50%] lg:mx-0 px-8 py-6 align-middle my-auto !bg-white">
-            <h2 className="text-orange-600 text-lg lg:text-2xl text-center font-semibold">Sign In Here</h2>
-            <p className='text-xs lg:text-sm text-gray-700 font-medium opacity-30 mb-8 text-center'>Buy with a community and enjoy whole sale discounts</p>
-
+        <div className="flex flex-col-reverse lg:flex-col w-full md:w-[80%] md:mx-auto lg:w-[50%] lg:mx-0 px-8 py-6 align-middle my-auto !bg-white">
             <div className="flex flex-col gap-8">
-
+                <p className="font-semibold opacity-30 text-lg text-center lg:hidden flex justify-center">OR</p>
+                <h2 className="text-orange-600 text-lg lg:text-2xl text-center font-semibold">Sign In Here</h2>
+                <p className='text-xs lg:text-sm text-gray-700 font-medium opacity-30 text-center'>Buy with a community and enjoy whole sale discounts</p>
+                
                 <TextInput
                     label="Email"
                     name="email"
@@ -106,6 +109,12 @@ export default function SignIn({ providers }: any) {
                     value={data.password}
                     handleChange={handleDataChange}
                 />
+                <p className="font-lg text-center text-xs">
+                    Forgot password ? {" "}
+                    <span className="text-orange-500 cursor-pointer font-medium" onClick={() => router.push('/auth/forgotPassword')}>
+                        click here
+                    </span>
+                </p>
 
                 <div className="w-[80%] lg:w-[50%] mx-auto h-14">
                     <ButtonFull
@@ -123,41 +132,44 @@ export default function SignIn({ providers }: any) {
                 </p>
             </div>
 
-            <p className="font-semibold opacity-30 text-lg text-center my-4">OR</p>
+            <div className='flex flex-col gap-4'>
+                <p className="font-semibold opacity-30 text-lg text-center my-4 hidden lg:flex justify-center">OR</p>
+                <p className="font-semibold text-lg text-center lg:hidden">Sign In with</p>
 
-            <div className="flex flex-col md:flex-row gap-5 text-white text-sm font-medium w-full md:w-fit mx-auto mb-8">
-                <div
-                    className="flex flex-row items-center border border-[#DB4437] rounded-md cursor-pointer"
-                    onClick={() => socialSignUp('google')}
-                >
-                    <FaGoogle className="text-2xl w-[20%] text-[#DB4437] text-center "/>
-                    <span 
-                        className="bg-[#DB4437] w-[80%] px-3 py-2 whitespace-nowrap"
+                <div className="flex flex-row gap-10 lg:gap-5 text-white text-sm font-medium md:w-fit mx-auto mb-4">
+                    <div
+                        className="flex flex-row items-center lg:border border-[#DB4437] rounded-md cursor-pointer"
+                        onClick={() => socialSignUp('google')}
                     >
-                        Sign in with Google
-                    </span>
-                </div>
+                        <FaGoogle className="text-2xl lg:text-2xl lg:w-[20%] text-[#DB4437] text-center "/>
+                        <span 
+                            className="bg-[#DB4437] w-[80%] px-3 py-2 whitespace-nowrap hidden lg:flex"
+                        >
+                            Sign in with Google
+                        </span>
+                    </div>
 
-                <div
-                    className="flex flex-row items-center border border-[#4267B2] rounded-md cursor-pointer"
-                >
-                    <FaFacebook className="text-2xl w-[20%] text-[#4267B2] text-center "/>
-                    <span 
-                        className="bg-[#4267B2] w-[80%] px-3 py-2 whitespace-nowrap"
+                    <div
+                        className="flex flex-row items-center lg:border border-[#4267B2] rounded-md cursor-pointer"
                     >
-                        Sign in with Facebook
-                    </span>
-                </div>
+                        <FaFacebook className="text-2xl lg:text-2xl lg:w-[20%] text-[#4267B2] text-center "/>
+                        <span 
+                            className="bg-[#4267B2] w-[80%] px-3 py-2 whitespace-nowrap hidden lg:flex"
+                        >
+                            Sign in with Meta
+                        </span>
+                    </div>
 
-                <div
-                    className="flex flex-row items-center border border-blue-400 rounded-md cursor-pointer"
-                >
-                    <FaTwitter className="text-2xl w-[20%] text-[#1DA1F2] text-center "/>
-                    <span 
-                        className="bg-[#1DA1F2] w-[80%] px-3 py-2 whitespace-nowrap"
+                    <div
+                        className="flex flex-row items-center lg:border border-blue-400 rounded-md cursor-pointer"
                     >
-                        Sign in with Twitter
-                    </span>
+                        <FaTwitter className="text-2xl lg:text-2xl lg:w-[20%] text-[#1DA1F2] text-center "/>
+                        <span 
+                            className="bg-[#1DA1F2] w-[80%] px-3 py-2 whitespace-nowrap hidden lg:flex"
+                        >
+                            Sign in with X
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>

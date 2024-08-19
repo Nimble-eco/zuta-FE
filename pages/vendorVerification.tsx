@@ -7,6 +7,7 @@ import { notify } from "../Utils/displayToastMessage";
 import { storeVendorVerificationAction } from "../requests/vendorVerification/vendorVerification.request";
 import ButtonFull from "../Components/buttons/ButtonFull";
 import VerificationSuccessModal from "../Components/modals/vendorVerification/VerificationSuccessModal";
+import Cookies from "js-cookie";
 const NaijaStates = require('naija-state-local-government');
 
 const vendorVerification = () => {
@@ -23,6 +24,7 @@ const vendorVerification = () => {
         full_name: '',
         email: '',
         phone: '',
+        type: '',
         bvn: "",
         business_name: "",
         business_email: "",
@@ -32,7 +34,6 @@ const vendorVerification = () => {
         state: '',
         pictures: []
     });
-
 
     const handleChange = (e: any) => {
         const value = e.target.value;
@@ -48,7 +49,7 @@ const vendorVerification = () => {
         if(vendorVerificationDataState.full_name == '')return notify("Name is required");
         else if(!vendorVerificationDataState.email) notify("Your email is required");
         else if(!vendorVerificationDataState.phone) notify("Your phone number is required");
-        else if(vendorVerificationDataState.bvn.length < 11) notify("Input a valid BVN");
+        else if(!vendorVerificationDataState.type) notify("Select a business type");
         else {
             setNextFormGroup(true);
         }
@@ -57,7 +58,7 @@ const vendorVerification = () => {
     const handleSubmit = async (e: any) => {
         e.preventDefault();
         if(vendorVerificationDataState.business_name === "") notify("Business name is required");
-        if(vendorVerificationDataState.business_email === "") notify("Business name is required");
+        if(vendorVerificationDataState.business_email === "") notify("Business email is required");
         if(vendorVerificationDataState.country === "") notify("Country is required");
         if(vendorVerificationDataState.state === "") notify("State is required");
 
@@ -69,7 +70,8 @@ const vendorVerification = () => {
             .then((res) => {
                 if (res.status === 201) {
                     toast.success("Information has been saved");
-                    setShowApplicationSuccessModal(true)   
+                    Cookies.set('user', JSON.stringify(res.data.data))
+                    setShowApplicationSuccessModal(true);   
                 }
             })
             .catch(error => {
@@ -94,30 +96,47 @@ const vendorVerification = () => {
             />
         }
 
-        <div className="flex flex-row w-full">
-            <div className="hidden lg:flex flex-col lg:w-[50%]">
-                <div className="w-[70%] h-[60%] mx-auto my-auto">
-                    <img 
-                        src='/images/undraw_certification.svg'
-                        alt="sell on zuta"
-                        className="w-full h-[70%]"
-                    />
-                    <p className="text-sm mt-4 text-center">
-                        Start your verification process. <br />
-                        We use your BVN to verify your identity
-                    </p>
+        <div className="flex flex-col lg:flex-row w-full">
+            <div className="flex flex-col lg:w-[50%]">
+                <div className="flex flex-col justify-center pt-8 gap-4 w-[80%] lg:w-[70%] mx-auto">
+                    <div className="hidden lg:flex h-44 flex-row items-center gap-4 w-full bg-orange-500 rounded-md">
+                        <div className="text-white w-1/2 flex items-center justify-center">
+                            <h2 className="font-semibold text-3xl">Sell on <br /> Zuta</h2>
+                        </div>
+                        <div className=" w-1/2">
+                            <img 
+                                src='/images/undraw_web_shopping.svg'
+                                className="w-[90%]"
+                            />
+                        </div>
+                    </div>
+                    <p className="text-center font-semibold text-black mb-0">Why sell on Zuta?</p>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="flex h-14 justify-center items-center rounded-md bg-red-600 text-white font-medium text-center text-xs lg:text-base">
+                            Connect with more buyers
+                        </div>
+                        <div className="flex h-14 justify-center items-center rounded-md bg-red-600 text-white font-medium text-center text-xs lg:text-base">
+                            Sell more product
+                        </div>
+                        <div className="flex h-14 justify-center items-center rounded-md bg-red-600 text-white font-medium text-center text-xs lg:text-base">
+                            Product delivery on us
+                        </div>
+                        <div className="flex h-14 justify-center items-center rounded-md bg-red-600 text-white font-medium text-center text-xs lg:text-base">
+                            Make more money
+                        </div>
+                        <div className="flex h-14 justify-center items-center rounded-md bg-red-600 text-white font-medium text-center text-xs lg:text-base">
+                            Benefit from our marketting
+                        </div>
+                        <div className="flex h-14 justify-center items-center rounded-md bg-red-600 text-white font-medium text-center text-xs lg:text-base">
+                            Seller support
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <div
                 className="w-full lg:w-[50%] px-5 bg-white py-5"
             >
-                <h2
-                    className="text-center text-2xl font-bold font-serif text-orange-500 mt-2 mb-6"
-                >
-                    Start Your verification Process
-                </h2>
-
                 <form
                     className="flex flex-col lg:w-[80%] lg:mx-auto"
                 >
@@ -200,23 +219,37 @@ const vendorVerification = () => {
                             >
                                 <label
                                     className="block text-gray-700 text-sm font-bold mb-2"
-                                    htmlFor="bvn"
+                                    htmlFor="type"
                                 >
-                                    Bank verification number
+                                    Account Type
                                 </label>
-                                <input
-                                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                    id="BVN"
-                                    type="text"
-                                    placeholder="Enter your BVN"
-                                    name='bvn'
-                                    onChange={(e) => handleChange(e)}
-                                    value={vendorVerificationDataState.bvn}
-                                />
+                                <div className="flex flex-col gap-3 lg:w-[60%]">
+                                    <div className="flex flex-row justify-between items-center gap-4 px-3 py-2 border border-gray-300 rounded-md">
+                                        <label htmlFor="type" className="">Individual</label>
+                                        <input 
+                                            type="radio"
+                                            name="type"
+                                            value={'individual'}
+                                            className="w-4 h-4"
+                                            onChange={(e)=>setVendorVerificationDataState({...vendorVerificationDataState, type: e.target.value})}
+                                        />
+                                    </div>
+                                    <div className="flex flex-row justify-between items-center gap-4 px-3 py-2 border border-gray-300 rounded-md">
+                                        <label htmlFor="type" className="">Business</label>
+                                        <input 
+                                            type="radio"
+                                            name="type"
+                                            value={'business'}
+                                            className="w-4 h-4"
+                                            onChange={(e)=>setVendorVerificationDataState({...vendorVerificationDataState, type: e.target.value})}
+                                        />
+                                    </div>
+                                </div>
+                               
                             </div>
                             <button
                                 onClick={(e) => showNextForm(e)}
-                                className="hover:bg-orange-700 hover:text-white text-orange-300 font-bold py-2 px-4 w-[30%] ml-[65%] rounded-full mb-10 xs:border-0 sm:!border border-orange-700 focus:outline-none focus:shadow-outline"
+                                className="hover:bg-orange-700 hover:text-white text-orange-700 font-bold py-2 px-4 w-[30%] ml-[65%] rounded-full mb-10 xs:border-0 sm:!border border-orange-700 focus:outline-none focus:shadow-outline"
                             >
                                 Continue
                             </button>
@@ -271,48 +304,53 @@ const vendorVerification = () => {
                                         value={vendorVerificationDataState.business_email}
                                     />
                                 </div>
-                                <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4">
-                                    <div className="w-full flex flex-col">
-                                        <label
-                                            className="block text-gray-700 text-sm font-bold mb-2"
-                                            htmlFor="business_tin"
-                                        >
-                                            Business Tax ID
-                                            <span
-                                                className='text-gray-500 pl-2 font-normal italic'
-                                            >
-                                                optional
-                                            </span>
-                                        </label>
-                                        <input
-                                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                            id="tax_id"
-                                            type="text"
-                                            placeholder="Enter your business tax id"
-                                            name="tax_id"
-                                            onChange={(e) => handleChange(e)}
-                                            value={vendorVerificationDataState.tax_id}
-                                        />
-                                    </div>
-                                    <div className="w-full flex flex-col">
-                                        <label
-                                            className="block text-gray-700 text-sm font-bold mb-2"
-                                            htmlFor="cac-id"
-                                        >
-                                            CAC Registration Number
-                                        
-                                        </label>
-                                        <input
-                                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                            id="cac_reg_number"
-                                            type="text"
-                                            placeholder="Enter your CAC reg number"
-                                            name="cac_reg_number"
-                                            value={vendorVerificationDataState.cac_reg_number}
-                                            onChange={(e) => handleChange(e)}
-                                        />
-                                    </div>
-                                </div>
+                                {
+                                    vendorVerificationDataState?.type === 'business' && (
+                                        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4">
+                                            <div className="w-full flex flex-col">
+                                                <label
+                                                    className="block text-gray-700 text-sm font-bold mb-2"
+                                                    htmlFor="business_tin"
+                                                >
+                                                    Business Tax ID
+                                                    <span
+                                                        className='text-gray-500 pl-2 font-normal italic'
+                                                    >
+                                                        optional
+                                                    </span>
+                                                </label>
+                                                <input
+                                                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                                    id="tax_id"
+                                                    type="text"
+                                                    placeholder="Enter your business tax id"
+                                                    name="tax_id"
+                                                    onChange={(e) => handleChange(e)}
+                                                    value={vendorVerificationDataState.tax_id}
+                                                />
+                                            </div>
+                                            <div className="w-full flex flex-col">
+                                                <label
+                                                    className="block text-gray-700 text-sm font-bold mb-2"
+                                                    htmlFor="cac-id"
+                                                >
+                                                    CAC Registration Number
+                                                
+                                                </label>
+                                                <input
+                                                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                                    id="cac_reg_number"
+                                                    type="text"
+                                                    placeholder="Enter your CAC reg number"
+                                                    name="cac_reg_number"
+                                                    value={vendorVerificationDataState.cac_reg_number}
+                                                    onChange={(e) => handleChange(e)}
+                                                />
+                                            </div>
+                                        </div>
+                                    )   
+                                }
+                               
 
                                 <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4">
                                     <div className="w-full flex flex-col">
@@ -353,11 +391,11 @@ const vendorVerification = () => {
                                     </div>
                                 </div>
 
-                                <div className="flex flex-col lg:flex-row gap-3 justify-end">
-                                    <div className="h-12 w-[80%] !mx-auto md:w-[35%] md:!mx-0 rounded-full xs:border-0 sm:!border border-orange-700 focus:outline-none focus:shadow-outline hover:bg-orange-700 hover:!text-white">
+                                <div className="flex flex-col md:flex-row gap-3 md:justify-center lg:justify-end">
+                                    <div className="h-[2.5em] w-[80%] !mx-auto md:w-[35%] md:!mx-0 rounded-full xs:border-0 sm:!border border-orange-700 focus:outline-none focus:shadow-outline text-orange-300 hover:bg-orange-700 hover:!text-white">
                                         <button
                                             onClick={() => setNextFormGroup(false)}
-                                            className="text-orange-300 font-bold py-1 px-4 w-full h-full"
+                                            className="font-bold py-1 px-4 w-full h-full"
                                         >
                                             Prev
                                         </button>

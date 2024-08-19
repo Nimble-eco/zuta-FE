@@ -28,9 +28,11 @@ const register = () => {
     }
 
     const submit = async () => {
-        if(data.password !== data.password_confirmation) return toast.error('Password mismatch');
         if(!data.email) return toast.error('Add a valid email address');
-        if(!data.phone || data.phone.length <= 10) toast.error('Add a valid phone number');
+        if(!data.phone || data.phone.length <= 10) return toast.error('Add a valid phone number');
+        if(!data.password) return toast.error('Add a valid Password');
+        if(!data.password_confirmation) return toast.error('Please Confirm password');
+        if(data.password !== data.password_confirmation) return toast.error('Password mismatch');
 
         setIsLoading(true);
 
@@ -43,7 +45,7 @@ const register = () => {
             }
         })
         .catch(error => {
-            toast.error(error.message || 'Error try again later');
+            toast.error(error?.response?.data?.message || 'Error try again later');
         })
         .finally(() => setIsLoading(false))
     }
@@ -87,11 +89,12 @@ const register = () => {
 
         </div>
 
-        <div className="flex flex-col w-full md:w-[80%] md:mx-auto lg:w-[50%] lg:mx-0 px-8 py-6 align-middle my-auto !bg-white">
-            <h2 className="text-orange-600 text-lg lg:text-2xl text-center font-semibold">Sign Up Here</h2>
-            <p className='text-xs lg:text-sm text-gray-700 font-medium opacity-30 mb-8 text-center'>Buy with a community and enjoy whole sale discounts</p>
-
+        <div className="flex flex-col-reverse lg:flex-col w-full md:w-[80%] md:mx-auto lg:w-[50%] lg:mx-0 px-8 py-6 align-middle my-auto !bg-white">
             <div className="flex flex-col gap-6">
+                <p className="font-semibold opacity-30 text-lg text-center lg:hidden flex justify-center">OR</p>
+                <h2 className="text-orange-600 text-lg lg:text-2xl text-center font-semibold">Sign Up Here</h2>
+                <p className='text-xs lg:text-sm text-gray-700 font-medium opacity-30 text-center'>Buy with a community and enjoy whole sale discounts</p>
+                
                 <TextInput
                     label="Name"
                     name="name"
@@ -146,41 +149,44 @@ const register = () => {
                 </p>
             </div>
 
-            <p className="font-semibold opacity-30 text-lg text-center my-4">OR</p>
+            <div className='flex flex-col gap-4'>
+                <p className="font-semibold opacity-30 text-lg text-center my-4 hidden lg:flex justify-center">OR</p>
+                <p className="font-semibold text-lg text-center lg:hidden">Sign up with</p>
 
-            <div className="flex flex-col md:flex-row gap-5 text-white text-sm font-medium w-full md:w-fit mx-auto mb-8">
-                <div
-                    className="flex flex-row items-center border border-[#DB4437] rounded-md cursor-pointer"
-                    onClick={() => socialSignUp('google')}
-                >
-                    <FaGoogle className="text-2xl w-[20%] text-[#DB4437] text-center "/>
-                    <span 
-                        className="bg-[#DB4437] w-[80%] px-3 py-2 whitespace-nowrap"
+                <div className="flex flex-row gap-10 lg:gap-5 text-white text-sm font-medium md:w-fit mx-auto mb-8">
+                    <div
+                        className="flex flex-row items-center lg:border border-[#DB4437] rounded-md cursor-pointer"
+                        onClick={() => socialSignUp('google')}
                     >
-                        Sign in with Google
-                    </span>
-                </div>
+                        <FaGoogle className="text-4xl lg:text-2xl lg:w-[20%] text-[#DB4437] text-center "/>
+                        <span 
+                            className="bg-[#DB4437] w-[80%] px-3 py-2 whitespace-nowrap hidden lg:flex"
+                        >
+                            Sign in with Google
+                        </span>
+                    </div>
 
-                <div
-                    className="flex flex-row items-center border border-[#4267B2] rounded-md cursor-pointer"
-                >
-                    <FaFacebook className="text-2xl w-[20%] text-[#4267B2] text-center "/>
-                    <span 
-                        className="bg-[#4267B2] w-[80%] px-3 py-2 whitespace-nowrap"
+                    <div
+                        className="flex flex-row items-center lg:border border-[#4267B2] rounded-md cursor-pointer"
                     >
-                        Sign in with Facebook
-                    </span>
-                </div>
+                        <FaFacebook className="text-4xl lg:text-2xl lg:w-[20%] text-[#4267B2] text-center "/>
+                        <span 
+                            className="bg-[#4267B2] w-[80%] px-3 py-2 whitespace-nowrap hidden lg:flex"
+                        >
+                            Sign in with Meta
+                        </span>
+                    </div>
 
-                <div
-                    className="flex flex-row items-center border border-blue-400 rounded-md cursor-pointer"
-                >
-                    <FaTwitter className="text-2xl w-[20%] text-[#1DA1F2] text-center "/>
-                    <span 
-                        className="bg-[#1DA1F2] w-[80%] px-3 py-2 whitespace-nowrap"
+                    <div
+                        className="flex flex-row items-center lg:border border-blue-400 rounded-md cursor-pointer"
                     >
-                        Sign in with Twitter
-                    </span>
+                        <FaTwitter className="text-4xl lg:text-2xl lg:w-[20%] text-[#1DA1F2] text-center "/>
+                        <span 
+                            className="bg-[#1DA1F2] w-[80%] px-3 py-2 whitespace-nowrap hidden lg:flex"
+                        >
+                            Sign in with X
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>

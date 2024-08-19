@@ -17,6 +17,7 @@ import Cookies from 'js-cookie';
 import { useRouter } from 'next/router';
 import { convertToBase64 } from '../../../Utils/convertImageToBase64';
 import { formatAmount } from '../../../Utils/formatAmount';
+import TextAreaInput from '../../inputs/TextAreaInput';
 
 interface IEditProductProps {
     product: {
@@ -164,7 +165,7 @@ const EditProduct = ({product}: IEditProductProps) => {
         .then((response) => {
             if(response.status === 201) {
                 setIsLoading(false);
-                toast.success('Product created successfully');
+                toast.success('Product upated successfully');
                 router.push('/vendor/product')
             }
         })
@@ -176,9 +177,8 @@ const EditProduct = ({product}: IEditProductProps) => {
     }
 
   return (
-    <div className="flex flex-col w-full md:w-[80%] md:absolute md:right-0 md:left-[21%]">
-        <ToastContainer />
-        <div className="flex flex-row relative px-2 py-4 mb-3 border-b border-gray-200">
+    <div className="flex flex-col w-full gap-4 md:w-[80%] md:absolute md:right-0 md:left-[20%]">
+        <div className="flex flex-row relative bg-white px-2 py-4 mb-3 border-b border-gray-200">
             <h2 className="text-lg font-bold">Product Details</h2>
             <div className="w-fit absolute right-1 bottom-2">
                 <ButtonFull 
@@ -197,7 +197,7 @@ const EditProduct = ({product}: IEditProductProps) => {
             onInputChange={handleChange}
         />
 
-        <TextInput 
+        <TextAreaInput 
             label="Shot Description"
             name='product_description'
             value={productData?.product_description || ""}
@@ -215,7 +215,7 @@ const EditProduct = ({product}: IEditProductProps) => {
                 />
             </div>
             <div className="w-full">
-                <div className='flex flex-row gap-2'>
+                <div className='flex flex-row items-center gap-2'>
                     <div className='w-full md:w-[60%]'>
                         <MyNumberInput  
                             label="Discount"
@@ -234,40 +234,21 @@ const EditProduct = ({product}: IEditProductProps) => {
         <div className="flex flex-col md:grid md:grid-cols-2 gap-4 mb-4">
             <div className="w-full">
                 <MyDropDownInput
-                    label="How long to package"
-                    name="duration_to_prepare"
-                    onSelect={() => {}}
+                    label="Staus"
+                    name="status"
+                    onSelect={handleChange}
                     options={[
                         {
-                            title: 'Less than a day',
-                            value: '1day'
+                            title: 'Public',
+                            value: 'public'
                         },
                         {
-                            title: '2 days',
-                            value: '2days'
+                            title: 'Private',
+                            value: 'private'
                         },
-                        {
-                            title: '3 days',
-                            value: '3days'
-                        },
-                        {
-                            title: '4 days',
-                            value: '4days'
-                        },
-                        {
-                            title: '5 days',
-                            value: '5days'
-                        },
-                        {
-                            title: '6 days',
-                            value: '6days'
-                        },
-                        {
-                            title: '7 days',
-                            value: '7days'
-                        }
                     ]}
                 />
+                <p className='text-xs text-gray-500 font-medium'>Show this item in the marketplace</p>
             </div>
             <div className="w-full">
                 <MyNumberInput 

@@ -22,14 +22,14 @@ const DeleteProductModal = ({setShow, onDelete, loading}: IDeleteProductModalPro
             <Modal.Body className='md:!min-w-[40vw] min-h-[30vh] py-5 px-4 flex flex-col gap-2'>
                 <h2 className='text-xl text-center'>Delete Product</h2>
                 <p className='text-center'>You will no longer have access to this resource, continue ?</p>
-                <div className='w-[80%] mx-auto flex flex-col-reverse lg:flex-row gap-4 justify-center'>
-                    <div className='h-14 lg:w-[40%]'>
+                <div className='w-[80%] mx-auto flex flex-col-reverse lg:grid lg:grid-cols-2 gap-4 justify-center'>
+                    <div className='h-10'>
                         <ButtonGhost
                             action='Cancel'
                             onClick={setShow}
                         />
                     </div>
-                    <div className='h-14 lg:w-[60%]'>
+                    <div className='h-10'>
                         <ButtonFull
                             action='Delete'
                             loading={loading}
