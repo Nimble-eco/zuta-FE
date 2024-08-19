@@ -36,7 +36,7 @@ const Header = ({search = true, onSearch}: INavBarProps) => {
         const cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')!) : [];
         setCartCount((cart?.products?.length + cart?.subscriptions?.length) || 0);
     }, []);
-
+    console.log({user})
     return (
         <div
             className='flex flex-col w-full relative shadow-md'
@@ -156,6 +156,14 @@ const Header = ({search = true, onSearch}: INavBarProps) => {
                     </button>
                 </form>
             </div>
+            {
+                user && !user.user_verified && (
+                    <div className='bg-red-100 py-4 flex justify-center'>
+                        <a href='/auth/requestEmailVerification' className='text-black font-semibold text-center text-sm'>Your email is unverified, Click here to verify your email</a>
+                    </div>
+                )
+            }
+           
             { mobileMenu &&
                 <div className='fixed left-0 top-0 bottom-0 w-[60%] bg-white shadow-lg z-50 flex flex-col'>
                     <div className='bg-slate-800 py-10 px-4 text-white flex flex-col relative'>
@@ -164,7 +172,7 @@ const Header = ({search = true, onSearch}: INavBarProps) => {
                         <p className='text-sm'>Connecting Buyers and Wholesalers</p>
                     </div>
                     <div className='px-6 text-lg mt-10 text-black flex flex-col'>
-                        <a className='mb-6'>
+                        <a href='/vendorVerification' className='mb-6'>
                             Sell
                         </a>
                         <a className='mb-6'>

@@ -80,6 +80,9 @@ export default function SignIn({ providers }: any) {
             console.log({error})
             setIsLoading(false);
             toast.error(error.response?.data?.message || 'Error try again later');
+            if(error?.response?.status === 413) {
+                router.push('/auth/requestEmailVerification');
+            }
         })
     }
 
