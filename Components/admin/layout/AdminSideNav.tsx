@@ -20,8 +20,8 @@ const AdminSideNavPanel = () => {
     }
 
   return (
-    <div className='hidden md:flex flex-col bg-white py-4 w-[19%] mr-[1%] fixed left-0 top-0 bottom-0 overflow-scroll gap-6 text-center'>
-        <a href="/" className="mb-2 text-orange-500 text-xl font-serif">Zuta</a>
+    <div className='hidden md:flex flex-col bg-white py-2 w-[19%] mr-[1%] fixed left-0 top-0 bottom-0 overflow-scroll gap-6 text-center'>
+        <a href="/" className="mb-2 !text-orange-500 text-xl font-serif">Zuta</a>
         <a 
             href="/admin/users"
             className={`cursor-pointer ${router.pathname.includes('users') ? activeStyle : 'hover:!text-orange-500'}`}

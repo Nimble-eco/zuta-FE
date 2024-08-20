@@ -36,7 +36,7 @@ const Header = ({search = true, onSearch}: INavBarProps) => {
         const cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')!) : [];
         setCartCount((cart?.products?.length + cart?.subscriptions?.length) || 0);
     }, []);
-    console.log({user})
+
     return (
         <div
             className='flex flex-col w-full relative shadow-md'
@@ -126,7 +126,7 @@ const Header = ({search = true, onSearch}: INavBarProps) => {
                 <a href='#0' className='mr-6'>
                     Open Orders
                 </a>
-                <a href='#0' className='mr-6'>
+                <a href='/customer-support' className='mr-6'>
                     Customer Service
                 </a>
                 <a href='/vendorVerification' className='!text-orange-500'>
@@ -181,7 +181,7 @@ const Header = ({search = true, onSearch}: INavBarProps) => {
                         <a className='mb-6'>
                             Categories
                         </a>
-                        <a className='mb-6'>
+                        <a className='mb-6' href='/customer-support'>
                             Customer Service
                         </a>
                         {

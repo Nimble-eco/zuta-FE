@@ -242,7 +242,7 @@ export async function getServerSideProps(context: any) {
         ]);
 
         const coupons = couponsResult.status === 'fulfilled' ? couponsResult?.value?.data : [];
-        console.log({coupons})
+       
         return {
             props: {
                 coupons

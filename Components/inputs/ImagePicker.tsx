@@ -11,6 +11,7 @@ interface ImagePickerProps {
 }
 
 const ImagePicker = ({label, onSelect, files, onRemove}: ImagePickerProps) => {
+  console.log({files})
   return (
     <div className='flex flex-col'>
       <div className="flex flex-row relative py-2 mb-4 border-b border-gray-200">
@@ -25,7 +26,7 @@ const ImagePicker = ({label, onSelect, files, onRemove}: ImagePickerProps) => {
         </div>
       </div>
       {
-        !files || files?.length === 0 ? (
+        !files || files?.length === 0 || (files?.length === 1 && !files[0]) ? (
           <div className='flex flex-col bg-orange-50 rounded-md border-dashed justify-center text-center py-10 cursor-pointer'>
             <label className="text-sm font-semibold cursor-pointer">
               <BsFileImage className="text-3xl text-orange-300 mb-3 mx-auto" />

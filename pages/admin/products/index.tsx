@@ -184,10 +184,9 @@ const ProductsIndexPage = ({products}:IProductsIndexPageProps) => {
             />
         }
 
-        <div className="flex flex-row w-[90%] mx-auto mt-8 relative mb-10">
+        <div className="flex flex-row w-full mx-auto mt-8 relative mb-10">
             <AdminSideNavPanel />
-            <div className="flex flex-col w-[80%] absolute right-0 left-[21%]">
-                <h2 className="text-2xl font-bold text-slate-700 mb-4">Products</h2>
+            <div className="flex flex-col w-[80%] absolute right-0 left-[20%]">
                 <div className="grid grid-cols-4 gap-4 mb-6">
                     <StatsCard
                         title='All Products'
@@ -195,19 +194,22 @@ const ProductsIndexPage = ({products}:IProductsIndexPageProps) => {
                     />
                     
                 </div>
-                <div className="flex flex-row text-sm font-semibold !text-gray-400 px-4 pt-5 bg-white">
-                    <a href="#0" className="hover:!text-orange-500 mr-3">
-                        Active
-                    </a>
-                    <a href="#0" className="hover:!text-orange-500 mr-3">
-                        Pending
-                    </a>
-                    <a href="#0" className="hover:!text-orange-500 mr-3">
-                        Inactive
-                    </a>
-                    <a href="#0" className="hover:!text-orange-500 mr-3">
-                        Featured
-                    </a>
+                <div className='flex flex-col pt-4 px-4 bg-white'>
+                    <h2 className="text-2xl font-bold text-slate-700 mb-4">Products</h2>
+                    <div className="flex flex-row text-sm font-semibold !text-gray-400">
+                        <a href="#0" className="hover:!text-orange-500 mr-3">
+                            Active
+                        </a>
+                        <a href="#0" className="hover:!text-orange-500 mr-3">
+                            Pending
+                        </a>
+                        <a href="#0" className="hover:!text-orange-500 mr-3">
+                            Inactive
+                        </a>
+                        <a href="#0" className="hover:!text-orange-500 mr-3">
+                            Featured
+                        </a>
+                    </div>
                 </div>
 
                 <div className="flex flex-row py-3 px-4 relative bg-white justify-between">
