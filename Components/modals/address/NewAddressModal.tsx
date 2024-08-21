@@ -74,6 +74,7 @@ const NewAddressModal = ({setShow, redirect}: INewAddressModalProps) => {
             if(redirect) redirect();
             
         } catch(error: any) {
+            setIsLoading(false);
             notify(error?.message || "Error Try later")
         }
     }
@@ -81,11 +82,11 @@ const NewAddressModal = ({setShow, redirect}: INewAddressModalProps) => {
   return (
     <div className="!rounded-md ">
         <ToastContainer />
-        <Modal show={true} onHide={setShow} backdrop="static" dialogClassName='modal-90w'>
-            <Modal.Body className='md:!min-w-[40vw] !w-[40vw]'>
-                <div className='flex flex-col min-h-[50vh] relative'>
+        <Modal show={true} onHide={setShow} backdrop="static" dialogClassName='lg:modal-90w'>
+            <Modal.Body className='md:!min-w-[40vw] w-[90%] lg:!w-[40vw] mx-auto'>
+                <div className='flex flex-col min-h-[50vh] justify-center relative'>
                     <IoIosCloseCircleOutline className='text-3xl text-red-600 text-opacity-60 cursor-pointer absolute top-3 right-3' onClick={setShow} />
-                    <form className="flex flex-col w-[90%] md:w-[60%] mx-auto my-10">
+                    <form className="flex flex-col w-[90%] mx-auto my-10">
                         <h3 className="text-center mb-3 font-bold text-base text-gray-600">Enter New Address</h3>
                         <div className="flex flex-col mb-3">
                             <label className="text-base text-gray-700 mt-1">
@@ -142,6 +143,7 @@ const NewAddressModal = ({setShow, redirect}: INewAddressModalProps) => {
                                 className="text-base text-gray-700 mt-1"
                             >
                                 Phone number
+                                <span className="text-red-500 ml-2">*</span>
                             </label>
                             <input
                                 type="text"

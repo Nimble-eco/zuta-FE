@@ -2,7 +2,6 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { parse } from 'cookie';
 import { ToastContainer, toast} from "react-toastify";
-import { injectStyle } from "react-toastify/dist/inject-style";
 import {GrTransaction} from 'react-icons/gr'
 import ButtonFull from "../Components/buttons/ButtonFull";
 import { BsArrowRightCircle } from 'react-icons/bs'
@@ -10,9 +9,9 @@ import Header from "../Components/Header"
 import { sendAxiosRequest } from "../Utils/sendAxiosRequest";
 import Image from "next/image";
 import { RiHomeSmileLine } from "react-icons/ri";
-import { MdOutlineRateReview, MdStore } from "react-icons/md";
+import { MdOutlineRateReview, MdReviews, MdStore } from "react-icons/md";
 import { CgMoreO } from "react-icons/cg";
-import { GiPerson } from "react-icons/gi";
+import { GiPerson, GiShoppingCart } from "react-icons/gi";
 import TextInput from "../Components/inputs/ColumnTextInput";
 import { HiOutlineMail, HiOutlinePhone } from "react-icons/hi";
 import { BsPersonSquare } from "react-icons/bs";
@@ -34,13 +33,14 @@ import { AiFillEdit } from "react-icons/ai";
 import { convertToBase64 } from "../Utils/convertImageToBase64";
 import MyDropDownInput from "../Components/inputs/MyDropDownInput";
 import DeleteAddressModal from "../Components/modals/address/DeleteAddressModal";
+import RateProductModal from "../Components/modals/pending-reviews/RateProductModal";
 
 interface IProfilePageProps {
     profile: any;
     orders: any;
     orderTrains: any[];
     addresses: any[];
-    reviews: any[];
+    reviews: any;
 }
 
 function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePageProps) {
@@ -65,6 +65,9 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
     const [selectedOrder, setSelectedOrder] = useState<any>({});
     const [isVendor, setIsVendor] = useState(false);
 
+    const [showRateProductModal, setShowRateProductModal] = useState(false);
+    const [selectedPendingReview, setSelectedPendingReview] = useState<any>({});
+
     const handleProfileChange = (e: any) => setUser({...user, [e.target.name]: e.target.value});
 
     const toggleShowAddressMore = (index: number) => {
@@ -76,10 +79,6 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
         });
 
         setShowAddressMore(newArr);
-    }
-
-    if (typeof window !== "undefined") {
-        injectStyle();
     }
 
     const getPage = (page: string) => router.push(`/${page}`);
@@ -188,7 +187,6 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
         return () => { isMounted = false }
     }, []);
 
-
     return (
         <div
             className="min-h-screen bg-gray-100"
@@ -236,51 +234,59 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                         />
                     }
 
+                    {
+                        showRateProductModal && <RateProductModal
+                            order={selectedPendingReview.order}
+                            orderTrain={selectedPendingReview.openOrder}
+                            setShow={()=>setShowRateProductModal(false)}
+                        />
+                    }
+
                     <div className="flex flex-col text-gray-700 bg-white rounded-md py-6 mb-10 min-h-screen">
                         <div className="hidden lg:flex flex-row border-b border-gray-300 w-[90%] md:w-[80%] mx-auto whitespace-nowrap justify-evenly pb-3 mb-4">
                             <div 
-                                className={`${currentNav === 'profile' && 'bg-orange-400 bg-opacity-25'} flex flex-row cursor-pointer px-4 pt-2 pb-1 rounded-[20px] font-medium`}
+                                className={`${currentNav === 'profile' && 'bg-orange-400 bg-opacity-25'} flex flex-row items-center cursor-pointer px-4 pt-2 pb-1 rounded-[20px] font-medium`}
                                 onClick={() => {
                                     setCurrentNav('profile');
                                     Cookies.set('currentNav', 'profile');
                                 }}
                             >
                                 <GiPerson className="text-xl mr-2" />
-                                <p>Personal Info</p>
+                                <p className="mb-0">Personal Info</p>
                             </div>
                             <div 
-                                className={`${currentNav === 'orders' && 'bg-orange-400 bg-opacity-25'} flex flex-row cursor-pointer px-4 pt-2 pb-1 rounded-[20px] font-medium`}
+                                className={`${currentNav === 'orders' && 'bg-orange-400 bg-opacity-25'} flex flex-row items-center cursor-pointer px-4 pt-2 pb-1 rounded-[20px] font-medium`}
                                 onClick={() => {
                                     setCurrentNav('orders');
                                     Cookies.set('currentNav', 'orders');
                                 }}
                             >
                                 <GrTransaction className="text-xl mr-2" />
-                                <p>Orders</p>
+                                <p className="mb-0">Orders</p>
                             </div>
                             <div 
-                                className={`${currentNav === 'address' && 'bg-orange-400 bg-opacity-25'} flex flex-row cursor-pointer px-4 pt-2 pb-1 rounded-[20px] font-medium`}
+                                className={`${currentNav === 'address' && 'bg-orange-400 bg-opacity-25'} flex flex-row items-center cursor-pointer px-4 pt-2 pb-1 rounded-[20px] font-medium`}
                                 onClick={() => {
                                     setCurrentNav('address');
                                     Cookies.set('currentNav', 'address');
                                 }}
                             >
                                 <RiHomeSmileLine className="text-xl mr-2" />
-                                <p>Address</p>
+                                <p className="mb-0">Address</p>
                             </div>
                             <div 
-                                className={`${currentNav === 'reviews' && 'bg-orange-400 bg-opacity-25'} flex flex-row cursor-pointer px-4 pt-2 pb-1 rounded-[20px] font-medium`}
+                                className={`${currentNav === 'reviews' && 'bg-orange-400 bg-opacity-25'} flex flex-row items-center cursor-pointer px-4 pt-2 pb-1 rounded-[20px] font-medium`}
                                 onClick={() => {
                                     setCurrentNav('reviews');
                                     Cookies.set('currentNav', 'reviews');
                                 }}
                             >
                                 <MdOutlineRateReview className="text-xl mr-2" />
-                                <p>Pending Reviews</p>
+                                <p className="mb-0">Pending Reviews</p>
                             </div>
                         </div>
 
-                        <div className="flex lg:hidden w-[60%] mx-auto whitespace-nowrap py-3 mb-4">
+                        <div className="flex lg:hidden w-[60%] mx-auto whitespace-nowrap">
                             <MyDropDownInput
                                 label="Tab"
                                 value={currentNav}
@@ -303,13 +309,13 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                                     className="flex flex-col md:flex-row md:justify-between w-[90%] md:w-[80%] mx-auto min-h-screen"
                                 >
                                     <div 
-                                        className="flex flex-col md:w-[40%] mx-auto md:my-6"
+                                        className="flex flex-col gap-3 md:w-[40%] mx-auto md:my-6"
                                     >
                                         <div className="rounded-full h-24 w-24 mx-auto relative group">
                                             <img 
                                                 src={user?.picture ?? 'https://via.placeholder.com/100'}
                                                 alt="profile" 
-                                                className="h-full w-full rounded-full object-fill" 
+                                                className="h-full w-full rounded-full object-cover object-center" 
                                             />
                                             <div className="bg-gray-500 absolute bottom-0 top-0 left-0 right-0 rounded-full bg-opacity-50 z-20 group" />
                                             <label className="cursor-pointer absolute bottom-[40%] right-[40%] z-30 hidden group group-hover:flex">
@@ -323,7 +329,7 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                                             </label>
                                         </div>
                                         <div
-                                            className="flex flex-col mt-6 w-fit mx-auto"
+                                            className="flex flex-col justify-center items-center md:mt-6 "
                                         >
                                             <div className="flex flex-row mb-3">
                                                 <BsPersonSquare className='text-orange-500 text-2xl mr-2' />
@@ -345,7 +351,7 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                                             </div>
                                             {
                                                 isVendor && <div 
-                                                    className={`flex flex-row cursor-pointer px-4 py-2 pb-1 rounded-[20px] font-medium bg-orange-500 bg-opacity-20 justify-center align-middle`}
+                                                    className={`flex flex-row items-center cursor-pointer px-4 py-2 pb-1 rounded-[20px] font-medium bg-orange-500 bg-opacity-20 justify-center align-middle`}
                                                     onClick={() => getPage('vendor/product/')}
                                                 >
                                                     <MdStore className="text-2xl mr-2" />
@@ -476,6 +482,7 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                                             <span>Cancelled</span>
                                         </div>
                                     </div>
+                                    
                                     <table className="md:w-full ml-2 text-sm h-fit min-w-[600px] overflow-auto">
                                         <thead className="bg-gray-200 px-4">
                                             <tr className="!w-full px-4">
@@ -487,6 +494,11 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                                                 <th className='w-[20%]'>
                                                     <p className="my-2">
                                                         Qty
+                                                    </p>
+                                                </th>
+                                                <th className='w-[20%]'>
+                                                    <p className="my-2">
+                                                        Price
                                                     </p>
                                                 </th>
                                                 <th className='w-[20%]'>
@@ -506,7 +518,7 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                                                 </th>
                                             </tr>
                                         </thead>
-                                        <tbody className=''>
+                                        <tbody className='relative'>
                                         {
                                             orderType === 'simple' ? 
                                                 simpleOrdersData?.data?.length > 0 ? simpleOrdersData?.data?.map((order: any) => (
@@ -515,7 +527,7 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                                                         setShowViewOrderModal(true);
                                                     }}>
                                                         <td className="">
-                                                            <p className="mb-2 pl-4">{order?.product_name}</p>
+                                                            <p className="mb-2 pl-4 capitalize">{order?.product_name}</p>
                                                         </td>
                                                         <td className=""><p>{order?.quantity}</p>
                                                         </td>
@@ -523,7 +535,10 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                                                             <p className="mb-2">{formatAmount(order?.product_price_paid)}</p>
                                                         </td>
                                                         <td className="">
-                                                            <p className="mb-2">{order?.status}</p>
+                                                            <p className="mb-2">{formatAmount(order?.order_amount)}</p>
+                                                        </td>
+                                                        <td className="">
+                                                            <p className="mb-2 capitalize">{order?.status}</p>
                                                         </td>
                                                         <td className="">
                                                             <div className="my-2 pr-4">
@@ -538,15 +553,16 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                                                         </td>
                                                     </tr>
                                                 )) : (
-                                                    <tr
-                                                        className="flex w-fit mx-auto"
+                                                    <div
+                                                        className="flex flex-col justify-center items-center w-fit mx-auto absolute top-1/2 left-6 md:!center-absolute-el"
                                                     >
+                                                        <GiShoppingCart className="text-6xl mt-8"/>
                                                         <span
-                                                            className="text-orange-600 text-xl my-8 mx-auto text-center animate-bounce"
+                                                            className="text-xl text-center font-medium"
                                                         >
-                                                            No orders yet!!
+                                                            No orders yet!
                                                         </span>
-                                                    </tr>
+                                                    </div>
                                                 ) :
                                             null
                                         }
@@ -559,7 +575,7 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                                                         setShowViewOrderTrainModal(true);
                                                     }}>
                                                         <td className="">
-                                                            <p className="mb-2 pl-4">{order?.product_name}</p>
+                                                            <p className="mb-2 pl-4 capitalize">{order?.product_name}</p>
                                                         </td>
                                                         <td className=""><p>{order?.pivot_quantity ?? order?.quantity}</p>
                                                         </td>
@@ -567,7 +583,10 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                                                             <p className="mb-2">{formatAmount(order?.pivot_open_order_price_paid ?? order?.open_order_price_paid)}</p>
                                                         </td>
                                                         <td className="">
-                                                            <p className="mb-2">{order?.pivot_status ?? order?.status}</p>
+                                                            <p className="mb-2">{formatAmount(order?.pivot_order_amount ?? order?.order_amount)}</p>
+                                                        </td>
+                                                        <td className="">
+                                                            <p className="mb-2 capitalize">{order?.pivot_status ?? order?.status}</p>
                                                         </td>
                                                         <td className="">
                                                             <div className="my-2 pr-4">
@@ -582,15 +601,16 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                                                         </td>
                                                     </tr>
                                                 )) : (
-                                                    <tr
-                                                        className="flex w-fit mx-auto"
+                                                    <div
+                                                        className="flex flex-col justify-center items-center w-fit mx-auto absolute top-1/2 left-6 md:!center-absolute-el"
                                                     >
+                                                        <GiShoppingCart className="text-6xl mt-8"/>
                                                         <span
-                                                            className="text-orange-600 text-xl my-10 mx-auto text-center animate-bounce"
+                                                            className="text-xl text-center font-medium"
                                                         >
-                                                            No order train has been boarded!!
+                                                            No order train yet!
                                                         </span>
-                                                    </tr>
+                                                    </div>
                                                 ) :
                                             null
                                         }
@@ -603,20 +623,20 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                         {
                             currentNav === 'address' && (
                             <div className="flex flex-col relative">
-                                <div className="hidden lg:flex w-fit absolute top-2 right-8">
+                                <div className="flex w-fit absolute top-0 center-absolute-el h-10">
                                     <ButtonFull
                                         action="Add Address"
                                         onClick={() => setShowNewAddressModal(!showNewAddressModal)}
                                     />
                                 </div>
 
-                                <div className="w-[90%] md:w-[50%] mx-auto mt-10 flex flex-col">
+                                <div className="w-[90%] md:w-[50%] mx-auto mt-16 flex flex-col">
                                     {
                                         addresses && addresses?.length > 0 ? addresses?.map((address: any, index: number) => (
                                             <div className='flex flex-col py-3 px-4 shadow-lg rounded-md mb-4' key={address.name}>
-                                                <div className="flex flex-row relative">
-                                                    <GoLocation className="text-xl text-gray-500 mr-2" />
-                                                    <p className="text-base font-serif">{address.title}</p>
+                                                <div className="flex flex-row relative items-center">
+                                                    <GoLocation className="text-xl text-orange-500 mr-2" />
+                                                    <p className="text-base mb-0 capitalize font-semibold">{address.title}</p>
                                                     <div className="flex flex-col">
                                                         <CgMoreO 
                                                             className="text-orange-500 text-xl cursor-pointer absolute right-1 mb-2" 
@@ -647,7 +667,7 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                                                         }
                                                     </div>
                                                 </div>
-                                                <p className="mb-0">{address?.name}</p>
+                                                <p className="mb-0 capitalize">{address?.name}</p>
                                                 <p className="mb-0">{address?.address}</p>
                                             </div>
                                         )) : (
@@ -684,25 +704,38 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                         {
                             currentNav === 'reviews' && (
                             <div className="flex flex-col w-[90%] lg:w-[70%] mx-auto">
-                                <div className="border border-gray-100 rounded-sm px-4 py-3 flex flex-row mb-6">
-                                    <div className="w-[19%] mr-[1%]">
-                                        <img src="https://via.placeholder.com/100" alt="product image" />
-                                    </div>
-                                    <div className="flex flex-col w-full text-sm">
-                                        <div className="flex flex-row justify-between mb-2 lg:text-lg">
-                                            <p className="line-clamp-1">12V Battery Charger Car Solar AGM GEL VRLA</p>
-                                            <a
-                                                href="#0"
-                                                className="!text-orange-500 font-bold cursor-pointer whitespace-nowrap !text-xs lg:!text-sm ml-5"
-                                            >
-                                                RATE THIS PRODUCT
-                                            </a>
+                                {
+                                    reviews?.data?.length ?
+                                    reviews?.data?.map((review: any) => (
+                                        <div className="border border-gray-100 rounded-md px-4 py-3 flex flex-row mb-6" key={review.id}>
+                                            <div className="w-[19%] mr-[1%]">
+                                                <img src={review?.product?.product_images[0] ?? "https://via.placeholder.com/100"} alt="product image" className="object-center object-cover rounded-md" />
+                                            </div>
+                                            <div className="flex flex-col w-full text-sm">
+                                                <div className="flex flex-row justify-between mb-2 lg:text-lg">
+                                                    <p className="line-clamp-1 capitalize mb-0">{review?.product?.product_name}</p>
+                                                    <a
+                                                        href="#0"
+                                                        className="!text-orange-500 font-bold cursor-pointer whitespace-nowrap !text-xs lg:!text-sm ml-5"
+                                                        onClick={()=>{
+                                                            setSelectedPendingReview(review);
+                                                            setShowRateProductModal(true);
+                                                        }}
+                                                    >
+                                                        RATE THIS PRODUCT
+                                                    </a>
+                                                </div>
+                                                <p className="font-semibold text-black mb-0">Order nº: {review?.order?.id ?? review?.openOrder?.id}</p>
+                                                <p className="font-thin">Delivered on {new Date(review?.order?.delivered_on).toLocaleDateString()}</p>
+                                            </div>
                                         </div>
-                                        <p className="font-semibold text-black">Order nº: 1877794622</p>
-                                        <p className="font-thin">Delivered on 11-10-22</p>
-                                    </div>
-                                </div>
-
+                                    )) : (
+                                        <div className="flex flex-col gap-4 py-4 justify-center items-center">
+                                            <MdReviews className="h-24 w-24" />
+                                            <p className="font-semibold text-lg">No pending reviews</p>
+                                        </div>
+                                    )
+                                }
                             </div>
                         )}
 
@@ -762,7 +795,7 @@ export async function getServerSideProps(context: any) {
         });
 
         const getMyPendingReviews = await sendAxiosRequest(
-            '/api/review/product/me',
+            '/api/pending/reviews/me',
             "get",
             {},
             token,
@@ -790,14 +823,14 @@ export async function getServerSideProps(context: any) {
         const orderTrains = myOrderTrains.status === 'fulfilled' ? myOrderTrains.value.data.data : [];
         const reviews = myReviews.status === 'fulfilled' ? myReviews.value.data : [];
         const myVendor = myVendorAccount.status === 'fulfilled' ? myVendorAccount.value.data : [];
-
+        console.log({reviews})
         return {
             props: {
                 addresses,
                 profile,
                 orders,
                 orderTrains: orderTrains,
-                reviews,
+                reviews: reviews ?? {},
                 vendor: myVendor
             }
         }
@@ -818,7 +851,7 @@ export async function getServerSideProps(context: any) {
                 profile: {},
                 orders: [],
                 orderTrains: [],
-                reviews: [],
+                reviews: {},
                 vendor: {}
             }
         }

@@ -208,7 +208,7 @@ const index = ({orders}: IStandardOrdersIndexPageProps) => {
                 {/* OORDERS TABLE */}
                 <div className="flex flex-col pb-8 bg-white overflow-y-auto">
                     <MyTable
-                        headings={['id', 'product_name', 'quantity', 'price', 'status', 'order_amount', 'order_paid', 'state', 'country']}
+                        headings={['product_name', 'quantity', 'price', 'status', 'order_amount', 'order_paid', 'state', 'country']}
                         content={ordersData?.data?.data?.map((order: any) => ({
                             ...order,
                             id: order.id,

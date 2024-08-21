@@ -59,8 +59,8 @@ const SelectAddressModal = ({selectAddress, setShow, showNewAddressModal}: ISele
     <div className="!rounded-md ">
         <ToastContainer />
 
-        <Modal show={true} onHide={setShow} backdrop="static" dialogClassName='modal-90w'>
-            <Modal.Body className='md:!min-w-[30vw] !w-[30vw]'>
+        <Modal show={true} onHide={setShow} backdrop="static" dialogClassName='md:modal-90w'>
+            <Modal.Body className='md:!min-w-[30vw] md:!w-[30vw]'>
                 <div className='flex flex-col min-h-[50vh] relative'>
                     <MdOutlineClose className='text-3xl cursor-pointer absolute top-3 right-3' onClick={setShow} />
                     <div className="w-[90%] mx-auto pt-16 pb-10 flex flex-col gap-4">

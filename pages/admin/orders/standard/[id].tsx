@@ -13,11 +13,10 @@ interface IShowOrderPageProps {
 }
 
 const ShowOrder = ({order}: IShowOrderPageProps) => {
-    console.log({order})
     const router = useRouter();
     const [status, setStatus] = useState(order?.status);
     const [loading, setLoading] = useState(false);
-
+    console.log({order})
     const updateOrderStatus = async() => {
         setLoading(true);
         if(!status) return toast.error('Select a status');
@@ -26,35 +25,47 @@ const ShowOrder = ({order}: IShowOrderPageProps) => {
 
         switch (status) {
             case 'shipped':
-                res = await shipAnOrderAction({id: order.id});
+                res = await shipAnOrderAction({id: order.id})
+                .catch(error => {
+                    setLoading(false);
+                    toast.error(error?.response?.data?.message || 'Error try again later');
+                });
             break;
             case 'unshipped':
-                res = await unshipAnOrderAction({id: order.id});
+                res = await unshipAnOrderAction({id: order.id})
+                .catch(error => {
+                    setLoading(false);
+                    toast.error(error?.response?.data?.message || 'Error try again later');
+                });
             break;
             case 'delivered':
-                res = await deliverAnOrderAction({id: order.id});
+                res = await deliverAnOrderAction({id: order.id})
+                .catch(error => {
+                    setLoading(false);
+                    toast.error(error?.response?.data?.message || 'Error try again later');
+                });
             break;
             case 'closed':
-                res = await closeAnOrderAction({id: order.id});
+                res = await closeAnOrderAction({id: order.id})
+                .catch(error => {
+                    setLoading(false);
+                    toast.error(error?.response?.data?.message || 'Error try again later');
+                });
             break;
             case 'cancelled':
-                res = await cancelAnOrderAction({id: order.id});
+                res = await cancelAnOrderAction({id: order.id})
+                .catch(error => {
+                    setLoading(false);
+                    toast.error(error?.response?.data?.message || 'Error try again later');
+                });
             break;
             default:
                 break;
         }
         
-        if(res) {
-            await res.then((response: any) => {
-                if(response.status === 202) {
-                    toast.success('Vendor status updated');
-                }
-            })
-            .catch((error: any) => {
-                console.log({error});
-                toast.error(error?.response?.data?.message || 'Error try again later');
-            })
-            .finally(() => setLoading(false));
+        if(res?.status === 202) {
+            toast.success('Status updated');
+            setTimeout(()=>window.location.reload(), 3000);
         }
     }
     
@@ -70,6 +81,7 @@ const ShowOrder = ({order}: IShowOrderPageProps) => {
                         <select 
                             className="px-4 py-2 bg-gray-100 rounded-xl"
                             onChange={(e)=>setStatus(e.target?.value)}
+                            value={status}
                         >
                             <option value={'shipped'}>Shipped</option>
                             <option value={'unshipped'}>Unshipped</option>

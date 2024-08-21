@@ -90,7 +90,7 @@ const cart = () => {
     }, []);
 
   return (
-    <div className="flex flex-col bg-gray-100 relative  overflow-scroll">
+    <div className="flex flex-col bg-gray-100 relative min-h-screen overflow-scroll">
         <Header />
         <div className="flex flex-col bg-white py-4 px-3 h-fit w-[90%] fixed bottom-0 left-[5%] right-[5%] shadow-md z-50 mb-4 lg:hidden">
             <Total items={items} />
@@ -123,7 +123,7 @@ const cart = () => {
                     </button>
                 </div>
                 <div className="flex flex-col py-3 bg-white pl-2 rounded-md">
-                    <h4 className="font-semibold my-3 text-sm">Join these order train</h4>
+                    <h4 className="font-semibold my-3 text-sm text-center">Join these order train</h4>
                     <div className="flex flex-row overflow-x-scroll lg:flex-col gap-4">
                         {
                             openOrderProducts?.map((product) => (

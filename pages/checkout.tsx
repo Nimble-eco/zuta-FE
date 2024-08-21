@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useRouter } from "next/router";
 import { FC, useEffect, useState } from "react";
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 import { injectStyle } from "react-toastify/dist/inject-style";
 import Header from "../Components/Header"
 import { sendAxiosRequest } from "../Utils/sendAxiosRequest";
@@ -155,7 +155,6 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
 
   return (
     <div className="bg-gray-200 min-h-screen flex flex-col relative">
-        <ToastContainer />
         <Header />
 
         {
@@ -200,7 +199,7 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
                                 </span>
                                 
                                 <div
-                                    className="flex flex-row gap-4" 
+                                    className="flex flex-row items-center gap-4" 
                                 >
                                     <p
                                         className="text-gray-800 m-0"
@@ -214,7 +213,7 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
                                         defaultValue={item.quantity}
                                     />
                                     <p
-                                        className="text-gray-800 py-1 px-2"
+                                        className="text-gray-800 mb-0"
                                     >
                                         = {formatAmount(item.product_price * (item.quantity))}
                                     </p>
@@ -239,7 +238,7 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
                                 </span>
                                 
                                 <div
-                                    className="flex flex-row gap-4" 
+                                    className="flex flex-row items-center gap-4" 
                                 >
                                     <p
                                         className="text-gray-800 m-0"
@@ -253,7 +252,7 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
                                         disabled={true}
                                     />
                                     <p
-                                        className="text-gray-800 py-1 px-2"
+                                        className="text-gray-800 mb-0"
                                     >
                                         = {formatAmount(item.open_order_price * (item.quantity ))}
                                     </p>
@@ -268,7 +267,7 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
                 <div className="flex flex-col gap-2 bg-white py-4 px-3 h-fit mb-4 rounded-md">
                     <h3 className="lg:text-center text-lg mb-0">Proceed to payment</h3>
                     <p className="lg:text-center mb-0">Deliver fee: {formatAmount(deliveryFee)}</p>
-                    <p className="hidden lg:flex lg:text-center text-lg font-semibold text-orange-500 mb-0">
+                    <p className="hidden lg:flex lg:text-center lg:justify-center text-lg font-semibold text-orange-500 mb-0">
                         Total: {formatAmount(totalAmount) ? formatAmount(totalAmount) : 0}
                     </p>
                     <div className='flex flex-row gap-2 items-center'>
@@ -286,7 +285,8 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
                     </div>
                     <button 
                         onClick={() => checkOut()}
-                        className="hidden lg:flex text-center font-medium text-[#0ba4db] cursor-pointer border-2 border-[#0ba4db] rounded-md py-2 mt-4"
+                        disabled={isLoading}
+                        className="hidden lg:flex lg:justify-center text-center font-medium text-[#0ba4db] cursor-pointer border-2 border-[#0ba4db] rounded-md py-2 mt-4"
                     >
                         {isLoading ? 'Loading...' : `Pay with PayStack`}
                     </button>
@@ -308,9 +308,9 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
                                             onClick={() => setSelectedAddress(address)}
                                         />
                                     }
-                                    <p className="font-medium">
+                                    <p className="font-medium capitalize">
                                         {address.title}
-                                        {address.name && <span className="opacity-30 text-sm">/{address.name}</span>}
+                                        {address.name && <span className="text-gray-600 text-sm">/{address.name}</span>}
                                     </p>
                                 </div>
                                 <p className="text-sm">{address.address}</p>

@@ -83,25 +83,24 @@ const ShowOrderTrainModal = ({orderTrain, setShow}: IShowOrderTrainModalProps) =
         setShow();
         setTimeout(() => router.push('/profile?path=orders'), 3000);
     }
-
+    console.log({orderTrain})
   return (
     <div className="!rounded-md">
-        <ToastContainer />
-        <Modal show={true} onHide={setShow} backdrop="static" dialogClassName='modal-lg'>
-            <Modal.Body className='relative'>
+        <Modal show={true} onHide={setShow} dialogClassName='md:modal-lg'>
+            <Modal.Body className='relative w-full'>
                 <MdOutlineClose className='text-3xl cursor-pointer absolute top-3 right-3' onClick={setShow} />
                 <div className='flex flex-col min-h-[50vh]'>
-                    <h2 className="text-2xl font-semibold my-4 w-fit ml-[3%] uppercase">Order Train</h2>
+                    <h2 className="font-semibold text-base my-4 w-fit ml-[3%] capitalize">Order Train</h2>
                     <div className="flex flex-col lg:flex-row gap-6 w-[95%] mx-auto py-2 relative">
                         <div className='w-full lg:w-[50%] cursor-pointer h-full flex align-middle' onClick={() => router.push(`/product?id=${orderTrain?.product?.id}`)}>
                             <SwiperSlider 
                                 slides={orderTrain?.product?.product_images}
                             />
                         </div>
-                        <div className="w-full lg:w-[50%] flex flex-col gap-1 !mt-4 lg:!mt-0">
-                            <h1 className="text-xl md:text-2xl justify-center mb-0">{orderTrain?.product_name}</h1>
+                        <div className="w-full lg:w-[50%] flex flex-col gap-2 lg:gap-4 justify-center lg:justify-start items-center lg:items-start !mt-4 lg:!mt-0">
+                            <h1 className="text-xl md:text-2xl justify-center mb-0 capitalize">{orderTrain?.product_name}</h1>
                             <p className="text-gray-600 py-2 mb-0">{orderTrain?.product?.product_description}</p>
-                            <div className="flex flex-row gap-8 w-full">
+                            <div className="flex flex-row justify-center lg:justify-start gap-8 w-full">
                                 <div 
                                     className='flex flex-row gap-1'
                                 >
@@ -116,8 +115,8 @@ const ShowOrderTrainModal = ({orderTrain, setShow}: IShowOrderTrainModalProps) =
                                 </div>
                             </div>
                             <div className="flex flex-col gap-[2px]">
-                                <p className="text-lg font-semibold opacity-25 !mb-0">Fees:</p>
-                                <div className="flex flex-col lg:flex-row gap-4">
+                                <p className="hidden lg:block text-lg font-semibold text-gray-500 !mb-0">Fees:</p>
+                                <div className="flex flex-row gap-4 text-sm">
                                     <div className="flex flex-row gap-1">
                                         <p className="text-gray-600">Delivery Fee:</p>
                                         <p className="text-gray-600">{formatAmount(orderTrain?.pivot_order_delivery_fee ?? orderTrain?.order_delivery_fee)}</p>
@@ -136,8 +135,8 @@ const ShowOrderTrainModal = ({orderTrain, setShow}: IShowOrderTrainModalProps) =
                             </div>
                             {
                                 (orderTrain?.pivot_status ?? orderTrain?.status) === 'unshipped' && (
-                                    <div className="w-fit flex flex-col gap-1">
-                                        <div className="w-[50%] h-12">
+                                    <div className="w-fit !mx-auto lg:!mx-0 flex flex-col !justify-center lg:!justify-start !items-center lg:!items-start gap-1">
+                                        <div className="w-[50%] h-10">
                                             <ButtonGhost
                                                 action="Cancel Order"
                                                 onClick={cancelOrder}

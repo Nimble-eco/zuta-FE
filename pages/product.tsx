@@ -14,6 +14,7 @@ import router from 'next/router';
 import { formatAmount } from '../Utils/formatAmount';
 import { capitalizeFirstLetter } from '../Utils/capitalizeFirstLettersOfString';
 import ProductDetailsSideDrawer from "../Components/drawer/ProductDetailsSideDrawer";
+import { BsChat } from 'react-icons/bs';
 
 interface IProductPageProps {
     product: {
@@ -128,7 +129,7 @@ function product({product, similar_products, featured_similar_products}: IProduc
             <MyGallery 
                 show={showImageGallery}
                 setShow={toggleImageGallery}
-                slides={product?.product_images}
+                slides={product?.product_images ?? []}
             />
 
             <div 
@@ -136,7 +137,7 @@ function product({product, similar_products, featured_similar_products}: IProduc
             >
                 <div className='w-[90%] max-w-full md:w-1/3 !mx-auto md:!mx-0 lg:!mx-0 md:!mr-3 cursor-pointer h-full lg:h-60' onClick={toggleImageGallery}>
                     <SwiperSlider 
-                        slides={product?.product_images}
+                        slides={product?.product_images ?? []}
                     />
                 </div>
                 <div className="w-[90%] md:w-[35%] !mx-auto md:!mx-0 lg:!mx-[20px] flex flex-col">
@@ -279,7 +280,11 @@ function product({product, similar_products, featured_similar_products}: IProduc
                         <button disabled={currentReviewPage === 0} onClick={() => setCurrentReviewPage(currentReviewPage - 1)} className='mr-3 cursor-pointer'>Previous</button>
                         <button disabled={currentReviewPage === reviewPages.length - 1} onClick={() => setCurrentReviewPage(currentReviewPage + 1)} className='mr-3 cursor-pointer'>Next</button>
                     </div>
-                </div> : <p className='text-center text-xl mt-8'>No reviews yet</p>
+                </div> : 
+                <div className='flex flex-col justify-center items-center gap-2 my-16'>
+                    <BsChat className='text-5xl text-orange-500'/>
+                    <p className='text-center text-xl font-medium text-orange-500'>No reviews yet</p>
+                </div>
             }
         </div>
     )

@@ -58,7 +58,7 @@ export const unshipAnOrderAction = async (payload: ICancelOrderActionProps) => {
 
 export const deliverAnOrderAction = async (payload: ICancelOrderActionProps) => {
     const user = JSON.parse(Cookies.get('user')!);
-    return axiosInstance.post('/api/order/deleivered', payload, {
+    return axiosInstance.post('/api/order/delivered', payload, {
         headers: {
             Authorization: user.access_token
         }

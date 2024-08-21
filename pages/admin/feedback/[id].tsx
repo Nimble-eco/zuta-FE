@@ -4,7 +4,6 @@ import AdminSideNavPanel from "../../../Components/admin/layout/AdminSideNav";
 import ButtonFull from "../../../Components/buttons/ButtonFull";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import ColumnTextInput from "../../../Components/inputs/ColumnTextInput";
 import MyDropDownInput from "../../../Components/inputs/MyDropDownInput";
 import { feedbackCategories, feedbackStatusTypes, feedbackTypes, priorityTypes } from "../../../Utils/data";
 import TextAreaInput from "../../../Components/inputs/TextAreaInput";

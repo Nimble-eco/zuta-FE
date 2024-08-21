@@ -21,17 +21,18 @@ const showVendor = ({vendor}: IShowVendorPageProps) => {
     const unApproveVendor = async() => {
       setIsBlockingVendor(true)
   
-      await managementUnApproveVendorAction(vendor.id)
-      .then((response) => {
-          if(response.status === 202) {
-              toast.success('Vendor status updated');
-          }
-      })
-      .catch(error => {
-        console.log({error});
-        toast.error(error?.response?.data?.message || 'Error try again later');
-      })
-      .finally(() => setIsBlockingVendor(false));
+        await managementUnApproveVendorAction(vendor.id)
+        .then((response) => {
+            if(response.status === 200) {
+                toast.success('Vendor status updated');
+                setTimeout(()=>window.location.reload(), 3000);
+            }
+        })
+        .catch(error => {
+            console.log({error});
+            toast.error(error?.response?.data?.message || 'Error try again later');
+        })
+        .finally(() => setIsBlockingVendor(false));
     }
 
     const approveVendor = async() => {
@@ -39,8 +40,9 @@ const showVendor = ({vendor}: IShowVendorPageProps) => {
   
         await managementApproveVendorAction(vendor.id)
         .then((response) => {
-            if(response.status === 202) {
+            if(response.status === 200) {
                 toast.success('Vendor status updated');
+                setTimeout(()=>window.location.reload(), 3000);
             }
         })
         .catch(error => {

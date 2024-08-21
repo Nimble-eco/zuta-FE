@@ -10,7 +10,7 @@ interface ITextAreaInputProps {
 
 const TextAreaInput = ({label, name, value, onInputChange, placeHolder}: ITextAreaInputProps) => {
   return (
-    <div className="flex flex-col mb-4 py-2">
+    <div className="flex flex-col mb-4">
       <label htmlFor={label} className='font-semibold mb-3 text-sm'>{capitalizeFirstLetter(label)}:</label>
       <textarea
         placeholder={placeHolder || ''}

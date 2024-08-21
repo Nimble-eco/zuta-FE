@@ -19,28 +19,30 @@ const showProduct = ({product}: IShowProductPageProps) => {
     const [isBlockingProduct, setIsBlockingProduct] = useState(false);
 
     const unApproveProduct = async() => {
-      setIsBlockingProduct(true)
-  
-      await managementUnApproveProductAction(product.id)
-      .then((response) => {
-          if(response.status === 202) {
-              toast.success('Product status updated');
-          }
-      })
-      .catch(error => {
-        console.log({error});
-        toast.error(error?.response?.data?.message || 'Error try again later');
-      })
-      .finally(() => setIsBlockingProduct(false));
+        setIsBlockingProduct(true)
+    
+        await managementUnApproveProductAction(product.id)
+        .then((response) => {
+            if(response.status === 200) {
+                toast.success('Product status updated');
+                setTimeout(()=>window.location.reload(), 3000);
+            }
+        })
+        .catch(error => {
+            console.log({error});
+            toast.error(error?.response?.data?.message || 'Error try again later');
+        })
+        .finally(() => setIsBlockingProduct(false));
     }
 
     const approveProduct = async() => {
-      setIsBlockingProduct(true)
+        setIsBlockingProduct(true)
   
         await managementApproveProductAction(product.id)
         .then((response) => {
-            if(response.status === 202) {
+            if(response.status === 200) {
                 toast.success('Product status updated');
+                setTimeout(()=>window.location.reload(), 3000);
             }
         })
         .catch(error => {
@@ -56,7 +58,7 @@ const showProduct = ({product}: IShowProductPageProps) => {
             <div className="min-h-screen bg-gray-100 flex flex-col gap-6 w-full md:w-[80%] absolute right-0 md:left-[20%] rounded-md px-4">
                 <div className='flex flex-col bg-white mt-6 rounded-md'>
                     <div className="flex flex-row justify-between items-center border-b border-gray-200 py-4 px-4">
-                        <h2 className="text-xl font-semibold align-center align-baseline my-auto capitalize">{product.name}</h2>
+                        <h2 className="text-xl font-semibold align-center align-baseline my-auto capitalize">{product.product_name}</h2>
                         <div className="flex flex-row ">
                             <div className="ml-3">
                                 {
@@ -77,107 +79,49 @@ const showProduct = ({product}: IShowProductPageProps) => {
                         </div>
                     </div>
         
-                    <div className='flex flex-col'>
-                        <div className='flex flex-col lg:grid lg:grid-cols-2 lg:gap-4'>
-                            <div className="flex flex-row w-full">
-                                <div className='w-[60%] mr-[3%] md:mr-none'>
-                                    <TextCard label='Name' value={product.name} />
-                                </div>
-                                <div className='w-[30%] md:w-auto md:mr-none'>
-                                    <TextCard label='Quantity' value={product.quantity} />
-                                </div>
-                            </div>
-                            <div className="flex flex-row">
-                                <div className='w-[60%] mr-[3%] md:mr-none'>
-                                    <TextCard label='Price' value={product.product_price} />
-                                </div>
-                                <div className='w-[30%] md:w-auto md:mr-none'>
-                                    <TextCard label='Discount' value={product.product_discount} />
-                                </div>
-                            </div>
-                        </div>
-        
-                        <div className='flex flex-col lg:grid lg:grid-cols-2 lg:gap-4'>
-                            <div className="flex flex-row w-full">
-                                <div className='w-[60%] mr-[3%] md:mr-none'>
-                                    <TextCard label='Status' value={product.status} />
-                                </div>
-                                <div className='w-[30%] md:w-auto md:mr-none'>
-                                    <TextCard label='Featured' value={product.featured_status} />
-                                </div>
-                            </div>
-                            <div className="flex flex-row">
-                                <div className='w-[60%] mr-[3%] md:mr-none'>
-                                    <TextCard label='Category(s}' value={product.product_categories} />
-                                </div>
-                                <div className='w-[30%] md:w-auto md:mr-none'>
-                                    <TextCard label='Tag(s)' value={product.product_tags} />
-                                </div>
-                            </div>
-                        </div>
-        
-                        <div className='flex flex-col lg:grid lg:grid-cols-2 lg:gap-4'>
-                            <div className="flex flex-row w-full">
-                                <div className='w-[60%] md:mr-none'>
-                                    <TextCard label='Orders' value={product.orders?.length} />
-                                </div>
-                                <div className='w-[30%] md:w-auto md:mr-none'>
-                                    <TextCard label='Order Trains' value={product.openOrders?.length} />
-                                </div>
-                            </div>
-                            <div className="flex flex-row">
-                                <div className='w-[60%] mr-[3%] md:mr-none'>
-                                    <TextCard label='Vendor Approved' value={product.vendor_approved ? 'True' : 'False'} />
-                                </div>
-                                <div className='w-[60%] mr-[3%] md:mr-none'>
-                                    <TextCard label='Management Approved' value={product.management_approved ? 'True' : 'False'} />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className='flex flex-col lg:grid lg:grid-cols-2 lg:gap-4'>
-                            <div className="flex flex-row w-full">
-                                <div className='w-[30%] md:w-auto md:mr-none'>
-                                    <TextCard label='Flag(s)' value={product.flags} />
-                                </div>
-                                <div className='w-[30%] md:w-auto md:mr-none'>
-                                    <TextCard label='View(s)' value={product.views?.length} />
-                                </div>
-                            </div>
-                            <div className="flex flex-row">
-                                <div className='w-[60%] mr-[3%] md:mr-none'>
-                                    <TextCard label='Reviews' value={product.reviews?.length} />
-                                </div>
-                                <div className='w-[60%] mr-[3%] md:mr-none'></div>
-                            </div>
-                        </div>
+                    <div className='flex flex-col md:grid md:grid-cols-2 lg:grid-cols-4 gap-4'>
+                        <TextCard label='Name' value={product.product_name} />
+                        <TextCard label='Quantity' value={product.quantity} />
+                        <TextCard label='Price' value={product.product_price} />
+                        <TextCard label='Discount' value={product.product_discount} />
+                        <TextCard label='Status' value={product.status} />
+                        <TextCard label='Featured' value={product.featured_status ?? '--'} />
+                        <TextCard label='Category(s}' value={product.product_categories ?? '--'} />
+                        <TextCard label='Tag(s)' value={product.product_tags} />
+                        <TextCard label='Orders' value={product.orders?.length} />
+                        <TextCard label='Order Trains' value={product.openOrders?.length ?? 0} />
+                        <TextCard label='Vendor Approved' value={product.vendor_approved ? 'True' : 'False'} />
+                        <TextCard label='Management Approved' value={product.management_approved ? 'True' : 'False'} />
+                        <TextCard label='Flag(s)' value={product?.flags ?? 0} />
+                        <TextCard label='View(s)' value={product.views?.length} />
+                        <TextCard label='Reviews' value={product.reviews?.length} />
                     </div>
                 </div>
 
-                <div className='flex flex-col bg-white mt-6 rounded-md p-4'>
+                <div className='flex flex-col bg-white rounded-md p-4'>
                     <div className="flex flex-row justify-between items-center">
                         <h4 className="text-base text-slate-700 font-semibold">Vendor</h4>
                         <p 
                             onClick={()=>router.push(`/admin/stores/${product.vendor_id}`)}
-                            className="text-sm text-gray-800 cursor-pointer hover:text-orange-500 font-medium"
+                            className="text-sm text-orange-600 border border-orange-600 px-4 py-1 rounded-md cursor-pointer hover:text-orange-800 font-medium"
                         >
                             View
                         </p>
                     </div>
-                    <div className="gird grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                         <TextCard label="Name" value={product?.vendor?.vendor_name} />
                         <TextCard label="Email" value={product?.vendor?.vendor_email} />
                         <TextCard label="Phone Number" value={product?.vendor?.vendor_phone} />
                         <TextCard label="City" value={product?.vendor?.vendor_city} />
                         <TextCard label="State" value={product?.vendor?.vendor_state} />
                         <TextCard label="Country" value={product?.vendor?.vendor_country} />
-                        <TextCard label="Flag(s)" value={product?.vendor?.vendor_flag} />
+                        <TextCard label="Flag(s)" value={product?.vendor?.flag} />
                     </div>
                 </div>
 
                 {
                     product?.featured ? 
-                    <div className='flex flex-col bg-white mt-6 rounded-md p-4'>
+                    <div className='flex flex-col bg-white rounded-md p-4'>
                         <div className="flex flex-row justify-between items-center">
                             <h4 className="text-base text-slate-700 font-semibold">Showcase</h4>
                             <p 
@@ -200,9 +144,9 @@ const showProduct = ({product}: IShowProductPageProps) => {
                         <h4 className="text-base text-slate-700 font-semibold">Showcase</h4>
                         <p 
                             onClick={()=>router.push(`/admin/showcase/create/${product.id}`)}
-                            className="text-sm text-gray-800 cursor-pointer hover:text-orange-500 font-medium"
+                            className="text-sm text-orange-600 border border-orange-600 rounded-md px-4 py-1 cursor-pointer hover:text-orange-800 font-medium"
                         >
-                            Showcase Product
+                            Promote
                         </p>
                     </div>
                 }
@@ -262,7 +206,10 @@ export async function getServerSideProps(context: any) {
   
     try {
         const getMyProduct = await axiosInstance.get('/api/product/show?id=' + id, {
-            headers: {Authorization: token}
+            headers: {
+                Authorization: token,
+                team: user?.vendor
+            }
         });
         const product = getMyProduct.data?.data;
   

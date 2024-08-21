@@ -18,6 +18,9 @@ import { formatAmount } from "../../Utils/formatAmount";
 import NewAddressModal from "../../Components/modals/address/NewAddressModal";
 import { RiCoupon2Line } from "react-icons/ri";
 import { couponValidateAction } from "../../requests/coupons/coupons.requests";
+import { BiLoaderCircle } from "react-icons/bi";
+import { BsChat } from "react-icons/bs";
+import generateRandomKey from "../../Utils/generateRandowmKey";
 
 interface ICreateOrderTrainPageProps {
     product: {
@@ -53,7 +56,7 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
     const [couponCode, setCouponCode] = useState('');
     const [validatingCoupon, setValidatingCoupon] = useState(false);
 
-    const [paymentReference, setPaymentReference] = useState('');
+    const [paymentReference, setPaymentReference] = useState(generateRandomKey(8));
     const pay_stack_key = process.env.NEXT_PUBLIC_PAY_STACK_KEY!;
 
     const toggleImageGallery = () => setShowImageGallery(!showImageGallery);
@@ -81,18 +84,16 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
     }
 
     const openOrderTrain = async () => {
-        await axiosInstance.post('/api/open-order/store', {
+        return axiosInstance.post('/api/open-order/store', {
             product_id: product.id,
             quantity,
             address_id: selectedAddress.id,
             order_delivery_fee: deliveryFee,
+            reference: paymentReference
         }, {
             headers: {
                 Authorization: user.access_token
             }
-        })
-        .then((response) => {
-            console.log({response})
         })
     }
 
@@ -104,6 +105,7 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
     };
 
     const onSuccess = async () => {
+        setIsLoading(true);
         await openOrderTrain()
         .then(() => {
             toast.success('Payment successful')
@@ -113,38 +115,14 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
             console.log({error})
             toast.error(error?.response?.message || 'Error try agin later');
         })
-      
+        .finally(()=>setIsLoading(false))
     };
     
-      
     const onClose = () => {
         console.log('çlosed');
     }
 
     const initializePayment = usePaystackPayment(config);
-
-    const createPayment = async () => {
-        setIsLoading(true);
-
-        await axiosInstance.post('/api/payment/store', {
-            amount: totalAmount,
-            type: 'open_order'
-        }, {
-            headers: {
-                Authorization: user.access_token
-            }
-        })
-        .then((response) => {
-            setIsLoading(false)
-            console.log({response})
-            setPaymentReference(response.data.data.id);
-        })
-        .catch(error => {
-            console.log({error})
-            setIsLoading(false)
-            toast.error(error.response?.message ?? 'Error try agin later');
-        });
-    }
     
     const vailidateCoupon = async () => {
         setValidatingCoupon(true);
@@ -212,7 +190,7 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
         <div className='w-full h-fit lg:h-[60vh] cursor-pointer flex align-middle mt-2' onClick={toggleImageGallery}>
             <SwiperSlider 
                 slides={product?.product_images}
-                slidesToShow={2}
+                slidesToShow={product?.product_images?.length > 2 ? 2 : 1}
             />
         </div>
 
@@ -220,7 +198,7 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
             className="flex flex-col md:flex-row w-full lg:w-[95%] mx-auto px-3 lg:px-5 py-4 mt-6 relative"
         >
             <div className="w-full md:w-[60%] flex flex-col lg:px-4">
-                <h1 className="text-xl md:text-2xl justify-center mb-0 !text-center lg:!text-left">
+                <h1 className="text-xl md:text-2xl justify-center mb-0 !text-center lg:!text-left capitalize">
                     {product?.product_name}
                 </h1>
                 <p className="text-gray-600 py-2 mb-0 line-clamp-4 !text-center lg:!text-left">
@@ -336,11 +314,18 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
                             if(!selectedAddress?.address) {
                                 setShowSelectAddressModal(true)
                             }
-                            else createPayment().then(() => initializePayment(onSuccess, onClose))
+                            else initializePayment(onSuccess, onClose)
                         }}
+                        disabled={isLoading}
                         className="bg-orange-500 hover:bg-orange-700 text-white font-medium py-2 px-4 h-12 rounded-full w-[60%] !mx-auto whitespace-nowrap fixed bottom-4 left-4 right-4 lg:static"
                     >
-                        {selectedAddress?.address ? `Checkout ${formatAmount(totalAmount) }` : 'Start Order Train'}
+                        {
+                            selectedAddress?.address ? 
+                            `Checkout ${formatAmount(totalAmount) }` : 
+                            isLoading ? 
+                            <BiLoaderCircle className="h-6 w-6 animate-spin" /> :
+                            'Start Order Train'
+                        }
                     </button>
                 </div>
 
@@ -379,7 +364,11 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
                     <button disabled={currentReviewPage === 0} onClick={() => setCurrentReviewPage(currentReviewPage - 1)} className='mr-3 cursor-pointer'>Previous</button>
                     <button disabled={currentReviewPage === reviewPages.length - 1} onClick={() => setCurrentReviewPage(currentReviewPage + 1)} className='mr-3 cursor-pointer'>Next</button>
                 </div>
-            </div> : <p className='text-center text-xl mt-8'>No reviews yet</p>
+            </div> : 
+            <div className='flex flex-col justify-center items-center gap-2 my-16'>
+                <BsChat className='text-5xl text-orange-500'/>
+                <p className='text-center text-xl font-medium text-orange-500'>No reviews yet</p>
+            </div>
         }
     </div>
   )

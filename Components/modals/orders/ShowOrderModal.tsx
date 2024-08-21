@@ -1,8 +1,7 @@
 import { useState } from "react";
 import Modal from 'react-bootstrap/Modal';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { toast, ToastContainer } from 'react-toastify';
-import { injectStyle } from "react-toastify/dist/inject-style";
+import { toast } from 'react-toastify';
 import { MdOutlineClose } from 'react-icons/md';
 import SwiperSlider from "../../sliders/Swiper";
 import { formatAmount } from "../../../Utils/formatAmount";
@@ -22,8 +21,6 @@ const ShowOrderModal = ({order, setShow}: IShowOrderModalProps) => {
     const [isLoading, setIsLoading] = useState(false);
     const [rating, setRating] = useState<number>(0);
     const [comment, setComment] = useState('');
-
-    if(typeof window !== 'undefined') injectStyle();
 
     const cancelOrder = async () => {
         setIsLoading(true);
@@ -78,7 +75,6 @@ const ShowOrderModal = ({order, setShow}: IShowOrderModalProps) => {
 
   return (
     <div className="!rounded-md ">
-        <ToastContainer />
         <Modal show={true} onHide={setShow} backdrop="static" dialogClassName='modal-90w'>
             <Modal.Body className='md:!min-w-[40vw] !w-[40vw] relative'>
                 <MdOutlineClose className='text-3xl cursor-pointer absolute top-3 right-3' onClick={setShow} />

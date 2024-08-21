@@ -14,7 +14,7 @@ const VerificationSuccessModal = ({setShow}: IVerificationSuccessModalProps) => 
   return (
     <div className="!rounded-md">
         <Modal show={true} onHide={setShow} backdrop="static" dialogClassName='w-[90%] md:modal-90w mx-auto'>
-            <Modal.Body className='md:!min-w-[40vw] md:w-[65vw] lg::!w-[45vw] relative mx-auto'>
+            <Modal.Body className='md:!min-w-[40vw] md:w-[65vw] lg:!w-[45vw] relative mx-auto'>
                 <IoIosCloseCircleOutline className='text-3xl text-red-600 text-opacity-60 cursor-pointer absolute top-3 right-3' onClick={setShow} />
                 <div className='flex flex-col min-h-[40vh] justify-center text-center align-middle gap-4 px-4'>
                     <h2 className='text-xl text-green-500 flex flex-row justify-center'>

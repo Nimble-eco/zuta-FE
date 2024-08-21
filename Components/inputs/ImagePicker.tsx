@@ -11,7 +11,6 @@ interface ImagePickerProps {
 }
 
 const ImagePicker = ({label, onSelect, files, onRemove}: ImagePickerProps) => {
-  console.log({files})
   return (
     <div className='flex flex-col'>
       <div className="flex flex-row relative py-2 mb-4 border-b border-gray-200">
@@ -47,7 +46,7 @@ const ImagePicker = ({label, onSelect, files, onRemove}: ImagePickerProps) => {
                     />
                   }
                   <img
-                    className="h-40 w-36 rounded-md"
+                    className="h-40 w-36 rounded-md object-cover object-center"
                     src={file}
                     key={index}
                   />

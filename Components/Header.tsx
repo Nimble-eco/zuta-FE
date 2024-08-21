@@ -21,9 +21,7 @@ const Header = ({search = true, onSearch}: INavBarProps) => {
     const [searchStr, setSearchStr] = useState<string>('');
     const [user, setUser] = useState<any>({});
 
-    const goToCartPage = () => {
-        router.push(`/cart`);
-    }
+    const goToCartPage = () => router.push(`/cart`);
 
     const searchProducts = (searchStr: string) => router.push(`/results?search=${searchStr}`);
 
@@ -178,21 +176,30 @@ const Header = ({search = true, onSearch}: INavBarProps) => {
                         <a className='mb-6'>
                             Open Orders
                         </a>
-                        <a className='mb-6'>
-                            Categories
-                        </a>
-                        <a className='mb-6' href='/customer-support'>
-                            Customer Service
-                        </a>
+
                         {
-                            user?.access_token ? 
-                            <a className='mb-6' href='/profile'>
-                                Profile
-                            </a> :
+                            user?.access_token ? <>
+                                <a className='mb-6' href='/profile'>
+                                    Profile
+                                </a> 
+                                <a className='mb-6' href='/customer-support'>
+                                    Customer Service
+                                </a>    
+                            </> :
                             <a className='mb-6' href='/auth/signIn'>
                                 Sign In
                             </a>
                         }
+
+                        <p className='text-lg font-bold text-slate-800 my-4'>Top Categories</p>
+
+                        <a className='mb-6' href={`/results?search=groceries`}>Groceries</a>
+                        <a className='mb-6' href={`/results?search=electronics`}>Electronics</a>
+                        <a className='mb-6' href={`/results?search=food`}>Food stuffs</a>
+
+                        <a className='mb-6 !text-orange-500' href='/product-categories'>
+                            See all
+                        </a>
                     </div>
                 </div>
             }

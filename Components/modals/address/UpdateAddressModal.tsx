@@ -2,12 +2,10 @@ import { useState } from "react";
 import Modal from 'react-bootstrap/Modal';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { MdOutlineClose } from 'react-icons/md';
-import { ToastContainer, toast } from 'react-toastify';
-import { injectStyle } from 'react-toastify/dist/inject-style';
+import { toast } from 'react-toastify';
 import ButtonGhost from "../../buttons/ButtonGhost";
 import ButtonFull from "../../buttons/ButtonFull";
 import Cookies from "js-cookie";
-import { useRouter } from "next/router";
 import axiosInstance from "../../../Utils/axiosConfig";
 const NaijaStates = require('naija-state-local-government');
 
@@ -29,15 +27,13 @@ interface IUpdateAddressModalProps {
 }
 
 const UpdateAddressModal = ({setShow, address}: IUpdateAddressModalProps) => {
-    const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [updatedAddress, setUpdatedAddress] = useState(address);
     const states = NaijaStates.states();
-    const [lgas, setLGAs] = useState<string[]>([]);
+    const [lgas, setLGAs] = useState<string[]>(NaijaStates.lgas(address?.city)?.lgas);
 
     let token: string;
     if (typeof window !== "undefined") {
-        injectStyle();
         let user = Cookies.get('user') ? JSON.parse(Cookies.get('user')!) : null;
         token = user?.access_token;
     }
@@ -63,9 +59,10 @@ const UpdateAddressModal = ({setShow, address}: IUpdateAddressModalProps) => {
             if(res.status === 200){
                 setIsLoading(false);
                 toast.success('Address Updated');
-                router.push('/profile')
+                setShow();
             }
         } catch(error: any) {
+            setIsLoading(false);
             toast.error(error?.message || "Error Try later")
         }
     }
@@ -83,19 +80,19 @@ const UpdateAddressModal = ({setShow, address}: IUpdateAddressModalProps) => {
 
             if(res.status === 200){
                 setIsLoading(false);
-                toast.success('Address Updated');
-                router.push('/profile')
+                toast.success('Default address set successfully');
+                setShow();
             }
         } catch(error: any) {
+            setIsLoading(false);
             toast.error(error?.message || "Error Try later")
         }
     }
 
   return (
     <div className="!rounded-md ">
-        <ToastContainer />
-        <Modal show={true} onHide={setShow} backdrop="static" dialogClassName='modal-90w'>
-            <Modal.Body className='md:min-w-[40vw] w-[40vw]'>
+        <Modal show={true} onHide={setShow} dialogClassName='md:modal-90w'>
+            <Modal.Body className='md:min-w-[40vw] md:w-[40vw]'>
                 <div className='flex flex-col min-h-[50vh] relative'>
                     <MdOutlineClose className='text-3xl cursor-pointer absolute top-3 right-3' onClick={setShow} />
                     <form className="flex flex-col w-[95%] md:w-[80%] mx-auto my-10">
@@ -206,8 +203,8 @@ const UpdateAddressModal = ({setShow, address}: IUpdateAddressModalProps) => {
                             >
                                 <option value={''}>Select a local government area</option>
                                 {
-                                    lgas && lgas?.map((lga: string) => (
-                                        <option key={lga} value={lga}>{lga}</option>
+                                    lgas && lgas?.map((lga: string, index: number) => (
+                                        <option key={`${lga} ${index}`} value={lga}>{lga}</option>
                                     ))
                                 }
                             </select>
@@ -249,15 +246,15 @@ const UpdateAddressModal = ({setShow, address}: IUpdateAddressModalProps) => {
                             />
                         </div>
                     
-                        <div className="flex flex-col md:flex-row mt-4 gap-3">
-                            <div className="w-[45%] whitespace-nowrap">
+                        <div className="flex flex-col-reverse justify-center md:flex-row md:items-center mt-4 gap-3">
+                            <div className="lg:w-[45%] whitespace-nowrap h-10">
                                 <ButtonGhost 
                                     action="Set default address"
                                     onClick={(e: any) => setDefaultAddress(e)}
                                     loading={isLoading} 
                                 />
                             </div>
-                            <div className="w-[55%]">
+                            <div className="lg:w-[55%] h-10">
                                 <ButtonFull
                                     action="Update Address" 
                                     onClick={(e: any) => updateAddress(e)} 

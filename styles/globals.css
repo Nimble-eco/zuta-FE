@@ -146,3 +146,8 @@ a{
   .slider.round:before {
     border-radius: 50%;
   }
+
+  .center-absolute-el {
+    left: 50%;
+    transform: translateX(-50%);
+  }

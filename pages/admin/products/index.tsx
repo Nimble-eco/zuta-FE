@@ -235,7 +235,7 @@ const ProductsIndexPage = ({products}:IProductsIndexPageProps) => {
                             vendor_approved: product.vendor_approved ? 'True' : 'False',
                             flag: product.flag
                         }))} 
-                        onRowButtonClick={(user: any) => router.push(`products/${user.id}`)}
+                        onRowButtonClick={(product: any) => router.push(`products/${product.id}`)}
                     />
                     <div className='flex flex-row justify-end text-sm w-[80%] mx-auto'>
                         <button onClick={() => paginateData(productsData?.data?.meta, 'prev')} className='mr-3 cursor-pointer'>Previous</button>
