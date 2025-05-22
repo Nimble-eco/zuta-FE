@@ -18,7 +18,9 @@ export interface IJoinOrderTrainProps {
 export interface IUpdateOrderTrainStatusProps {
     id: string;
     user_id?: string;
-    status: statusType;
+    status?: statusType;
+    order_paid?: boolean;
+    order_payment_confirmed?: boolean;
 }
 
 export interface IFilterMyOrderTrainStatusProps {

@@ -5,7 +5,6 @@ const NaijaStates = require('naija-state-local-government');
 import { ToastContainer, toast } from 'react-toastify';
 import { injectStyle } from 'react-toastify/dist/inject-style';
 import { notify } from "../../../Utils/displayToastMessage";
-import { getAddressDetailsFromGoogleAPI } from "../../../Utils/getAddressDetailsFromGoogle";
 import { sendAxiosRequest } from "../../../Utils/sendAxiosRequest";
 import ButtonFull from "../../buttons/ButtonFull";
 import Cookies from "js-cookie";
@@ -30,25 +29,13 @@ const NewAddressModal = ({setShow, redirect}: INewAddressModalProps) => {
     });
     const states = NaijaStates.states();
     const [lgas, setLGAs] = useState<string[]>([]);
+    console.log({userAddress})
 
     let token: string;
     if (typeof window !== "undefined") {
         injectStyle();
         let user = Cookies.get('user') ? JSON.parse(Cookies.get('user')!) : null;
         token = user?.access_token;
-    }
-
-    // AUTOCOMPLETE USER ADDRESS WITH GOOGLE API
-    const [predictedAddress, setPredictedAddress] = useState<string[]>([]);
-
-    // SET ADDRESS DETAILS
-    const getAddressDetails = async (placeId :string) => {
-        let res = await getAddressDetailsFromGoogleAPI(placeId);
-        setUserAddress({
-            ...userAddress,
-            name: res?.formatted_address,
-            address: res
-        });
     }
 
     const handleAddressChange = ( e: any ) => {
@@ -123,6 +110,25 @@ const NewAddressModal = ({setShow, redirect}: INewAddressModalProps) => {
                             <label
                                 className="text-base text-gray-700 mt-1"
                             >
+                                Phone number
+                                <span className="text-red-500 ml-2">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                placeholder="2349012345678"
+                                className="text-base text-gray-700 bg-gray-100 border border-gray-200 rounded-md px-3 py-2 outline-none"
+                                name="phone"
+                                value={userAddress?.phone}
+                                onChange={(e) => handleAddressChange(e)}
+                            />
+                        </div>
+
+                        <div
+                            className="flex flex-col mb-3"
+                        >
+                            <label
+                                className="text-base text-gray-700 mt-1"
+                            >
                                 Address
                                 <span className="text-red-500 ml-2">*</span>
                             </label>
@@ -142,54 +148,13 @@ const NewAddressModal = ({setShow, redirect}: INewAddressModalProps) => {
                             <label
                                 className="text-base text-gray-700 mt-1"
                             >
-                                Phone number
-                                <span className="text-red-500 ml-2">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                placeholder="2349012345678"
-                                className="text-base text-gray-700 bg-gray-100 border border-gray-200 rounded-md px-3 py-2 outline-none"
-                                name="phone"
-                                value={userAddress?.phone}
-                                onChange={(e) => handleAddressChange(e)}
-                            />
-                        </div>
-
-                        {
-                            predictedAddress?.length > 0 && predictedAddress?.map((address: any, index: any) => (
-                                <div
-                                    className="flex flex-row items-center justify-between py-3"
-                                    key={index}
-                                    onClick={() => getAddressDetails(address.place_id)}
-                                >
-                                    <span
-                                        className="text-gray-800 m-0"
-                                    >
-                                        {address.description}
-                                    </span>
-                                    <button
-                                        className="bg-orange-500 text-white px-2 py-1 rounded-md"
-                                    >
-                                        Select
-                                    </button>
-                                </div>
-                            ))
-                        }
-
-                        <div
-                            className="flex flex-col mb-3"
-                        >
-                            <label
-                                className="text-base text-gray-700 mt-1"
-                            >
                                 State
                                 <span className="text-red-500 ml-2">*</span>
                             </label>
                             <select 
                                 className="text-base text-gray-700 bg-gray-100 border border-gray-200 rounded-md px-3 py-2 outline-none"
-                                value={userAddress.state} 
                                 onChange={(e) => {
-                                    setUserAddress({...userAddress, state: e.target.value})
+                                    setUserAddress({...userAddress, state: e.target.value.toLowerCase()})
                                     setLGAs(NaijaStates.lgas(e.target.value).lgas)
                                 }}
                             >
@@ -213,7 +178,6 @@ const NewAddressModal = ({setShow, redirect}: INewAddressModalProps) => {
                             </label>
                             <select 
                                 className="text-base text-gray-700 bg-gray-100 border border-gray-200 rounded-md px-3 py-2 outline-none"
-                                value={userAddress.city} 
                                 onChange={(e) => setUserAddress({...userAddress, city: e.target.value})}
                             >
                                 <option value={''}>Select a local government area</option>

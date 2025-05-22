@@ -17,7 +17,8 @@ const create = () => {
         title: '',
         url:'',
         descripton: '',
-        image: '',
+        image: undefined,
+        base64_image: '',
         enabled: undefined,
         position: undefined
     }); 
@@ -31,9 +32,7 @@ const create = () => {
 
     const selectImage = async (e: any) => {
         let base64_image = await convertToBase64(e.target.files[0]);
-        let arr = newBanner.base64_images;
-        arr.push(base64_image);
-        setNewBanner({...newBanner, base64_images: arr});
+        setNewBanner({...newBanner, image: e.target.files[0], base64_images: base64_image});
     }
 
     const createBanner = async () => {
@@ -58,7 +57,7 @@ const create = () => {
         <div className="flex flex-row w-full mx-auto mt-8 relative mb-10">
             <AdminSideNavPanel />
             <div className="flex flex-col w-full px-4 lg:px-0 lg:w-[80%] lg:absolute lg:right-0 lg:left-[20%]">
-                <div className="flex flex-row relative pr-2 py-4 mb-3 border-b border-gray-200">
+                <div className="flex flex-row relative items-center pr-2 py-4 mb-3 border-b border-gray-200 mt-10 lg:mt-0">
                     <h2 className="text-lg font-bold">Banner Details</h2>
                     <div className="w-fit absolute right-1 bottom-2">
                         <ButtonFull 
@@ -69,7 +68,7 @@ const create = () => {
                     </div>
                 </div>
 
-                <div className="flexflex-col gap-4 bg-white py-6 px-4 rounded-md">
+                <div className="flex flex-col gap-4 bg-white py-6 px-4 rounded-md">
                     <ColumnTextInput 
                         label="Title"
                         name='title'
@@ -118,7 +117,7 @@ const create = () => {
                         <ImagePicker 
                             label="Image"
                             onSelect={selectImage}
-                            files={newBanner.base64_images}
+                            files={[newBanner.base64_images]}
                         />
                     </div>
                 </div>

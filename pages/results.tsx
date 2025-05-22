@@ -1,7 +1,6 @@
 import { useState } from "react";
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { ToastContainer, toast} from "react-toastify";
-import { injectStyle } from "react-toastify/dist/inject-style";
+import { toast} from "react-toastify";
 import Header from "../Components/Header";
 import ProductComponent from "../Components/ProductComponent"
 import ResultsPageSideNavPanel from "../Components/navigation/SideNavPanel";
@@ -12,6 +11,7 @@ import { MdOutlineFilterList } from "react-icons/md";
 import axiosInstance from "../Utils/axiosConfig";
 import { useRouter } from "next/router";
 import { filterPublicProductsByPriceAction, filterPublicProductsByRatingAction } from "../requests/publicProducts/public-products.request";
+import { Loader2 } from "lucide-react";
 
 interface IResultsPageProps {
     products: any[];
@@ -26,11 +26,9 @@ function results({products, openOrderProducts, featuredProducts}: IResultsPagePr
     const [page, setPage] = useState(1);
     const [showMobileFilterDrawer, setShowMobileFilterDrawer] = useState<boolean>(false);
     const { search } = router.query;
-    const [moreProducts, setMoreProducts] = useState(true);
-    const [moreFeatures, setMoreFeatures] = useState(true);
-
-    if (typeof window !== "undefined") injectStyle();
-
+    const [moreProducts, setMoreProducts] = useState(products?.length > 0 ? true : false);
+    const [moreFeatures, setMoreFeatures] = useState(featuredProducts?.length > 0 ? true : false);
+0
     const loadMoreData = async () => {
         await axiosInstance.post('/api/public/product/search/index', {
             search: search,
@@ -112,11 +110,11 @@ function results({products, openOrderProducts, featuredProducts}: IResultsPagePr
             className="flex flex-col w-full bg-white min-h-screen relative"
         >
             <Header />
-            <ToastContainer />
 
             { showMobileFilterDrawer && <BottomDrawer 
                 filterByPrice={filterByPrice}
                 filterByRating={filterByRating}
+                setShow={()=>setShowMobileFilterDrawer(false)}
             /> }
 
             <div className="flex flex-col md:flex-row shadow-md py-5 relative">
@@ -168,7 +166,7 @@ function results({products, openOrderProducts, featuredProducts}: IResultsPagePr
                             dataLength={featuredProductsList?.length}
                             next={loadFeaturedProductsData}
                             hasMore={moreFeatures}
-                            loader={<h4 className="block text-center">...</h4>}
+                            loader={<Loader2 className="h-7 w-7 mx-auto mt-8 text-orange-600 animate-spin" />}
                             className='flex flex-col w-full gap-y-48'
                         >
                             {
@@ -198,13 +196,7 @@ function results({products, openOrderProducts, featuredProducts}: IResultsPagePr
                             dataLength={data?.length}
                             next={loadMoreData}
                             hasMore={moreProducts}
-                            loader={<h4 style={{ 
-                                display: "block",
-                                textAlign: 'center' 
-                                }}>
-                                    Loading...
-                                </h4>
-                            }
+                            loader={<Loader2 className="h-7 w-7 mx-auto mt-8 text-orange-600 animate-spin" />}
                             className='flex flex-col gap-y-10 md:grid md:grid-cols-2 md:gap-4 lg:grid-cols-3 lg:gap-5 xl:grid-cols-4 w-[90%] mx-auto lg:w-full px-8'
                         >
                             {data?.length > 0 ? data?.map((product: any, index: number) => (

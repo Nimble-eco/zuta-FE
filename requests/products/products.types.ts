@@ -8,6 +8,9 @@ export interface IStoreProductActionProps {
     product_categories: string[];
     product_tags?: string[];
     base64_images?: string[];
+    url_images?: string[];
+    url_videos?: string[];
+    url_testimonial_videos?: string[];
     images?: File[];
     status?: string;
 }
@@ -15,15 +18,21 @@ export interface IStoreProductActionProps {
 export interface IUpdateProductActionProps {
     id: number;
     vendor_id: string;
-    product_name: string;
-    product_description: string;
-    product_price: number;
+    product_name?: string;
+    product_introduction?: string;
+    product_description?: string;
+    product_summary?: string;
+    product_price?: number;
     product_discount?: number;
-    quantity: number;
+    quantity?: number;
     status?: string;
-    product_categories: string[];
+    product_categories?: string[];
     product_tags?: string[];
+    product_images?: string[];
+    product_videos?: string[];
     base64_images?: string[];
+    url_images?: string[];
+    url_videos?: string[];
     images?: File[];
 }
 

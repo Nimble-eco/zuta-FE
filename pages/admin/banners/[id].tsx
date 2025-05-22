@@ -20,7 +20,11 @@ interface IUpdateBannerProps {
 const update = ({banner}: IUpdateBannerProps) => {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
-    const [newBanner, setNewBanner] = useState<any>(banner); 
+    const [newBanner, setNewBanner] = useState<any>({
+        ...banner, 
+        image: undefined,
+        base64_images: banner.image
+    }); 
     
     const handleChange = (e: any) => {
         setNewBanner((prev: any) => ({
@@ -31,9 +35,7 @@ const update = ({banner}: IUpdateBannerProps) => {
 
     const selectImage = async (e: any) => {
         let base64_image = await convertToBase64(e.target.files[0]);
-        let arr = newBanner.base64_images;
-        arr.push(base64_image);
-        setNewBanner({...newBanner, base64_images: arr});
+        setNewBanner({...newBanner, image: e.target.files[0], base64_images: base64_image});
     }
 
     const updateBanner = async () => {
@@ -43,10 +45,10 @@ const update = ({banner}: IUpdateBannerProps) => {
             id: banner.id
         })
         .then((response) => {
-            if(response.status === 201) {
+            if(response.status === 202) {
                 setIsLoading(false);
-                toast.success('Banner created successfully');
-                router.push('/admin/banners')
+                toast.success('Banner updated successfully');
+                setTimeout(()=>router.back(), 2000);
             }
         })
         .catch(error => {
@@ -60,10 +62,10 @@ const update = ({banner}: IUpdateBannerProps) => {
         setIsLoading(true);
         await deleteBannerAction(banner.id)
         .then((response) => {
-            if(response.status === 201) {
+            if(response.status === 200) {
                 setIsLoading(false);
                 toast.success('Banner deleted successfully');
-                router.push('/admin/banners')
+                setTimeout(()=>router.back(), 2000);
             }
         })
         .catch(error => {
@@ -75,12 +77,12 @@ const update = ({banner}: IUpdateBannerProps) => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col overflow-scroll">
-        <div className="flex flex-row w-full mx-auto mt-8 relative mb-10">
+        <div className="flex flex-row w-full mx-auto mt-8 relative">
             <AdminSideNavPanel />
-            <div className="flex flex-col w-[80%] absolute right-0 left-[20%]">
-                <div className="flex flex-row justify-between items-center border-b border-gray-200">
+            <div className="flex flex-col w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%]">
+                <div className="flex flex-row justify-between items-center bg-white px-4 py-3 rounded-t-md border-b border-gray-200 mt-20 lg:mt-0">
                     <h2 className="text-lg font-bold">Banner Details</h2>
-                    <div className="flex flex-row gap-4 items-center">
+                    <div className="flex flex-row gap-2 items-center">
                         <div className="hidden lg:flex w-fit ">
                             <ButtonGhost 
                                 action="Delete"
@@ -98,7 +100,7 @@ const update = ({banner}: IUpdateBannerProps) => {
                     </div>
                 </div>
 
-                <div className="flexflex-col gap-4 bg-white py-6 px-4 rounded-md">
+                <div className="flex flex-col gap-4 bg-white py-6 px-4 rounded-md">
                     <ColumnTextInput 
                         label="Title"
                         name='title'
@@ -147,7 +149,7 @@ const update = ({banner}: IUpdateBannerProps) => {
                         <ImagePicker 
                             label="Image"
                             onSelect={selectImage}
-                            files={newBanner.base64_images}
+                            files={[newBanner.base64_images]}
                         />
                     </div>
 
@@ -174,7 +176,7 @@ export async function getServerSideProps(context: any) {
     const token = user?.access_token;
   
     try {
-      const getBanner = await axiosInstance.get('/api/advert/banner/show?id=' + id, {
+      const getBanner = await axiosInstance.get('/api/advert/banners/show?id=' + id, {
         headers: { Authorization: token }
       });
       const banner = getBanner.data?.data;

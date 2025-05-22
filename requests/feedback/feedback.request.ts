@@ -4,7 +4,16 @@ import axiosInstance from "../../Utils/axiosConfig";
 
 export const storeFeedbackAction = async (payload: IStoreFeedbackPayloadProps) => {
     const user = JSON.parse(Cookies.get('user')!);
-    return axiosInstance.post('/api/feedback/store', payload, {
+
+    const formData = new FormData();
+    formData.append('comment', payload.comment);
+    formData.append('category', payload.category);
+    formData.append('type', payload.type);
+    formData.append('user_id', payload.user_id!);
+    formData.append('email', payload.email!);
+    formData.append('image', payload.image!);
+
+    return axiosInstance.post('/api/feedback/store', formData, {
         headers: {
             Authorization: user.access_token
         }

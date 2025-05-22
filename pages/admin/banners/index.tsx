@@ -12,6 +12,7 @@ import { toast } from 'react-toastify';
 import TextInput from '../../../Components/inputs/MyTextInput';
 import { filterBannersAction, searchBannersAction } from '../../../requests/banners/banner.request';
 import ButtonFull from '../../../Components/buttons/ButtonFull';
+import { processImgUrl } from '../../../Utils/helper';
 
 interface IBannersIndexPageProps {
     banners: any
@@ -22,7 +23,7 @@ const BannersIndexPage = ({banners}:IBannersIndexPageProps) => {
     const router = useRouter();
     const [showFilterInput, setShowFilterInput] = useState<boolean>(false);
     const [loading, setLoading] = useState(false);
-
+    
     const [filterByDetails, setFilterByDetails] = useState({
         title: '',
         enabled: undefined,
@@ -163,10 +164,10 @@ const BannersIndexPage = ({banners}:IBannersIndexPageProps) => {
             />
         }
 
-        <div className="flex flex-row w-full mx-auto mt-8 relative mb-10">
+        <div className="flex flex-row w-full mx-auto mt-8 relative">
             <AdminSideNavPanel />
-            <div className="flex flex-col w-[80%] absolute right-0 left-[20%]">
-                <div className="grid grid-cols-4 gap-4 mb-6">
+            <div className="flex flex-col w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%] px-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6 mt-20 lg:mt-0">
                     <StatsCard
                         title='All Banners'
                         value={banners.data?.meta?.total ?? 0}
@@ -206,6 +207,9 @@ const BannersIndexPage = ({banners}:IBannersIndexPageProps) => {
                         content={bannersData?.data?.data?.map((banner: any) => ({
                             ...banner,
                             id: banner.id,
+                            image: processImgUrl(banner.image),
+                            enabled: banner.enabled ? 'True' : 'False',
+                            created_at: new Date(banner.created_at).toLocaleDateString()
                         }))} 
                         onRowButtonClick={(banner: any) => router.push(`banners/${banner.id}`)}
                     />

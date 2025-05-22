@@ -1,7 +1,5 @@
-import { toast, ToastContainer } from 'react-toastify';
-import { injectStyle } from "react-toastify/dist/inject-style";
+import { toast } from 'react-toastify';
 import ButtonFull from "../../../Components/buttons/ButtonFull"
-import FilterAndSearchGroup from "../../../Components/inputs/FilterAndSearchGroup"
 import VendorSideNavPanel from "../../../Components/vendor/layout/VendorSideNavPanel"
 import { useState } from 'react'
 const NaijaStates = require('naija-state-local-government');
@@ -15,11 +13,13 @@ import TextAreaInput from "../../../Components/inputs/TextAreaInput";
 import { sendAxiosRequest } from "../../../Utils/sendAxiosRequest";
 import { parse } from "cookie";
 import axiosInstance from "../../../Utils/axiosConfig";
-import { updateMyVendorAction } from "../../../requests/vendor/vendor.request";
+import { updateMyVendorAction, vendorApproveStoreAction, vendorUnapproveStoreAction } from "../../../requests/vendor/vendor.request";
 import { MdDeleteForever } from 'react-icons/md';
 import DeleteModal from '../../../Components/modals/DeleteModal';
 import { deleteBankDetailsAction } from '../../../requests/wallet/wallet.request';
 import { useRouter } from 'next/router';
+import { FcMoneyTransfer } from 'react-icons/fc';
+import SliderInput from '../../../Components/inputs/SliderInput';
 
 interface ISettingsPageProps {
     userProfile: any;
@@ -27,17 +27,15 @@ interface ISettingsPageProps {
     wallet: any;
 }
 
-const index = ({userProfile, vendorProfile, wallet}: ISettingsPageProps) => {
-    const [showFilterInput, setShowFilterInput] = useState<boolean>(false);
+const index = ({vendorProfile, wallet}: ISettingsPageProps) => {
     const [showAddPaymentMethodModal, setShowAddPaymentMethodModal] = useState<boolean>(false);
     const [vendor, setVendor] = useState(vendorProfile);
     const [isLoading, setIsLoading] = useState(false);
+    const [isApproving, setIsApproving] = useState(false);
     const [tab, setTab] = useState('profile');
     const [showDeleteBankDataModal, setShowDeleteBankDataModal] = useState<boolean>(false);
     const [selectedBankID, setSelectedBankID] = useState<string>('');
     const router = useRouter();
-
-    if(typeof window !== 'undefined') injectStyle();
 
     const states = NaijaStates.states();
     const [lgas, setLGAs] = useState<string[]>([]);
@@ -63,9 +61,9 @@ const index = ({userProfile, vendorProfile, wallet}: ISettingsPageProps) => {
 
         await deleteBankDetailsAction(selectedBankID)
         .then(response => {
-            toast.success('Bank details delete successfully')
+            toast.success('Bank details deleted successfully')
             setShowDeleteBankDataModal(false)
-            router.push('/vendor/setting')
+            setTimeout(()=>window.location.reload(), 2000)
         })
         .catch(error => {
             console.log({error});
@@ -74,14 +72,43 @@ const index = ({userProfile, vendorProfile, wallet}: ISettingsPageProps) => {
         .finally(() => setIsLoading(false));
     }
 
+    const approveStore = async () => {
+        setIsApproving(true);
+
+        await vendorApproveStoreAction(vendorProfile.id)
+        .then(response => {
+            toast.success('Store approved successfully')
+            setTimeout(()=>window.location.reload(), 2000)
+        })
+        .catch(error => {
+            console.log({error});
+            toast.error(error.response?.data?.message || 'Error! Try again later');
+        })
+        .finally(() => setIsApproving(false));
+    }
+
+    const unapproveStore = async () => {
+        setIsApproving(true);
+
+        await vendorUnapproveStoreAction(vendorProfile.id)
+        .then(response => {
+            toast.success('Store unapproved successfully')
+            setTimeout(()=>window.location.reload(), 2000)
+        })
+        .catch(error => {
+            console.log({error});
+            toast.error(error.response?.data?.message || 'Error! Try again later');
+        })
+        .finally(() => setIsApproving(false));
+    }
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-        <ToastContainer />
         {
             showAddPaymentMethodModal && <AddPaymentMethodModal
                 show={showAddPaymentMethodModal}
                 setShow={() => setShowAddPaymentMethodModal(!showAddPaymentMethodModal)}
-                redirect={() =>router.push('/vendor/setting')}
+                redirect={()=>setTimeout(()=>window.location.reload(), 2000)}
             />
         }
 
@@ -96,67 +123,91 @@ const index = ({userProfile, vendorProfile, wallet}: ISettingsPageProps) => {
 
         <VendorSideNavPanel />
         <div className="flex flex-col w-full lg:w-[80%] lg:absolute lg:right-2 lg:left-[20%]">
-            <h2 className="text-2xl font-bold text-slate-700 my-4">Settings</h2>
-            <div className="flex flex-row text-sm font-semibold text-gray-400 px-4 py-5 bg-white">
-                <a 
-                    href="#0" 
-                    className={`${tab === 'profile' && '!text-orange-500'} hover:!text-orange-500 mr-3`}
-                    onClick={() => setTab('profile')}
-                >
-                    Profile
-                </a>
-                <a 
-                    href="#0" 
-                    className={`${tab === 'payment' && '!text-orange-500'} hover:!text-orange-500 mr-3`}
-                    onClick={() => setTab('payment')}
-                >
-                    Payment
-                </a>
-                {/* <a 
-                    href="#0" 
-                    className={`hover:!text-orange-500 mr-3 ${tab === 'order' && '!text-orange-500'}`}
-                    onClick={() => setTab('order')}
-                >
-                    Order
-                </a>
-                <a 
-                    href="#0" 
-                    className={`hover:!text-orange-500 mr-3 ${tab === 'danger' && '!text-orange-500'}`}
-                    onClick={() => setTab('danger')}
-                >
-                    Danger
-                </a> */}
+            <div className='flex flex-col gap-2 px-4 bg-white py-4 mb-2 !mt-20 lg:!mt-0'>
+                <h2 className="text-xl font-semibold text-slate-700">Settings</h2>
+                <div className="flex flex-row font-semibold text-gray-400">
+                    <a 
+                        href="#0" 
+                        className={`${tab === 'profile' && '!text-orange-500'} hover:!text-orange-500 mr-3`}
+                        onClick={() => setTab('profile')}
+                    >
+                        Profile
+                    </a>
+                    <a 
+                        href="#0" 
+                        className={`${tab === 'payment' && '!text-orange-500'} hover:!text-orange-500 mr-3`}
+                        onClick={() => setTab('payment')}
+                    >
+                        Payment
+                    </a>
+                    {/* <a 
+                        href="#0" 
+                        className={`hover:!text-orange-500 mr-3 ${tab === 'order' && '!text-orange-500'}`}
+                        onClick={() => setTab('order')}
+                    >
+                        Order
+                    </a>
+                    <a 
+                        href="#0" 
+                        className={`hover:!text-orange-500 mr-3 ${tab === 'danger' && '!text-orange-500'}`}
+                        onClick={() => setTab('danger')}
+                    >
+                        Danger
+                    </a> */}
+                </div>
             </div>
 
             {/* PROFILE SECTION */}
             {
                 tab === 'profile' && 
-                <div className="bg-white">
-                    <div className="flex flex-col gap-4 w-[90%] lg:w-[60%] pl-[5%] mb-4">
+                <div className="bg-white min-h-screen pt-4 px-4">
+                    <div className="flex flex-col gap-4 w-full lg:w-[70%] mb-4">
                         <form className="flex flex-col gap-4">
-                            <ColumnTextInput 
-                                label="Vendor Name"
-                                value={vendor?.vendor_name || ""}
-                                name="vendor_name"
-                                placeHolder="Enter vendor name"
-                                onInputChange={handleChange}
-                            />
+                            <div className='flex flex-row gap-4 w-full'>
+                                <div className='w-[80%]'>
+                                    <ColumnTextInput 
+                                        label="Vendor Name"
+                                        value={vendor?.vendor_name || ""}
+                                        name="vendor_name"
+                                        placeHolder="Enter vendor name"
+                                        onInputChange={handleChange}
+                                    />
+                                </div>
 
-                            <ColumnTextInput 
-                                label="Phone Number"
-                                value={vendor?.vendor_phone}
-                                name="vendor_phone"
-                                placeHolder="Enter vendor phone"
-                                onInputChange={handleChange}
-                            />
+                                <div className="flex flex-col gap-3 w-[15%]">
+                                    <label className="text-base text-gray-700">
+                                        Approve
+                                    </label>
+                                    <SliderInput
+                                        name='user_approved'
+                                        value={vendor.user_approved}
+                                        handleChange={
+                                            vendorProfile?.user_approved ?
+                                            unapproveStore :
+                                            approveStore
+                                        }
+                                    />
+                                    {isApproving && <p className="text-orange-500 text-sm">Updating...</p>}
+                                </div>
 
-                            <ColumnTextInput 
-                                label="Vendor Email"
-                                value={vendor?.vendor_email}
-                                name="vendor_email"
-                                placeHolder="Enter vendor email"
-                                onInputChange={handleChange}
-                            />
+                            </div>
+                            <div className='grid grid-cols-2 gap-4'>
+                                <ColumnTextInput 
+                                    label="Phone Number"
+                                    value={vendor?.vendor_phone}
+                                    name="vendor_phone"
+                                    placeHolder="Enter vendor phone"
+                                    onInputChange={handleChange}
+                                />
+
+                                <ColumnTextInput 
+                                    label="Vendor Email"
+                                    value={vendor?.vendor_email}
+                                    name="vendor_email"
+                                    placeHolder="Enter vendor email"
+                                    onInputChange={handleChange}
+                                />
+                            </div>
 
                             <ColumnTextInput 
                                 label="Address"
@@ -166,46 +217,48 @@ const index = ({userProfile, vendorProfile, wallet}: ISettingsPageProps) => {
                                 onInputChange={handleChange}
                             />
 
-                            <div className="flex flex-col mb-3">
-                                <label className="text-base text-gray-700 mt-1">
-                                    State
-                                </label>
-                                <select 
-                                    className="text-base text-gray-700 bg-gray-100 border border-gray-200 rounded-md px-3 py-2 outline-none"
-                                    value={vendor?.vendor_state} 
-                                    onChange={(e) => {
-                                        setVendor({...vendor, vendor_state: e.target.value})
-                                        setLGAs(NaijaStates.lgas(e.target.value).lgas)
-                                    }}
-                                >
-                                    <option value={''}>Select a state</option>
-                                    {
-                                        states && states.map((state: string) => (
-                                            <option key={state} value={state}>{state}</option>
-                                        ))
-                                    }
-                                </select>
-                            </div>
+                            <div className='grid grid-cols-3 gap-4'>
+                                <div className="flex flex-col mb-3">
+                                    <label className="text-base text-gray-700 mt-1">
+                                        State
+                                    </label>
+                                    <select 
+                                        className="text-base text-gray-700 bg-gray-100 border border-gray-200 rounded-md px-3 py-2 outline-none"
+                                        value={vendor?.vendor_state} 
+                                        onChange={(e) => {
+                                            setVendor({...vendor, vendor_state: e.target.value})
+                                            setLGAs(NaijaStates.lgas(e.target.value).lgas)
+                                        }}
+                                    >
+                                        <option value={''}>Select a state</option>
+                                        {
+                                            states && states.map((state: string) => (
+                                                <option key={state} value={state}>{state}</option>
+                                            ))
+                                        }
+                                    </select>
+                                </div>
 
-                            <ColumnTextInput 
-                                label="Vendor City"
-                                value={vendor?.vendor_city}
-                                name="vendor_city"
-                                placeHolder="Enter vendor city"
-                                onInputChange={handleChange}
-                            />
-
-                            <div className="flex flex-col mb-3">
-                                <label className="text-base text-gray-700 mt-1">
-                                    Country
-                                </label>
-                                <input
-                                    type="text"
-                                    placeholder="your address"
-                                    className="text-base text-gray-700 bg-gray-100 border border-gray-200 rounded-md px-3 py-2 outline-none"
-                                    name="name"
-                                    defaultValue={'Nigeria'}
+                                <ColumnTextInput 
+                                    label="Vendor City"
+                                    value={vendor?.vendor_city}
+                                    name="vendor_city"
+                                    placeHolder="Enter vendor city"
+                                    onInputChange={handleChange}
                                 />
+
+                                <div className="flex flex-col mb-3">
+                                    <label className="text-base text-gray-700 mt-1">
+                                        Country
+                                    </label>
+                                    <input
+                                        type="text"
+                                        placeholder="your address"
+                                        className="text-base text-gray-700 bg-gray-100 border border-gray-200 rounded-md px-3 py-2 outline-none"
+                                        name="name"
+                                        defaultValue={'Nigeria'}
+                                    />
+                                </div>
                             </div>
 
                             <TextAreaInput
@@ -216,7 +269,7 @@ const index = ({userProfile, vendorProfile, wallet}: ISettingsPageProps) => {
                                 onInputChange={handleChange}
                             />
 
-                            <div className="w-[30%] mx-auto h-12">
+                            <div className="w-[80%] lg:w-[30%] mx-auto h-10">
                                 <ButtonFull
                                     action="Save"
                                     loading={isLoading}
@@ -233,13 +286,6 @@ const index = ({userProfile, vendorProfile, wallet}: ISettingsPageProps) => {
                 tab === 'payment' &&
                 <div className='bg-white relative min-h-[60vh]'>
                     <div className="flex flex-row py-3 px-4 relative bg-white">
-                        {/* <div className="w-[full]">
-                            <FilterAndSearchGroup 
-                                searchInputPlaceHolder="Search name, type"
-                                onSearch={() => {}}
-                                onFilterButtonClick={() => setShowFilterInput(!showFilterInput)}
-                            />
-                        </div> */}
                         <div className="w-fit absolute right-4 hidden md:flex">
                             <ButtonFull 
                                 action="Add Payment Method"
@@ -251,12 +297,12 @@ const index = ({userProfile, vendorProfile, wallet}: ISettingsPageProps) => {
                         {
                             wallet?.bank_details?.map((bank: any, index: number) => (
                                 <div className="flex flex-col w-full lg:w-[40%] border border-gray-100 px-4 py-3 relative mb-4 min-h-[6rem]" key={index}>
-                                    <div className="flex flex-row">
-                                        <span className="font-semibold text-slate-600 mr-3">{bank.bank_name}</span>
-                                        <p className="text-orange-500 text-base">{bank.account_type}</p>
+                                    <div className="flex flex-row gap-3 items-center">
+                                        <span className="font-semibold text-slate-600">{bank.bank_name}</span>
+                                        <p className="text-orange-500 text-base mb-0">{bank.account_type}</p>
                                     </div>
-                                    <p className="text-gray-800 text-sm">{bank.account_name}</p>
-                                    <p className="text-gray-600 text-sm">{bank.account_number}</p>
+                                    <p className="text-gray-800 text-sm mb-0">{bank.account_name}</p>
+                                    <p className="text-gray-600 text-sm mb-0">{bank.account_number}</p>
 
                                     <MdDeleteForever className='absolute bottom-1 right-2 cursor-pointer text-red-400 text-2xl' onClick={() => {
                                         setSelectedBankID(bank.id);
@@ -268,7 +314,10 @@ const index = ({userProfile, vendorProfile, wallet}: ISettingsPageProps) => {
 
                         {
                             wallet?.bank_details?.length === 0 && (
-                                <p className='text-center font-medium text-xl my-auto'>No bank details</p>
+                                <div className='flex flex-col gap-3 justify-center items-center pt-10'>
+                                    <FcMoneyTransfer className='h-20 w-20 transition ease-in-out animate-in duration-500 duration-800 slide-in-from-bottom' />
+                                    <p className='text-center font-medium text-xl my-auto'>No bank details</p>
+                                </div>
                             )
                         }
                     </div>
@@ -314,8 +363,6 @@ const index = ({userProfile, vendorProfile, wallet}: ISettingsPageProps) => {
                 </div>
             }
         </div>
-
-       
     </div>
   )
 }

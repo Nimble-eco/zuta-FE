@@ -4,7 +4,6 @@ import Header from "../../Components/Header"
 import TextAreaInput from "../../Components/inputs/TextAreaInput";
 import MyDropDownInput from "../../Components/inputs/MyDropDownInput";
 import { toast } from "react-toastify";
-import { convertToBase64 } from "../../Utils/convertImageToBase64";
 import { FaInstagram, FaTelegram, FaTwitter, FaWhatsapp } from "react-icons/fa";
 import { storeFeedbackAction } from "../../requests/feedback/feedback.request";
 import { useRouter } from "next/router";
@@ -16,11 +15,10 @@ const CustomerSupport = () => {
     const [comment, setComment] = useState('');
     const [type, setType] = useState('');
     const [category, setCategory] = useState('');
-    const [image, setImage] = useState<string | undefined>(undefined);
+    const [image, setImage] = useState<File | undefined>(undefined);
     
     const selectImage = async (e: any) => {
-        let base64_image = await convertToBase64(e.target.files[0]);
-        setImage(base64_image!);
+        setImage(e.target.files[0]);
     }
 
     const submit = async () => {

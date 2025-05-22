@@ -55,8 +55,8 @@ const showProduct = ({product}: IShowProductPageProps) => {
     return (
         <div className="min-h-screen bg-gray-100 overflow-scroll flex flex-row relative mb-10">
             <AdminSideNavPanel />
-            <div className="min-h-screen bg-gray-100 flex flex-col gap-6 w-full md:w-[80%] absolute right-0 md:left-[20%] rounded-md px-4">
-                <div className='flex flex-col bg-white mt-6 rounded-md'>
+            <div className="min-h-screen bg-gray-100 flex flex-col gap-6 w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%] rounded-md px-4">
+                <div className='flex flex-col bg-white mt-20 lg:mt-6 rounded-md'>
                     <div className="flex flex-row justify-between items-center border-b border-gray-200 py-4 px-4">
                         <h2 className="text-xl font-semibold align-center align-baseline my-auto capitalize">{product.product_name}</h2>
                         <div className="flex flex-row ">
@@ -79,7 +79,7 @@ const showProduct = ({product}: IShowProductPageProps) => {
                         </div>
                     </div>
         
-                    <div className='flex flex-col md:grid md:grid-cols-2 lg:grid-cols-4 gap-4'>
+                    <div className='grid-cols-2 grid md:grid-cols-3 lg:grid-cols-4 gap-4'>
                         <TextCard label='Name' value={product.product_name} />
                         <TextCard label='Quantity' value={product.quantity} />
                         <TextCard label='Price' value={product.product_price} />
@@ -143,7 +143,7 @@ const showProduct = ({product}: IShowProductPageProps) => {
                     <div className='bg-white py-6 px-4 rounded-md flex flex-row justify-between items-center'>
                         <h4 className="text-base text-slate-700 font-semibold">Showcase</h4>
                         <p 
-                            onClick={()=>router.push(`/admin/showcase/create/${product.id}`)}
+                            onClick={()=>router.push(`/admin/showcase/create?product_id=${product.id}`)}
                             className="text-sm text-orange-600 border border-orange-600 rounded-md px-4 py-1 cursor-pointer hover:text-orange-800 font-medium"
                         >
                             Promote
@@ -208,7 +208,7 @@ export async function getServerSideProps(context: any) {
         const getMyProduct = await axiosInstance.get('/api/product/show?id=' + id, {
             headers: {
                 Authorization: token,
-                team: user?.vendor
+                team: user?.vendor ?? ''
             }
         });
         const product = getMyProduct.data?.data;

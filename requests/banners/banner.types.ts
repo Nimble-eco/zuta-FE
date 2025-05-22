@@ -1,6 +1,6 @@
 export interface IStoreBannerPayloadProps {
     title: string;
-    image: string;
+    image: File;
     url?: string;
     description?: string;
     enabled?: boolean;
@@ -22,7 +22,7 @@ export interface IFilterBannerPayloadProps {
 export interface IUpdateBannerPayloadProps {
     id: number;
     title?: string;
-    image?: string;
+    image?: File;
     url?: string;
     description?: string;
     enabled?: number;

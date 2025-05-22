@@ -2,10 +2,8 @@ import { useState } from "react";
 import Modal from 'react-bootstrap/Modal';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { MdOutlineClose } from 'react-icons/md';
-import { ToastContainer, toast } from 'react-toastify';
-import { injectStyle } from 'react-toastify/dist/inject-style';
+import { toast } from 'react-toastify';
 import MyDropDownInput from "../../inputs/MyDropDownInput";
-import MySearchInput from "../../inputs/MySearchInput";
 import TextInput from "../../inputs/ColumnTextInput";
 import MyNumberInput from "../../inputs/MyNumberInput";
 import ButtonFull from "../../buttons/ButtonFull";
@@ -20,7 +18,6 @@ interface IAddPaymentMethodModalProps {
 }
 
 const AddPaymentMethodModal = ({show, setShow, redirect}: IAddPaymentMethodModalProps) => {
-  if (typeof window !== "undefined") injectStyle();
   const [loading, setLoading] = useState(false);
   const [newPaymentInfo, setNewPaymentInfo] = useState({
     account_type: 'Fiat',
@@ -54,9 +51,8 @@ const AddPaymentMethodModal = ({show, setShow, redirect}: IAddPaymentMethodModal
 
   return (
     <div className="!rounded-md ">
-      <ToastContainer />
-      <Modal show={show} onHide={setShow} backdrop="static" dialogClassName='modal-90w'>
-        <Modal.Body className='md:!min-w-[40vw] !w-[40vw]'>
+      <Modal show={show} onHide={setShow} backdrop="static" dialogClassName='lg:modal-90w'>
+        <Modal.Body className='lg:!min-w-[40vw] lg:!w-[40vw]'>
           <div className='flex flex-col min-h-[50vh] relative'>
             <MdOutlineClose className='text-3xl cursor-pointer absolute top-3 right-3' onClick={setShow} />
             <form className="flex flex-col w-[90%] md:w-[60%] mx-auto my-10">
@@ -65,7 +61,7 @@ const AddPaymentMethodModal = ({show, setShow, redirect}: IAddPaymentMethodModal
                 <MyDropDownInput 
                   label="Type"
                   name="account_type"
-                  options={[{ name: 'Fiat'}, {name: 'Crypto'}]}
+                  options={[{ name: 'Fiat'}]}
                   value={newPaymentInfo?.account_type}
                   onSelect={handleChange}
                 />

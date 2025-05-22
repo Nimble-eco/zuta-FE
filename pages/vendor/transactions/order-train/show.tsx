@@ -10,7 +10,7 @@ interface IShowTransactionPageProps {
 const show = ({order}: IShowTransactionPageProps) => {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col overflow-auto">
-        <div className="flex flex-row w-[95%] mx-auto mt-8 relative mb-10">
+        <div className="flex flex-row !w-full mx-auto lg:mt-8 relative">
             <VendorSideNavPanel />
             <SingleOpenOrderTransaction transaction={order} reviews={order.reviews}/>
         </div>

@@ -1,15 +1,13 @@
 import { useRouter } from "next/router";
 import {useEffect, useState } from "react";
 import Cookies from "js-cookie";
-import { toast, ToastContainer } from 'react-toastify';
-import { injectStyle } from "react-toastify/dist/inject-style";
+import { toast } from 'react-toastify';
 import axiosInstance from "../../../../Utils/axiosConfig";
 import ButtonFull from "../../../../Components/buttons/ButtonFull";
 import { PulseLoader } from "react-spinners";
 import Header from "../../../../Components/Header";
 import ButtonGhost from "../../../../Components/buttons/ButtonGhost";
 import RatingsCard from "../../../../Components/cards/RatingsCard";
-
 
 const paystack = () => {
     const router = useRouter();
@@ -19,7 +17,6 @@ const paystack = () => {
     const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
 
     if(typeof window !== 'undefined'){
-        injectStyle();
         userCookie = Cookies.get('user') ? JSON.parse(Cookies.get('user')!) : null; 
     }
 
@@ -49,7 +46,6 @@ const paystack = () => {
 
   return (
     <div className="bg-gray-200 min-h-screen flex flex-col relative">
-        <ToastContainer />
         <Header />
 
         <div 

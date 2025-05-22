@@ -13,6 +13,7 @@ import { formatAmount } from "../../../Utils/formatAmount";
 import { sendAxiosRequest } from "../../../Utils/sendAxiosRequest";
 import { filterProductsByVendorAction, searchProductsByVendorAction } from "../../../requests/products/products.request";
 import Cookies from "js-cookie";
+import { processImgUrl } from "../../../Utils/helper";
 
 interface IProductsIndexPageProps {
     products: any;
@@ -33,7 +34,7 @@ const index = ({products, categories, tags}: IProductsIndexPageProps) => {
     let vendorId: string = '';
 
     if(typeof window !== 'undefined') {
-        vendorId = JSON.parse(Cookies.get('user')!).vendor;
+        vendorId = Cookies.get('user') ? JSON.parse(Cookies.get('user')!).vendor : null;
     }
 
 
@@ -202,8 +203,8 @@ const index = ({products, categories, tags}: IProductsIndexPageProps) => {
         }
         <div className="flex flex-row w-full mx-auto mt-8 relative mb-10">
             <VendorSideNavPanel />
-            <div className="flex flex-col w-[80%] absolute right-0 left-[20%]">
-                <div className="flex flex-row justify-between items-center bg-white py-2 px-4 mb-1">
+            <div className="flex flex-col w-full lg:w-[80%] lg:absolute lg:right-0 lg:left-[20%]">
+                <div className="flex flex-row justify-between items-center bg-white py-2 px-4 mb-1 mt-14 lg:mt-0">
                     <h2 className="text-2xl font-bold text-slate-700 mb-4">Products</h2>
                     <div className="w-fit h-12">
                         <ButtonFull 
@@ -239,10 +240,11 @@ const index = ({products, categories, tags}: IProductsIndexPageProps) => {
                 {/* PRODUCTS TABLE */}
                 <div className="flex flex-col pb-8 bg-white overflow-y-auto">
                     <MyTable
+                        isLoading={loading}
                         headings={['product_image', 'product_name', 'product_price', 'vendor_approved', 'quantity', 'management_approved']}
                         content={productsData?.data?.map((product: any) => ({
                             ...product,
-                            product_image: product.product_images[0],
+                            product_image: processImgUrl(product.product_images[0]),
                             product_price: formatAmount(product.product_price),
                             vendor_approved: product?.vendor_approved ? 'Approved' : 'Unapproved',
                             management_approved: product?.management_approved ? 'Approved' : 'Unapproved',
@@ -267,6 +269,15 @@ export async function getServerSideProps(context: any) {
     const cookies = parse(context.req.headers.cookie || ''); 
     const user = JSON.parse(cookies.user || 'null');
     const token = user?.access_token;
+
+    if(!token) {
+        return {
+            redirect: {
+              destination: '/auth/signIn',
+              permanent: false
+            }
+        }
+    }
 
     try {
         const getMyProducts = await axiosInstance.get('/api/product/me', {

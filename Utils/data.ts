@@ -26,4 +26,15 @@ export const feedbackStatusTypes = [
     {title: 'pending', value: 'pending'},
     {title: 'resolved', value: 'resolved'},
     {title: 'dispute', value: 'dispute'},
+];
+
+export const appFaqs = [
+    {
+        question: 'What is an order train?',
+        answer: ''
+    },
+    {
+        question: 'Can i return items?',
+        answer: ''
+    },
 ]

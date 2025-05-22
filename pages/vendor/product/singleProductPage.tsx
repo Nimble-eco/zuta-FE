@@ -26,6 +26,15 @@ export async function getServerSideProps(context: any) {
   const user = JSON.parse(cookies.user || 'null');
   const token = user?.access_token;
 
+  if(!token) {
+    return {
+      redirect: {
+        destination: '/auth/signIn',
+        permanent: false
+      }
+    }
+  }
+
   try {
     const getMyProduct = await axiosInstance.get('/api/product/show?id=' + id, {
       headers: {

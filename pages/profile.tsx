@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { parse } from 'cookie';
-import { ToastContainer, toast} from "react-toastify";
+import { toast } from "react-toastify";
 import {GrTransaction} from 'react-icons/gr'
 import ButtonFull from "../Components/buttons/ButtonFull";
 import { BsArrowRightCircle } from 'react-icons/bs'
@@ -30,7 +30,6 @@ import { statusType } from "../requests/orderTrain/orderTrain.types";
 import Cookies from "js-cookie";
 import { updateUserAction } from "../requests/user/user.request";
 import { AiFillEdit } from "react-icons/ai";
-import { convertToBase64 } from "../Utils/convertImageToBase64";
 import MyDropDownInput from "../Components/inputs/MyDropDownInput";
 import DeleteAddressModal from "../Components/modals/address/DeleteAddressModal";
 import RateProductModal from "../Components/modals/pending-reviews/RateProductModal";
@@ -84,8 +83,9 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
     const getPage = (page: string) => router.push(`/${page}`);
 
     const selectImage = async (e: any) => {
-        let base64_image = await convertToBase64(e.target.files[0]);
-        setUser({...user, picture: base64_image, base64_image: base64_image});
+        // let base64_image = await convertToBase64(e.target.files[0]);
+        // setUser({...user, picture: base64_image, base64_image: base64_image});
+        setUser({...user, picture: e.target.files[0], file_image: e.target.files[0]});
     }
 
     const updateUserProfile = async () => {
@@ -97,7 +97,8 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
             email: user.email,
             phone: user.phone,
             description: user.description,
-            base64_image: user.base64_image
+            base64_image: user.base64_image,
+            file_image: user.file_image
         })
         .then((response) => {
             if(response.status === 202) {
@@ -186,13 +187,11 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
 
         return () => { isMounted = false }
     }, []);
+    console.log({profile})
 
     return (
-        <div
-            className="min-h-screen bg-gray-100"
-        >
+        <div className="min-h-screen bg-gray-100">
             <Header />
-            <ToastContainer />
             {
                 isLoading ? (
                     <SimpleLoader />
@@ -306,7 +305,7 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                         {
                             currentNav === 'profile' && (
                                 <div
-                                    className="flex flex-col md:flex-row md:justify-between w-[90%] md:w-[80%] mx-auto min-h-screen"
+                                    className="flex flex-col gap-4 md:flex-row md:justify-between w-[90%] md:w-[80%] mx-auto min-h-screen"
                                 >
                                     <div 
                                         className="flex flex-col gap-3 md:w-[40%] mx-auto md:my-6"
@@ -355,15 +354,15 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                                                     onClick={() => getPage('vendor/product/')}
                                                 >
                                                     <MdStore className="text-2xl mr-2" />
-                                                    <p>My Store</p>
+                                                    <p className="!mb-0">My Store</p>
                                                 </div>
                                             }
                                           
                                         </div>  
                                     </div>
-                                    <div className="flex flex-col border border-gray-100 md:w-[60%] px-8 pb-4">
+                                    <div className="flex flex-col gap-6 border border-gray-100 md:w-[60%] px-8 pb-4">
                                         <p className="text-center font-semibold border-b py-3">Personal Information</p>
-                                        <form className="flex flex-col">
+                                        <form className="flex flex-col gap-4">
                                             <TextInput 
                                                 label="name"
                                                 value={user?.name}
@@ -385,7 +384,7 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                                                 placeHolder='Enter your Phone number'
                                             />
                                         </form>
-                                        <div className="h-14 w-[60%] mx-auto">
+                                        <div className="h-10 w-[60%] mx-auto">
                                             <ButtonFull 
                                                 action="Save changes"
                                                 loading={isLoading}
@@ -823,7 +822,7 @@ export async function getServerSideProps(context: any) {
         const orderTrains = myOrderTrains.status === 'fulfilled' ? myOrderTrains.value.data.data : [];
         const reviews = myReviews.status === 'fulfilled' ? myReviews.value.data : [];
         const myVendor = myVendorAccount.status === 'fulfilled' ? myVendorAccount.value.data : [];
-        console.log({reviews})
+
         return {
             props: {
                 addresses,

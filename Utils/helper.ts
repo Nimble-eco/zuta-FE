@@ -328,6 +328,12 @@ const copyToClipboard = (text: string) => {
 	window.alert('Text copied to clipboard');
 }
 
+const processImgUrl = (imageStr: string) => {
+	// if(imageStr?.includes(process.env.NEXT_PUBLIC_API_BASEURL!)) return imageStr;
+	if(imageStr?.includes('https://') || imageStr?.includes("http://")) return imageStr;
+	else return `${process.env.NEXT_PUBLIC_API_BASEURL!}/${imageStr}`
+}
+
 export {
 	getDayOfYear,
 	getDatesInRange,
@@ -351,5 +357,6 @@ export {
 	obfuscateString,
 	obfuscateEmail,
 	filterTruthyProps,
-	copyToClipboard
+	copyToClipboard,
+	processImgUrl
 };

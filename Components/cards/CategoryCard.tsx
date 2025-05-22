@@ -14,16 +14,16 @@ const CategoryCard = ({image, title}: ICategoryCardProps) => {
 
   return (
     <div
-      className="flex flex-col justify-center items-center bg-white rounded-md px-4 py-3 min-w-70 cursor-pointer h-fit lg:h-40"
+      className="flex flex-col bg-white rounded-md p-4 cursor-pointer min-w-fit min-h-fit shadow-2xl"
       onClick={() => handleClick(title)}
     >
       <img
         src={image} 
         alt={title}
-        className='flex rounded-full mb-2 min-h-[6rem] min-w-[6rem] w-full'  
+        className='rounded-full mb-2 h-[6rem] w-[6rem] mx-auto object-cover object-center hidden md:flex'  
       />
       <span
-        className='text-center text-base font-bold text-gray-500 '
+        className='text-center text-sm font-semibold text-slate-800 '
       >
         {title}
       </span>

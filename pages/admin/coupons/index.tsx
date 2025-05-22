@@ -164,10 +164,10 @@ const CouponsIndexPage = ({coupons}:ICouponsIndexPageProps) => {
             />
         }
 
-        <div className="flex flex-row w-full mx-auto mt-8 relative mb-10">
+        <div className="flex flex-row w-full mx-auto mt-8 relative">
             <AdminSideNavPanel />
-            <div className="flex flex-col w-[80%] absolute right-0 left-[20%]">
-                <div className="grid grid-cols-4 gap-4 mb-6">
+            <div className="flex flex-col w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%] px-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6 mt-20 lg:mt-0">
                     <StatsCard
                         title='All Coupons'
                         value={coupons.data?.meta?.total ?? 0}

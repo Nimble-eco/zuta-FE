@@ -5,12 +5,10 @@ import { calculateTotalHours } from "../../../Utils/getHoursDifferenceFromDateTi
 import ButtonFull from "../../../Components/buttons/ButtonFull";
 import { activateProductShowcaseAction, deactivateProductShowcaseAction, reactivateProductShowcaseAction, reactivateShowcaseByAdminAction, resumeProductShowcaseAction } from "../../../requests/showcase/showcase.request";
 import { useState } from "react";
-import Cookies from "js-cookie";
 import { useRouter } from "next/router";
-import { ToastContainer, toast } from 'react-toastify'
-import { injectStyle } from "react-toastify/dist/inject-style";
 import { capitalizeFirstLetter } from "../../../Utils/capitalizeFirstLettersOfString";
 import AdminSideNavPanel from "../../../Components/admin/layout/AdminSideNav";
+import { toast } from "react-toastify";
 
 interface IShowFeaturedProductPageProps {
   featuredProduct: any;
@@ -20,10 +18,6 @@ interface IShowFeaturedProductPageProps {
 const show = ({featuredProduct, mostViewedInCategories}: IShowFeaturedProductPageProps) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  
-  if(typeof window !== 'undefined') {
-    injectStyle();
-  }
 
   const getElapsedTime = () => {
     const elapsedHours = calculateTotalHours(featuredProduct?.featured_start_date, new Date(Date.now()).toISOString());
@@ -92,8 +86,8 @@ const show = ({featuredProduct, mostViewedInCategories}: IShowFeaturedProductPag
     <div className="min-h-screen bg-gray-100 flex flex-col overflow-auto">
       <div className="flex flex-row w-[95%] mx-auto mt-8 relative mb-10">
         <AdminSideNavPanel />
-        <div className="min-h-screen bg-gray-100 flex flex-col w-full md:w-[80%] absolute right-0 md:left-[21%] rounded-md px-4">
-          <div className="flex flex-row gap-4 flex-wrap">
+        <div className="min-h-screen bg-gray-100 flex flex-col w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%] rounded-md px-4">
+          <div className="flex flex-row gap-4 flex-wrap mt-20 lg:mt-0">
             <div className="bg-white rounded-md shadow-md flex flex-col gap-1 px-4 py-2">
               <p className="text-lg font-semibold text-orange-600">Total Views before</p>
               <p className="text-slate font-medium">4</p>

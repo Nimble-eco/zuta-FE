@@ -4,7 +4,7 @@ export interface IStoreFeedbackPayloadProps {
     email?: string;
     category: string;
     type: string;
-    image?: string;
+    image?: File;
 }
 
 export interface IUpdateFeedbackPayloadProps {

@@ -8,6 +8,7 @@ import SwiperSlider from '../Components/sliders/Swiper';
 import { sendAxiosRequest } from '../Utils/sendAxiosRequest';
 import { cataloguesDummyData } from '../data/catalogues';
 import HorizontalSlider from '../Components/lists/HorizontalSlider';
+import { ArrowRightCircle } from 'lucide-react';
 
 interface IHomePageProps {
   products: any[];
@@ -25,62 +26,44 @@ const Home = ({products, openOrders, categories, tags, featured, catalogues}: IH
     router.push(`/results?search=${searchStr}`)
   }
 
-  const handleClick = (tag: string) => {
-    router.push(`/results?tag=${tag}`);
-  }
-
   return (
-    <div className=" min-h-screen w-full overflow-x-hidden">
+    <div className="min-h-screen w-full overflow-x-hidden">
       <Header onSearch={searchProducts}/>
 
       <div
-        className='flex flex-col justify-center w-full lg:w-[90%] md:w-[80%] mx-auto px-5 py-10 my-10'
+        className='flex flex-col justify-center w-full lg:w-[90%] md:w-[80%] mx-auto px-5 lg:px-0 py-10'
       >
-        <div className=' rounded-md w-[90%] md:w-[60%] flex flex-col text-left lg:pl-[4%]'>
-          <h2
-            className='text-2xl md:text-5xl text-gray-600 font-bold w-full lg:w-[80%] mb-8'
-          >
-            Make we buy am {''}
-              <span 
-                className='text-orange-500'
-              >
-                together
-              </span>  
+        <div className='flex flex-col text-left'>
+          <h2 className='text-2xl md:text-4xl text-gray-600 font-bold w-full lg:w-[80%] mb-6'>
+            Let us buy {''}
+            <span className='text-orange-500'>
+              Together
+            </span>  
           </h2>
-          <div 
-            className='flex flex-col text-base justify-start w-full lg:w-[80%] font-mono font-semibold text-left text-gray-500'
-          >
+          <div className='flex flex-col text-base justify-start w-full lg:w-[80%] font-mono font-semibold text-left text-gray-500'>
             <p className='pb-1'>
               Enjoy Wholesale prices
             </p>
-            <p className='pb-1'>
+            <p>
               Money back if the discount rate increases 
             </p>
           </div>
             
         </div>
-      </div>
-      <div className='lg:h-[50vh] my-10 w-[80%] mx-auto'>
-        <SwiperSlider 
-          slides={cataloguesDummyData}
-          // slides={catalogues?.map(catalogue => catalogue.image)}
-          slidesToShow={2}
-        />
+      
+        <div className='lg:h-[35vh] my-10 w-full mx-auto'>
+          <SwiperSlider 
+            slides={cataloguesDummyData}
+            // slides={catalogues?.map(catalogue => catalogue.image)}
+            slidesToShow={2}
+          />
+        </div>
       </div>
 
-      <div 
-        className="flex flex-col gap-2 justify-between w-full px-[5%] lg:px-[10%] py-8 bg-gray-100 mb-16"
-      >
-        <span
-          className='text-left text-xl font-mono pl-6 mb-2 text-gray-700 font-extrabold'
-        >
-          Categories
-        </span>
-        <div
-          className="hidden lg:flex lg:flex-row gap-6 py-4 overflow-x-scroll"
-        >
+      <div className="flex flex-col gap-2 justify-between w-full lg:px-[5%] py-8 bg-gray-100 mb-16">
+        <div className="hidden lg:flex lg:flex-row gap-4">
           {
-            categories.length > 0 && categories?.map((category: any, index: number) => (
+            categories.length > 0 && categories?.slice(0,8).map((category: any, index: number) => (
               <CategoryCard 
                 key={`${category.name} ${index}`}
                 image={category?.image}
@@ -88,11 +71,16 @@ const Home = ({products, openOrders, categories, tags, featured, catalogues}: IH
               />
             ))
           }
+          <a
+            href='/departments'
+            className='my-auto flex flex-row gap-1 items-center'
+          >
+            <p className='text-orange-600 text-sm whitespace-nowrap'>See more</p>
+            <ArrowRightCircle className='text-xl text-orange-600' />
+          </a>
         </div>
 
-        <div
-          className="grid grid-cols-3 gap-3 md:grid-cols-3 lg:hidden px-5 max-w-full"
-        >
+        <div className="grid grid-cols-3 gap-3 md:grid-cols-3 lg:hidden px-5 max-w-full">
           {
             categories.length > 0 && categories?.slice(0, 8).map((category: any, index: number) => (
               <CategoryCard 
@@ -105,75 +93,78 @@ const Home = ({products, openOrders, categories, tags, featured, catalogues}: IH
         </div>
       </div>
       
-      <div className='text-2xl mb-4 w-[90%] lg:w-[80%] ml-[12%] flex flex-row cursor-pointer'>
-        <h2 className='font-semibold mr-3'>Open Orders</h2>
-        <MdArrowForward className='text-4xl' />
+      <div className='flex flex-col gap-4 w-full lg:w-[90%] mx-auto px-4'>
+        <div className='text-2xl mb-4 flex flex-row justify-between items-center'>
+          <h2 className='font-semibold text-slate-800 text-xl'>Join Order Trains</h2>
+          <a href='/order-train' className="flex flex-row gap-2 items-center text-base font-medium">
+            <p className='text-orange-600 mb-0'>More</p>
+            <ArrowRightCircle className='text-3xl text-orange-600' />
+          </a>
+        </div>
+
+        <div className='flex flex-col md:grid md:grid-cols-2 md:gap-6 lg:grid-cols-3 lg:gap-4 xl:grid-cols-4 xl:gap-6'>
+          {
+            openOrders.length > 0 && openOrders?.slice(0,8).map((order:any, index: number) => (
+              <OpenOrderProductCard
+                key={`${order.name} + ${index}`}
+                order={order} 
+              />
+            ))
+          }
+        </div>
       </div>
 
-      <div
-        className='flex flex-col md:grid md:grid-cols-2 md:gap-6 lg:grid-cols-3 lg:gap-4 xl:grid-cols-4 xl:gap-6 justify-between w-[80%] mx-auto my-3 px-5 py-2'
-      >
-        {
-          openOrders.length > 0 && openOrders?.map((order:any, index: number) => (
-            <OpenOrderProductCard
-              key={`${order.name} + ${index}`}
-              order={order} 
-            />
-          ))
-        }
-      </div>
-
-      <div className='mb-4 w-[90%] lg:w-[80%] ml-[12%]'>
+      <div className='mb-4 px-4 w-full lg:w-[90%] mx-auto'>
         <HorizontalSlider
           list_name='Showcase'
           list={featured}
         />
       </div>
       
-      <div 
-        className='flex flex-col justify-between text-gray-800 my-16 w-full px-[5%] lg:px-[10%] py-8 mx-auto bg-gray-100'
-      >
-        <h2
-          className='justify-start text-xl font-mono pl-6 mb-2 font-extrabold'
-        >
-          Tags
-        </h2>
-        <div className='hidden lg:flex lg:flex-row gap-4 px-5 overflow-x-scroll'>
+      <div className='flex flex-col gap-10 py-8 bg-gray-100 w-full lg:px-[5%]'>
+        <div className='flex flex-col gap-2 w-full'>
+          <div className='hidden lg:flex lg:flex-row gap-4'>
+            {
+              tags.length > 0 && tags?.slice(0,8).map((tag: any, index: number) => (
+                <CategoryCard 
+                  key={`${tag.name} ${index}`}
+                  image={tag?.image}
+                  title={tag.name}
+                />
+              ))
+            }
+            <a
+              href='/departments'
+              className='my-auto flex flex-row gap-1 items-center'
+            >
+              <p className='text-orange-600 text-sm whitespace-nowrap'>See more</p>
+              <ArrowRightCircle className='text-xl text-orange-600' />
+            </a>
+          </div>
+
+          <div className='grid grid-cols-3 gap-2 md:grid-cols-4 lg:hidden px-5'>
+            {
+              tags.length > 0 && tags?.slice(0, 8).map((tag: any, index: number) => (
+                <CategoryCard 
+                  key={`${tag.name} ${index}`}
+                  image={tag?.image}
+                  title={tag.name}
+                />
+              ))
+            }
+          </div>
+        </div>
+          
+        <div className='flex flex-col md:grid md:grid-cols-2 gap-4 lg:grid-cols-3 lg:gap-6 px-4 lg:px-0'>
           {
-            tags.length > 0 && tags?.map((tag: any, index: number) => (
-              <CategoryCard 
-                key={`${tag.name} ${index}`}
-                image={tag?.image}
-                title={tag.name}
+            products.length > 0 && products?.map((product:any, index: number) => (
+              <ProductComponent 
+                key={`${product.name} + ${index}`}
+                product={product} 
               />
             ))
           }
         </div>
-
-        <div className='grid grid-cols-3 gap-3 md:grid-cols-3 lg:hidden px-5'>
-          {
-            tags.length > 0 && tags?.slice(0, 8).map((tag: any, index: number) => (
-              <CategoryCard 
-                key={`${tag.name} ${index}`}
-                image={tag?.image}
-                title={tag.name}
-              />
-            ))
-          }
-        </div>
-      </div>
-
-      <div
-        className='flex flex-col md:grid md:grid-cols-2 md:gap-6 lg:grid-cols-3 lg:gap-4 xl:grid-cols-4 xl:gap-6 justify-between w-[90%] lg:w-[80%] mx-auto my-3 px-5 py-2'
-      >
-        {
-          products.length > 0 && products?.map((product:any, index: number) => (
-            <ProductComponent 
-              key={`${product.name} + ${index}`}
-              product={product} 
-            />
-          ))
-        }
       </div>
     </div>
 
@@ -242,20 +233,22 @@ export async function getServerSideProps() {
       const tags = tagsResult.status === 'fulfilled' ? tagsResult?.value?.data : [];      
       const featured = featuredResult.status === 'fulfilled' ? featuredResult?.value?.data : [];      
       const banners = bannersResult.status === 'fulfilled' ? bannersResult?.value?.data : [];      
-    
+   
       return {
         props: {
           products : products?.data ?? [],
           openOrders: openOrders?.data ?? [],
-          categories: categories?.data ?? [],
-          tags: tags?.data ?? [],
+          categories: categories ?? [],
+          tags: tags ?? [],
           featured: featured?.data ?? [],
           catalogues: banners?.data ??  []
         },
       }
   }
-  catch(err) {
+  catch(err: any) {
     console.log({err})
+    const error = err?.toJSON();
+    console.log({error})
     return {
       props: {
         products: [],

@@ -5,6 +5,7 @@ export interface IUpdateUserPayloadProps {
     phone?: string;
     description?: string;
     base64_image?: string;
+    file_image?: File;
 }
 
 export interface IFilterUserIndexPayload {

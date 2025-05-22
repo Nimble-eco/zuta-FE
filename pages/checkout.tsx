@@ -14,6 +14,8 @@ import axiosInstance from "../Utils/axiosConfig";
 import NewAddressModal from "../Components/modals/address/NewAddressModal";
 import { RiCoupon2Line } from "react-icons/ri";
 import { couponValidateAction } from "../requests/coupons/coupons.requests";
+import { Loader2 } from "lucide-react";
+import { BiLoader } from "react-icons/bi";
 
 interface ICheckoutProps {
     user: any;
@@ -38,31 +40,72 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
         cart = JSON.parse(localStorage.getItem('cart')!) ?? [];
         userCookie = Cookies.get('user') ? JSON.parse(Cookies.get('user')!) : null; 
     }
-    
-    const getAllVendorsAddressFromCart = async () => {
-        return cart?.products?.map((item: any) => item.vendor.vendor_address);
+
+    const prepareOrders = () => {
+        let orders: any[] = [];
+
+        cart?.products?.map((item: any)=>{
+            const order = {
+                pickup_state: item?.vendor?.vendor_state,
+                destination_state: selectedAddress?.state,
+
+                item_category: item?.product_categories?.length ? item?.product_categories[0] : 'other',
+                item_quantity: item?.quantity
+            };
+
+            orders?.push(order);
+        });
+
+        cart?.subscriptions?.map((item: any)=>{
+            const order = {
+                pickup_state: item?.vendor?.vendor_state,
+                destination_state: selectedAddress?.state,
+
+                item_category: item?.product?.product_categories?.length ? item?.product?.product_categories[0] : 'other',
+                item_quantity: item?.quantity
+            };
+
+            orders?.push(order);
+        });
+
+        cart?.bundles?.map((item: any)=>{
+            const order = {
+                pickup_state: item?.vendor?.vendor_state,
+                destination_state: selectedAddress?.state,
+
+                item_category: item?.product?.product_categories?.length ? item?.product?.product_categories[0] : 'other',
+                item_quantity: item?.quantity
+            };
+
+            orders?.push(order);
+        });
+
+        return orders;
     }
 
-    const [deliveryFee, setDeliveryFee] = useState<number>(3000);
+    const [deliveryFee, setDeliveryFee] = useState<number>(0);
+    const [deliverySummary, setDeliverySummary] = useState<number>(3000);
+
     const getDeliveryFee = async () => {
-        const res = await axios({
+        setIsLoading(true);
+
+        const url = `${process.env.NEXT_PUBLIC_NIMBLE_API_BASEURL}/third-party/delivery/estimate-address`;
+        const orderData = prepareOrders();
+
+        const response = await axios({
             method: 'post',
-            url: 'http://localhost:8080/api/delivery-cost',
-            data: {
-                pickUp: getAllVendorsAddressFromCart(),
-                dropoff: userAddressDetails.geometry?.location,
-            },
+            url,
+            data: {orders: orderData},
             headers: {
                 'Content-Type': 'application/json',
             }
-        });
-        if(res.status === 200){
-            setDeliveryFee(res.data.cost);
+        }).finally(()=>setIsLoading(false));
+
+        if(response.status === 200){
+            setDeliveryFee(response.data?.data?.total_sum);
+            setDeliverySummary(response.data?.data?.estimates);
         }
     }
-
-    // SET GET PREDICTED ADDRESS DETAILS
-    const [userAddressDetails, setUserAddressDetails] = useState<any>({});
 
     const vailidateCoupon = async () => {
         setValidatingCoupon(true);
@@ -97,6 +140,7 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
             user_id: userCookie?.id,
             address_id: selectedAddress.id
         }).then((res) => {
+            localStorage.removeItem("cart");
             setIsLoading(false)
             router.push(res.data.data.pay_stack_checkout_url)
         })
@@ -107,9 +151,9 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
         })
     }
 
-    // useEffect(() => {
-    //     getDeliveryFee();
-    // }, [userAddressDetails]);
+    useEffect(() => {
+        if(selectedAddress?.id) getDeliveryFee();
+    }, [selectedAddress?.id]);
 
     useEffect(() => {
         let isMounted = true;
@@ -135,7 +179,7 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
         const bundles_total: number = cart.bundles?.reduce((acc: number, item: any) => acc + item.product_price * item.order_count, 0);
         setSubTotal(products_total + open_order_total + bundles_total);
         setTotalAmount(deliveryFee + products_total + open_order_total + bundles_total);
-    }, []);
+    }, [deliveryFee]);
 
     useEffect(() => {
         axiosInstance.post('/api/cart/update', {
@@ -147,7 +191,6 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
                 Authorization: userCookie?.access_token
             }
         })
-        // .then((response) => console.log({response}))
         .catch(error => {
             toast.error(error.response?.message || "Error try again later")
         })
@@ -264,12 +307,27 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
             </div>
 
             <div className="flex flex-col w-[90%] mx-auto lg:w-[30%]">
-                <div className="flex flex-col gap-2 bg-white py-4 px-3 h-fit mb-4 rounded-md">
+                <div className="flex flex-col gap-4 bg-white py-4 px-3 h-fit mb-4 rounded-md">
                     <h3 className="lg:text-center text-lg mb-0">Proceed to payment</h3>
-                    <p className="lg:text-center mb-0">Deliver fee: {formatAmount(deliveryFee)}</p>
-                    <p className="hidden lg:flex lg:text-center lg:justify-center text-lg font-semibold text-orange-500 mb-0">
-                        Total: {formatAmount(totalAmount) ? formatAmount(totalAmount) : 0}
-                    </p>
+                    <div className="p-3 border border-blue-600 rounded-md relative flex flex-row justify-between items-center gap-4">
+                        <p>Deliver fee:</p> 
+                        <div className="flex flex-row gap-1 items-center">
+                            {
+                                isLoading && (
+                                    <Loader2 className="h-4 w-4 text-orange-600 animate-spin" />
+                                )
+                            }
+                            <p className="font-semibold text-blue-600 !mb-0">{formatAmount(deliveryFee)}</p>
+                        </div>
+                        <a
+                            href="#0"
+                            target="_blank"
+                            className="absolute bottom-[2px] center-absolute-el text-xs"
+                        >
+                            Powered by <span className="text-blue-600 italic font-medium">Nimle logistics</span>
+                        </a>
+                    </div>
+                   
                     <div className='flex flex-row gap-2 items-center'>
                         <div className="flex flex-row gap-2 items-center py-2 px-4 border-gray-200 border rounded-md w-full">
                             <RiCoupon2Line className="text-lg text-gray-500" />
@@ -283,20 +341,30 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
                             {validatingCoupon ? 'Validatin...' : 'Apply'}
                         </button>
                     </div>
+
+                    <div className="hidden lg:flex flex-row justify-between items-center gap-4 text-lg font-semibold">
+                        <p className="!mb-0">
+                            Total:
+                        </p>
+                        <p className="text-orange-500 !mb-0">
+                            {formatAmount(totalAmount) ? formatAmount(totalAmount) : 0}
+                        </p>
+                    </div>
+
                     <button 
                         onClick={() => checkOut()}
                         disabled={isLoading}
-                        className="hidden lg:flex lg:justify-center text-center font-medium text-[#0ba4db] cursor-pointer border-2 border-[#0ba4db] rounded-md py-2 mt-4"
+                        className="hidden lg:flex lg:justify-center text-center font-medium text-[#0ba4db] cursor-pointer border-2 border-[#0ba4db] rounded-md py-2"
                     >
                         {isLoading ? 'Loading...' : `Pay with PayStack`}
                     </button>
                 </div>
 
-                <div className="flex flex-col bg-white pl-2 rounded-md gap-3 py-3">
+                <div className="flex flex-col bg-white px-2 rounded-md gap-4 py-3">
                     <h4 className="font-semibold my-2 text-sm">Delivery Address</h4>
                     {
                         addresses && addresses.length > 0 ? addresses?.map((address) => (
-                            <div className="flex flex-col gap-1" key={address.id}>
+                            <div className="flex flex-col" key={address.id}>
                                 <div className="flex flex-row gap-1">
                                     {
                                         selectedAddress?.id === address?.id ?
@@ -310,7 +378,7 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
                                     }
                                     <p className="font-medium capitalize">
                                         {address.title}
-                                        {address.name && <span className="text-gray-600 text-sm">/{address.name}</span>}
+                                        {address.name && <span className="text-gray-600 text-sm ml-1">/{address.name}</span>}
                                     </p>
                                 </div>
                                 <p className="text-sm">{address.address}</p>

@@ -1,5 +1,4 @@
-import { ToastContainer, toast } from 'react-toastify'
-import { injectStyle } from "react-toastify/dist/inject-style";
+import { toast } from 'react-toastify'
 import { HiOutlineChatAlt2 } from "react-icons/hi";
 import RatingsCard from "../../cards/RatingsCard";
 import { formatAmount } from "../../../Utils/formatAmount";
@@ -48,10 +47,6 @@ const SingleTransaction = ({transaction, reviews}: ISingleTransactionProps) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
-  if(typeof window !== 'undefined') {
-    injectStyle();
-  }
-
   const closeOrderByVendor = async () => {
     setIsLoading(true)
 
@@ -87,10 +82,9 @@ const SingleTransaction = ({transaction, reviews}: ISingleTransactionProps) => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col w-full md:w-[80%] absolute right-0 md:left-[21%] rounded-md px-4 text-sm">
-      <ToastContainer />
-      <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4">
-        <div className="flex flex-col px-4 bg-white w-full mb-4 lg:mb-0 mx-auto pb-6">
+    <div className="min-h-screen bg-gray-100 flex flex-col w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%] rounded-md px-4 text-sm">
+      <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 mt-20 lg:mt-0">
+        <div className="flex flex-col px-4 bg-white rounded-md w-full mb-4 lg:mb-0 mx-auto pb-6">
           <div className="flex flex-row justify-between py-2 border-b border-gray-100 mb-4">
             <h4 className="font-semibold text-base text-left my-auto">Order Details</h4>
             <div className="flex flex-row gap-2">
@@ -158,7 +152,7 @@ const SingleTransaction = ({transaction, reviews}: ISingleTransactionProps) => {
             </div>
           </div>
         </div>
-        <div className="bg-white flex flex-col px-3 py-4 mx-auto w-full mb-4 lg:mb-0">
+        <div className="bg-white rounded-md flex flex-col px-3 py-4 mx-auto w-full mb-4 lg:mb-0">
           <h4 className="font-semibold text-base text-left pb-2 border-b border-gray-100 mb-4">Product Details</h4>
           <div className="flex flex-row w-full pb-3">
             <div className="w-[50%] flex flex-col">
@@ -194,12 +188,12 @@ const SingleTransaction = ({transaction, reviews}: ISingleTransactionProps) => {
         </div>
       </div>
 
-      <div className="flex flex-col mt-10 bg-white px-4 py-3">
-        <h2 className="text-gray-700 text-base text-center my-4 font-semibold">Reviews</h2>
+      <div className="flex flex-col gap-4 mt-10 bg-white rounded-md px-4 py-3">
+        <h2 className="text-gray-700 text-base text-center font-semibold">Reviews</h2>
         { reviews && reviews?.map((review) => (
-          <div className="flex flex-col pb-3 border-b border-gray-100 mb-3">
+          <div className="flex flex-col pb-3 border-b border-gray-300">
             <div className="flex flex-row">
-              <h3 className="font-semibold mr-4">{review.user?.name}</h3>
+              <h3 className="font-semibold mr-4 capitalize">{review.user?.name}</h3>
               <RatingsCard rating={review.score} />
             </div>
             {review.comment && <p className="text-gay-500 text-sm">{review.comment}</p>}

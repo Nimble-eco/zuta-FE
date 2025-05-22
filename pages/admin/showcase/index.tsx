@@ -189,10 +189,10 @@ const ShowcaseIndexPage = ({items}: IShowcaseIndexPageProps) => {
             />
         }
 
-        <div className="flex flex-row w-full mx-auto mt-8 relative mb-10">
+        <div className="flex flex-row w-full mx-auto mt-8 relative">
             <AdminSideNavPanel />
-            <div className="flex flex-col w-[80%] absolute right-0 left-[20%]">
-                <div className="flex flex-row gap-6 justify-between lg:w-[95%] items-center mb-6">
+            <div className="flex flex-col w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%] px-4">
+                <div className="flex flex-row gap-6 justify-between lg:w-[95%] items-center mb-6 mt-20 lg:mt-0">
                     <h2 className="text-2xl font-bold text-slate-700">Showcase</h2>
                     {/* <div className="w-20">
                         <ButtonFull
@@ -201,7 +201,7 @@ const ShowcaseIndexPage = ({items}: IShowcaseIndexPageProps) => {
                         />
                     </div> */}
                 </div>
-                <div className="grid grid-cols-4 gap-4 mb-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
                     <StatsCard
                         title='All Featured Items'
                         value={items.data?.meta?.total ?? 0}

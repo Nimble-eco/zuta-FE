@@ -1,4 +1,3 @@
-import React from 'react'
 import { capitalizeFirstLetter } from '../../Utils/capitalizeFirstLettersOfString';
 
 interface ITextInputProps {
@@ -8,12 +7,13 @@ interface ITextInputProps {
     onInputChange: (e: any) => void;
     placeHolder?: string;
     type?: string;
+    className?: string;
 }
 
-const ColumnTextInput = ({label, name, value, onInputChange, placeHolder, type='text'}: ITextInputProps) => {
+const ColumnTextInput = ({label, name, value, onInputChange, placeHolder, type='text', className}: ITextInputProps) => {
   return (
-    <div className="flex flex-col mb-4">
-      <label htmlFor={label} className='font-semibold mb-3 text-sm'>{capitalizeFirstLetter(label)}:</label>
+    <div className={`flex flex-col gap-1 ${className}`}>
+      <label htmlFor={label} className='font-medium text-sm'>{capitalizeFirstLetter(label)}:</label>
       <input
         type={type}
         placeholder={placeHolder || ''}

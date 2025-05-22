@@ -53,10 +53,10 @@ const create = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col overflow-scroll">
-        <div className="flex flex-row w-full mx-auto mt-8 relative mb-10">
+        <div className="flex flex-row w-full mx-auto mt-8 relative">
             <AdminSideNavPanel />
             <div className="flex flex-col w-full px-4 lg:px-0 lg:w-[80%] lg:absolute lg:right-0 lg:left-[20%]">
-                <div className="flex flex-row justify-between items-center relative px-4 py-4 mb-3 bg-white border-b border-gray-200">
+                <div className="flex flex-row justify-between items-center relative px-4 py-4 mb-3 bg-white border-b border-gray-200 mt-12 lg:mt-0">
                     <h2 className="text-lg font-bold">Coupon Details</h2>
                     <div className="w-fit">
                         <ButtonFull 

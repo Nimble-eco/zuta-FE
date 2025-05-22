@@ -69,9 +69,9 @@ const ShowOrder = ({order, subscribers}: IShowOrderPageProps) => {
             />
         }
         <AdminSideNavPanel />
-        <div className="min-h-screen bg-gray-100 flex flex-col gap-6 w-full md:w-[80%] absolute right-0 md:left-[20%] rounded-md">
+        <div className="min-h-screen bg-gray-100 flex flex-col gap-6 w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%] rounded-md">
             <div className='flex flex-col bg-white mt-6 rounded-md'>
-                <div className="flex flex-row justify-between items-center border-b border-gray-200 py-4 px-4">
+                <div className="flex flex-col gap-4 lg:flex-row justify-between lg:items-center border-b border-gray-200 py-4 px-4 mt-20 lg:mt-0">
                     <h2 className="text-xl font-semibold align-center align-baseline my-auto capitalize">{order?.id}</h2>
                     <div className="flex flex-row gap-4 items-center">
                         <p className="text-orange-700 font-medium mb-0">Status:</p>

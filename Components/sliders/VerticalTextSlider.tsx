@@ -38,7 +38,7 @@ const VerticalTextSlider = ({ list, list_name }: IVerticalTextSliderProps) => {
             <MdArrowForward className='text-2xl' />
         </div>
         <Fade direction='up' duration={1500} className='' key={list[currentIndex]}>
-            <p className='px-3 text-base mt-2'>{list[currentIndex]}</p>
+            <p className='px-3 text-sm mt-2'>{list[currentIndex]}</p>
         </Fade>
     </div>
   )

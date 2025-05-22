@@ -11,8 +11,8 @@ interface IMyDropDownInputProps {
 
 const MyDropDownInput = ({label, name, options, value, onSelect}: IMyDropDownInputProps) => {
   return (
-    <div className='flex flex-col mb-4 w-full'>
-        <label className='font-semibold mb-1 text-sm'>
+    <div className='flex flex-col w-full'>
+        <label className='font-semibold mb-3 text-sm'>
             {capitalizeFirstLetter(label)}:
         </label>
         <select name={name ?? label} className='text-gray-500 text-sm bg-gray-100 py-2 px-4' value={value as string} onChange={(e) => onSelect(e)}>

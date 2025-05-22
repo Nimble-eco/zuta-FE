@@ -10,10 +10,10 @@ const Total = ({ items }: ICartTotalProps) => {
   const total = products_total + order_train + bundles_total;
 
   return (
-    <div className="justify-center text-center text-lg mb-8">
-        <h3 className="!text-lg">Total: {" "}
-          <span className='text-orange-500'>{formatAmount(total)}</span>
-        </h3>
+    <div className="justify-center text-center text-lg">
+      <h3 className="!text-lg">Total: {" "}
+        <span className='text-orange-500'>{formatAmount(total)}</span>
+      </h3>
     </div>
   );
 };

@@ -1,7 +1,6 @@
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { ToastContainer, toast } from 'react-toastify'
-import { injectStyle } from "react-toastify/dist/inject-style";
+import { toast } from 'react-toastify'
 import FilterContainer from "../../../../Components/modals/containers/FilterContainer";
 import MyNumberInput from "../../../../Components/inputs/MyNumberInput";
 import MyDropDownInput from "../../../../Components/inputs/MyDropDownInput";
@@ -41,7 +40,6 @@ const index = ({orders}: IOrdersIndexPageProps) => {
     let vendorId: string = '';
 
     if(typeof window !== 'undefined') {
-        injectStyle();
         vendorId = JSON.parse(Cookies.get('user')!).vendor;
     }
 
@@ -160,7 +158,6 @@ const index = ({orders}: IOrdersIndexPageProps) => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-        <ToastContainer />
         {
             showFilterInput && <FilterContainer 
                 show={showFilterInput}
@@ -228,25 +225,26 @@ const index = ({orders}: IOrdersIndexPageProps) => {
                 ]}
             />
         }
-        <div className="flex flex-row w-[95%] mx-auto mt-8 relative mb-10">
+        <div className="flex flex-row w-full mx-auto mt-8 relative mb-10">
             <VendorSideNavPanel />
-            <div className="flex flex-col w-[80%] absolute right-0 left-[21%]">
-                <h2 className="text-2xl font-bold text-slate-700 mb-4">Standard Orders</h2>
-                <div className="flex flex-row text-sm font-semibold !text-gray-400 px-4 py-5 bg-white">
-                    <a href="#0" className="hover:!text-orange-500 mr-3">
-                        Completed
-                    </a>
-                    <a href="#0" className="hover:!text-orange-500 mr-3">
-                        Pending
-                    </a>
-                    <a href="#0" className="hover:!text-orange-500 mr-3">
-                        Cancelled
-                    </a>
-                    <a href="#0" className="hover:!text-orange-500 mr-3">
-                        Rejected
-                    </a>
+            <div className="flex flex-col w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%]">
+                <div className='flex flex-col gap-2 bg-white pt-4 px-4 mt-20 lg:mt-0'>
+                    <h2 className="text-2xl font-bold text-slate-700 mb-4">Standard Orders</h2>
+                    <div className="flex flex-row text-sm font-semibold !text-gray-400 pb-5 bg-white">
+                        <a href="#0" className="hover:!text-orange-500 mr-3">
+                            Completed
+                        </a>
+                        <a href="#0" className="hover:!text-orange-500 mr-3">
+                            Pending
+                        </a>
+                        <a href="#0" className="hover:!text-orange-500 mr-3">
+                            Cancelled
+                        </a>
+                        <a href="#0" className="hover:!text-orange-500 mr-3">
+                            Rejected
+                        </a>
+                    </div>
                 </div>
-
                 <div className="flex flex-row py-3 px-4 relative bg-white justify-between">
                     <div className="w-[full]">
                         <FilterAndSearchGroup 

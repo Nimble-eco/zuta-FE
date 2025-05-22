@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { ToastContainer, toast } from 'react-toastify'
-import { injectStyle } from "react-toastify/dist/inject-style";
+import { toast } from 'react-toastify'
 import VendorSideNavPanel from "../../../Components/vendor/layout/VendorSideNavPanel"
 import { parse } from "cookie";
 import axiosInstance from "../../../Utils/axiosConfig";
@@ -29,7 +28,6 @@ const store = ({product, rate}: IStoreProductFeaturePageProps) => {
     let vendorId: string = '';
 
     if(typeof window !== 'undefined') {
-        injectStyle();
         vendorId = JSON.parse(Cookies.get('user')!).vendor;
     }
 
@@ -77,16 +75,16 @@ const store = ({product, rate}: IStoreProductFeaturePageProps) => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-        <ToastContainer />
-        <div className="flex flex-row w-[95%] mx-auto mt-8 relative mb-10">
+        <div className="flex flex-row w-full mx-auto lg:mt-8 relative">
             <VendorSideNavPanel />
-            <div className="flex flex-col w-[80%] absolute right-0 left-[21%]">
-                <div className='flex flex-row my-4 justify-between'>
-                    <h2 className="text-2xl font-bold my-auto text-slate-700 mb-4">Showcase: {capitalizeFirstLetter(product.product_name)}</h2>
-                    
-                    <div className="w-[20%] h-14 hidden lg:flex">
+            <div className="flex flex-col lg:w-[80%] lg:absolute right-0 lg:left-[20%]">
+                <div className='flex flex-row bg-white items-center justify-between py-4 px-4 rounded-md mb-4 mt-20 lg:mt-0'>
+                    <h2 className="text-xl font-semibold text-gray-700">Showcase: 
+                        <span className="font-bold text-slate-700 ml-2">{capitalizeFirstLetter(product.product_name)}</span>
+                    </h2>
+                    <div className="w-[20%] h-10 hidden lg:flex">
                         <ButtonFull
-                            action="Showcase"
+                            action="Advertise"
                             loading={isLoading}                        
                             onClick={storeProductFeature}
                         />
@@ -96,8 +94,8 @@ const store = ({product, rate}: IStoreProductFeaturePageProps) => {
                 <div className="flex flex-col-reverse gap-6 lg:grid lg:grid-cols-2">
                     <div className="flex flex-col text-gray-700">
 
-                        <div className='flex flex-row bg-white gap-10 px-4 py-6'>
-                            <div className='flex flex-col bg-gray-100 rounded-md px-4 py-3'>
+                        <div className='flex flex-row bg-white px-4 py-6 rounded-md w-full'>
+                            <div className='flex flex-row justify-between gap-4 items-center bg-gray-100 rounded-md px-4 py-3 w-full'>
                                 <label className="text-sm font-semibold">Start Date And Time:</label>
                                 <input 
                                     type="datetime-local"
@@ -110,8 +108,8 @@ const store = ({product, rate}: IStoreProductFeaturePageProps) => {
                             
                         </div>
 
-                        <div className='flex flex-row bg-white px-4 py-6 mt-4 relative'>
-                            <div className='flex flex-col bg-gray-100 rounded-md px-4 py-3'>
+                        <div className='flex flex-col gap-4 bg-white px-4 py-6 mt-4 relative rounded-md'>
+                            <div className='flex flex-row justify-between gap-4 items-center bg-gray-100 rounded-md px-4 py-3'>
                                 <label className="text-sm font-semibold">End Date And Time:</label>
                                 <input 
                                     type="datetime-local"
@@ -121,7 +119,7 @@ const store = ({product, rate}: IStoreProductFeaturePageProps) => {
                                     className="bg-transparent"
                                 />
                             </div>
-                            <div className="w-[10%] absolute right-20 bottom-4 h-10">
+                            <div className="w-[40%] mx-auto h-10">
                                 <ButtonGhost
                                     action="Get Amount"
                                     onClick={getFeaturedHours}
@@ -133,10 +131,10 @@ const store = ({product, rate}: IStoreProductFeaturePageProps) => {
                     </div>
 
                     <div className="flex flex-col text-gray-700 bg-white px-4 pt-4">
-                        <p className="text-sm mb-4">Show Your product to more customers</p>
+                        <p className="text-sm mb-4 font-bold">Show your products to more customers</p>
                         <p className="text-sm">
-                            Yor product will be featured in the product categories it belongs to at the time of payment.<br/> 
-                            Different Product categories incur different rates
+                            Your product will be featured in the product categories it belongs to at the time of payment.<br/> 
+                            Different Product categories incure different rates
                         </p>
                         <span className=" font-semibold my-3">Rate</span>
                         {

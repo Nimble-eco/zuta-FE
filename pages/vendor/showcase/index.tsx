@@ -1,8 +1,7 @@
 import Cookies from "js-cookie";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { ToastContainer, toast } from 'react-toastify'
-import { injectStyle } from "react-toastify/dist/inject-style";
+import { toast } from 'react-toastify'
 import FilterContainer from "../../../Components/modals/containers/FilterContainer";
 import VendorSideNavPanel from "../../../Components/vendor/layout/VendorSideNavPanel";
 import FilterAndSearchGroup from "../../../Components/inputs/FilterAndSearchGroup";
@@ -29,7 +28,6 @@ const index = ({featured_products}: IProductShowcaseIndexPageProps) => {
     })
     
     if(typeof window !== 'undefined') {
-        injectStyle();
         vendorId = JSON.parse(Cookies.get('user')!).vendor;
     }
 
@@ -143,7 +141,6 @@ const index = ({featured_products}: IProductShowcaseIndexPageProps) => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-        <ToastContainer />
         {
             showFilterInput && <FilterContainer 
                 show={showFilterInput}
@@ -179,28 +176,29 @@ const index = ({featured_products}: IProductShowcaseIndexPageProps) => {
             />
         }
 
-        <div className="flex flex-row w-[95%] mx-auto mt-8 relative mb-10">
+        <div className="flex flex-row w-full mx-auto lg:mt-8 relative">
             <VendorSideNavPanel />
-            
-            <div className="flex flex-col w-[80%] absolute right-0 left-[21%]">
-                <h2 className="text-2xl font-bold text-slate-700 mb-4">Product Showcase</h2>
-                <div className="flex flex-row text-sm font-semibold !text-gray-400 px-4 pt-5 bg-white">
-                    <a href="#0" className="hover:!text-orange-500 mr-3">
-                        All
-                    </a>
-                    <a href="#0" className="hover:!text-orange-500 mr-3">
-                        Pending
-                    </a>
-                    <a href="#0" className="hover:!text-orange-500 mr-3">
-                        Ongoing
-                    </a>
-                    <a href="#0" className="hover:!text-orange-500 mr-3">
-                        Closed
-                    </a>
+            <div className="flex flex-col w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%]">
+                <div className="flex flex-col gap-2 pt-4 px-4 rounded-t-md bg-white mt-20 lg:mt-0">
+                    <h2 className="text-2xl font-bold text-slate-700 mb-4">Product Showcase</h2>
+                    <div className="flex flex-row text-sm font-semibold !text-gray-400">
+                        <a href="#0" className="hover:!text-orange-500 mr-3">
+                            All
+                        </a>
+                        <a href="#0" className="hover:!text-orange-500 mr-3">
+                            Pending
+                        </a>
+                        <a href="#0" className="hover:!text-orange-500 mr-3">
+                            Ongoing
+                        </a>
+                        <a href="#0" className="hover:!text-orange-500 mr-3">
+                            Closed
+                        </a>
+                    </div>
                 </div>
 
-                <div className="flex flex-row py-3 px-4 relative bg-white justify-between">
-                    <div className="w-[full]">
+                <div className="flex py-3 px-4 bg-white">
+                    <div className="min-w-[full]">
                         <FilterAndSearchGroup 
                             searchInputPlaceHolder="Search product name, category"
                             onSearch={searchShowcaseProducts}
@@ -210,7 +208,7 @@ const index = ({featured_products}: IProductShowcaseIndexPageProps) => {
                     </div>
                 </div>
 
-                <div className="flex flex-col pb-8 bg-white text-gray-700">
+                <div className="flex flex-col pb-8 bg-white text-gray-700 overflow-scroll">
                     <MyTable
                         headings={['product_name', 'featured_amount', 'paid', 'featured_payment_confirmed', 'status', 'start_date', 'end_date']}
                         content={featuredProducts?.data?.map((featuredProduct: any) => ({

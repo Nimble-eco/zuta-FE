@@ -16,6 +16,7 @@ interface ICreateProductFeaturePageProps {
 }
 
 const CreateFeaturedProduct = ({product, rate}: ICreateProductFeaturePageProps) => {
+    console.log({product, rate})
     const router = useRouter();
     const [featuredDetails, setFeaturedDetails] = useState({
         featured_start_date: '',
@@ -70,8 +71,8 @@ const CreateFeaturedProduct = ({product, rate}: ICreateProductFeaturePageProps) 
        
         <div className="flex flex-row w-full mx-auto mt-8 relative mb-10">
             <AdminSideNavPanel />
-            <div className="flex flex-col w-[80%] absolute right-0 left-[20%]">
-                <div className='flex flex-row my-4 justify-between items-center'>
+            <div className="flex flex-col w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%]">
+                <div className='flex flex-row my-4 justify-between items-center mt-20 lg:mt-0'>
                     <h2 className="text-2xl font-bold my-auto text-slate-700">Showcase</h2>
                     <div className="w-[15%] h-10 hidden lg:flex">
                         <ButtonFull
@@ -170,7 +171,7 @@ export async function getServerSideProps(context: any) {
         const getProductShowcaseRate = await axiosInstance.get('/api/featured/product/rate?product_id=' + product_id, {
             headers: {
                 Authorization: token,
-                team: user?.vendor
+                team: user?.vendor || ""
             }
         });
 
@@ -179,6 +180,7 @@ export async function getServerSideProps(context: any) {
         ]);
 
         const myProductShowcaseRate = myProductRateResult.status === 'fulfilled' ? myProductRateResult?.value?.data : [];
+        console.log({myProductShowcaseRate, myProductRateResult})
        
         return {
             props: {

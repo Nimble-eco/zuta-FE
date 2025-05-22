@@ -1,3 +1,5 @@
+
+import dynamic from 'next/dynamic';
 import { useState, useEffect, useRef } from 'react'
 import ButtonFull from "../../buttons/ButtonFull"
 import ImagePicker from "../../inputs/ImagePicker"
@@ -12,12 +14,18 @@ import SelectedListItemCard from '../../cards/SelectedListItemCard'
 import { searchProductTagsAction } from '../../../requests/productTags/productTags.request'
 import { convertToBase64 } from '../../../Utils/convertImageToBase64'
 import { createProductAction } from '../../../requests/products/products.request'
-import { ToastContainer, toast } from 'react-toastify'
-import { injectStyle } from "react-toastify/dist/inject-style";
+import { toast } from 'react-toastify'
 import { useRouter } from 'next/router'
 import Cookies from 'js-cookie'
 import { formatAmount } from '../../../Utils/formatAmount'
 import TextAreaInput from '../../inputs/TextAreaInput'
+import { storeMediaAction, storeVideosRequest } from '../../../requests/media/media.requests'
+import VideoPicker from '../../inputs/VideoPicker'
+import ButtonGhost from '../../buttons/ButtonGhost'
+
+const Editor = dynamic(()=>import('react-simple-wysiwyg'), {
+    ssr: false
+});
 
 const CreateProduct = () => {
     const router = useRouter();
@@ -32,13 +40,14 @@ const CreateProduct = () => {
     let vendorId: string = '';
 
     if(typeof window !== 'undefined') {
-        injectStyle();
         vendorId = JSON.parse(Cookies.get('user')!).vendor;
     }
-
+    
     const [newProduct, setNewProduct] = useState<any>({
         product_name: '',
+        product_introduction: '',
         product_description: '',
+        product_summary: '',
         product_price: '',
         product_discount: 0,
         quantity: 0,
@@ -46,6 +55,10 @@ const CreateProduct = () => {
         product_categories: [],
         product_tags: [],
         base64_images: [],
+        images: [],
+        videos: [],
+        testimonial_videos: [],
+        product_faqs: [{question: '', answer : ''}],
     });
 
     const handleChange = (e: any) => {
@@ -54,6 +67,10 @@ const CreateProduct = () => {
             [e.target.name]: e.target.value
         }))
     }
+
+    const [product_images, setProductImages] = useState<string[]>([])
+    const [product_videos, setProductVideos] = useState<any[]>([])
+    const [product_testimonial_videos, setProductTestimonialVideos] = useState<any[]>([])
 
     const [searchProductCategoriesString, setSearchProductCategoriesString] = useState<string>('');
     const searchCategories = async (searchString: string) => {
@@ -122,24 +139,139 @@ const CreateProduct = () => {
     }
 
     const selectImage = async (e: any) => {
+        let arr = newProduct.images;
+        arr.push(e.target.files[0]);
+        setNewProduct({...newProduct, images: arr});
+
         let base64_image = await convertToBase64(e.target.files[0]);
-        let arr = newProduct.base64_images;
-        arr.push(base64_image);
-        setNewProduct({...newProduct, base64_images: arr});
+        let base64_arr = newProduct.base64_images;
+        base64_arr.push(base64_image);
+        setNewProduct({...newProduct, base64_images: base64_arr});
     }
 
-    const createProduct = async () => {
+    const selectVideo = async (e: any) => {
+        if(e.target.files[0]) {
+            let arr = [...product_videos];
+            arr.push(e.target.files[0]);
+            setProductVideos(arr);
+            setNewProduct({...newProduct, videos: arr});
+        }
+    }
 
-        setIsLoading(true);
-        await createProductAction({
+    const removeVideo = async(itemIndex: number) => {
+        let arr: string[] = newProduct.base64_videos;
+        let videos_arr: string[] = product_videos;
+        arr = arr.filter((imageSrc, index) => index !== itemIndex);
+        videos_arr = videos_arr.filter((imageSrc, index) => index !== itemIndex);
+        setNewProduct({...newProduct, base64_videos: arr})
+        setProductVideos(videos_arr)
+    }
+
+    const selectTestimonialVideo = async (e: any) => {
+        if(e.target.files[0]) {
+            let arr = [...product_testimonial_videos]; 
+            arr.push(e.target.files[0]);
+            setProductTestimonialVideos(arr);
+            setNewProduct({...newProduct, testimonial_videos: arr});
+        }
+    }
+
+    const removeTestimonialVideo = async(itemIndex: number) => {
+        let arr: string[] = newProduct.base64_testimonial_videos;
+        let videos_arr: string[] = product_testimonial_videos;
+        arr = arr.filter((imageSrc, index) => index !== itemIndex);
+        videos_arr = videos_arr.filter((imageSrc, index) => index !== itemIndex);
+        setNewProduct({...newProduct, base64_testimonial_videos: arr})
+        setProductTestimonialVideos(videos_arr)
+    }
+
+    const addFaq = () => {
+        setNewProduct({
+            ...newProduct, 
+            product_faqs: newProduct?.product_faqs ? [
+                ...newProduct?.product_faqs,
+                {question: '', answer : ''}
+            ] : [
+                {question: '', answer : ''}
+            ]
+        })
+    }
+
+    const removeFaq = (index: number) => {
+        setNewProduct({
+            ...newProduct, 
+            product_faqs: newProduct?.product_faqs?.filter((_:any,i: number)=> i !== index)
+        })
+    }
+
+    const handleFaqChange = (index: number, field: string, value: string) => {
+        const updatedItems = newProduct?.product_faqs?.map((item: any, i: number) => 
+            i === index ? { ...item, [field]: value } : item
+        );
+        setNewProduct({
             ...newProduct,
-            vendor_id: vendorId
+            product_faqs: updatedItems
+        });
+    };
+
+
+    const createProduct = async () => {
+        setIsLoading(true);
+
+        let url_product_images:any;
+        let url_videos:any;
+        let url_testimonial_videos:any;
+
+        if(newProduct?.images?.length > 0){
+            await storeMediaAction({
+                files: newProduct.images,
+                category: 'products'
+            })
+            .then(response => {
+                if(response.status === 201) {
+                    url_product_images = [...response?.data?.data];
+                }
+            })
+        }
+
+        if(product_videos?.length > 0){
+            await storeVideosRequest({
+                files: product_videos,
+                category: 'products'
+            })
+            .then(response => {
+                if(response.status === 201) {
+                    url_videos = [...response?.data?.data];
+                }
+            })
+        }
+
+        if(product_testimonial_videos?.length > 0){
+            await storeVideosRequest({
+                files: product_testimonial_videos,
+                category: 'products'
+            })
+            .then(response => {
+                if(response.status === 201) {
+                    url_testimonial_videos = [...response?.data?.data];
+                }
+            })
+        }
+
+
+        createProductAction({
+            ...newProduct,
+            images: null,
+            vendor_id: vendorId,
+            url_images: url_product_images,
+            url_videos,
+            url_testimonial_videos
         })
         .then((response) => {
             if(response.status === 201) {
                 setIsLoading(false);
                 toast.success('Product created successfully');
-                router.push('/vendor/product')
+                setTimeout(()=>router.push('/vendor/product'), 2000);
             }
         })
         .catch(error => {
@@ -168,9 +300,8 @@ const CreateProduct = () => {
     }, []);
 
   return (
-    <div className="flex flex-col w-[80%] absolute right-0 left-[20%]">
-        <ToastContainer />
-        <div className="flex flex-row justify-between items-center relative py-4 bg-white mb-1">
+    <div className="flex flex-col gap-4 min-h-screen w-[95%] mx-auto lg:w-[80%] lg:mx-0 lg:absolute right-0 lg:left-[20%] pb-20 px-4">
+        <div className="flex flex-row justify-between items-center relative py-4 px-4 lg:px-0 bg-white mt-20 lg:mt-0">
             <h2 className="text-lg font-bold">Product Details</h2>
             <div className="w-fit">
                 <ButtonFull 
@@ -190,10 +321,10 @@ const CreateProduct = () => {
         />
 
         <TextAreaInput 
-            label="Shot Description"
-            name='product_description'
-            value={newProduct.product_description}
-            placeHolder="Enter a short description of product"
+            label="Shot introduction"
+            name='product_introduction'
+            value={newProduct.product_introduction}
+            placeHolder="Enter a short introduction of product"
             onInputChange={handleChange}
         />
 
@@ -207,8 +338,8 @@ const CreateProduct = () => {
                 />
             </div>
             <div className="w-full">
-                <div className='flex flex-row items-center gap-2'>
-                    <div className='w-full md:w-[60%]'>
+                <div className='flex flex-col items-baseline gap-2'>
+                    <div className='w-full'>
                         <MyNumberInput 
                             label="Discount %"
                             name="product_discount"
@@ -216,11 +347,20 @@ const CreateProduct = () => {
                             onInputChange={handleChange}
                         />
                     </div>
-                    <p className='font-medium text-green-600 align-bottom my-auto'>
-                        discount  = {" "} {(formatAmount((newProduct.product_discount/100) * newProduct.product_price)) ?? 0}
+                    <p className='font-medium text-green-600 !mb-0 whitespace-nowrap'>
+                        Discount  = {" "} {(formatAmount((newProduct.product_discount/100) * newProduct.product_price)) ?? 0}
                     </p>
                 </div>
             </div>
+        </div>
+
+        <div className='flex flex-col'>
+            <p className='text-sm font-medium'>Product Description</p>
+            <Editor 
+                value={newProduct?.product_description} 
+                onChange={(e: any)=>setNewProduct({...newProduct, product_description: e.target.value})} 
+                className="min-h-[40vh]"    
+            />
         </div>
 
         <div className="flex flex-col md:grid md:grid-cols-2 gap-6">
@@ -347,6 +487,85 @@ const CreateProduct = () => {
                 onSelect={selectImage}
                 files={newProduct.base64_images}
             />
+        </div>
+
+        <div className="flex flex-col bg-white">
+            <VideoPicker
+                label='Product videos'
+                onSelect={selectVideo}
+                files={product_videos}
+                onRemove={removeVideo}
+                uploading={isLoading}
+                disabled={true}
+                // disabled={product_videos?.length === product?.product_videos?.length}
+                // uploadFiles={()=>uploadVideos('videos')}
+            />
+        </div>
+
+        <div className="flex flex-col bg-white">
+            <VideoPicker
+                label='Product testimonials'
+                onSelect={selectTestimonialVideo}
+                files={product_testimonial_videos}
+                // files={productData?.base64_testimonial_videos}
+                onRemove={removeTestimonialVideo}
+                uploading={isLoading}
+                disabled={true}
+                // disabled={product_testimonial_videos?.length === product?.product_testimonials?.length}
+                // uploadFiles={()=>uploadVideos('testimonials')}
+            />
+        </div>
+
+        <div className='flex flex-col'>
+            <p className='text-sm font-medium'>Foot Note/Specifications</p>
+            <Editor 
+                value={newProduct?.product_summary} 
+                onChange={(e: any)=>setNewProduct({...newProduct, product_summary: e.target.value})} 
+                className="min-h-[40vh]"    
+            />
+        </div>
+
+        <div className='flex flex-col gap-1'>
+            <p className='text-sm font-medium'>FAQs</p>
+            <p className='text-xs font-light mb-4'>Frequently asked questions about this product</p>
+            <div className='flex flex-col gap-2'>
+                {
+                    (newProduct?.product_faqs || Array.from([1]))?.map((faq: any, index: number) => (
+                        <div key={index} className='flex flex-col md:flex-row gap-4 md:items-center'>
+                            <p className='hidden md:flex font-light'>{index + 1}.</p>
+                            <TextInput 
+                                label="Question"
+                                value={faq?.question || ""}
+                                name='question'
+                                placeHolder="Enter FAQ question here"
+                                onInputChange={(e: any)=>handleFaqChange(index, e.target.name, e.target.value)}
+                                className='lg:w-[50%]'
+                            />
+                            <TextInput 
+                                label="Answer"
+                                value={faq?.answer || ""}
+                                name='answer'
+                                placeHolder="Enter FAQ answer here"
+                                onInputChange={(e: any)=>handleFaqChange(index, e.target.name, e.target.value)}
+                                className='lg:w-[50%]'
+                            />
+                            <p 
+                                onClick={()=>removeFaq(index)}
+                                className='text-red-600 cursor-pointer text-sm font-medium text-right'
+                            >
+                                Remove
+                            </p>
+                        </div>
+                    ))
+                }
+            </div>
+
+            <div className='flex lg:justify-end lg:w-[18%] lg:ml-[80%] mt-6'>
+                <ButtonGhost
+                    action='Add FAQ'
+                    onClick={addFaq}
+                />
+            </div>
         </div>
     </div>
   )

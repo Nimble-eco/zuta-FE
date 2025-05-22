@@ -21,7 +21,6 @@ export const updateMyVendorAction = async (payload: IUpdateVendorPayload) => {
     });
 }
 
-
 export const filterVendorsAction = async (payload: IFilterVendorsPayload) => {
     const user = JSON.parse(Cookies.get('user')!);
     return axiosInstance.post('/api/vendor/filter/index', payload, {
@@ -46,6 +45,20 @@ export const managementUnApproveVendorAction = async (id: string) => {
 export const managementApproveVendorAction = async (id: string) => {
     const user = JSON.parse(Cookies.get('user')!);
     return axiosInstance.post('/api/vendor/management/approve', {id}, {
+        headers: {Authorization: user.access_token}
+    });
+}
+
+export const vendorUnapproveStoreAction = async (id: string) => {
+    const user = JSON.parse(Cookies.get('user')!);
+    return axiosInstance.post('/api/vendor/user/unapprove', {id}, {
+        headers: {Authorization: user.access_token}
+    });
+}
+
+export const vendorApproveStoreAction = async (id: string) => {
+    const user = JSON.parse(Cookies.get('user')!);
+    return axiosInstance.post('/api/vendor/user/approve', {id}, {
         headers: {Authorization: user.access_token}
     });
 }

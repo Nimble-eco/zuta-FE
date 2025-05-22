@@ -1,10 +1,19 @@
 import Cookies from "js-cookie";
 import axiosInstance from "../../Utils/axiosConfig";
-import { ICancelOrderActionProps, ICreateOrderProps, IFilterOrderActionProps } from "./order.types";
+import { ICancelOrderActionProps, ICreateOrderProps, IFilterOrderActionProps, IUpdateOrderProps } from "./order.types";
 
 export const createAnOrderAction = async (payload: ICreateOrderProps) => {
     const user = JSON.parse(Cookies.get('user')!);
     return axiosInstance.post('/api/order/store', payload, {
+        headers: {
+            Authorization: user.access_token
+        }
+    })
+}
+
+export const updateOrderRequest = async (payload: IUpdateOrderProps) => {
+    const user = JSON.parse(Cookies.get('user')!);
+    return axiosInstance.post('/api/order/update', payload, {
         headers: {
             Authorization: user.access_token
         }

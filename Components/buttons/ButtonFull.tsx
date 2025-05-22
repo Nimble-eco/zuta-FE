@@ -5,6 +5,7 @@ interface IButtonFullProps {
   action: string;
   onClick: any;
   loading?: boolean;
+  disabled?: boolean;
 }
 
 const override = {
@@ -16,12 +17,13 @@ const override = {
   borderColor: " #FFFFFF",
 };
 
-const ButtonFull: FC<IButtonFullProps> = ({action, onClick, loading}) => {
+const ButtonFull: FC<IButtonFullProps> = ({action, onClick, loading, disabled}) => {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="bg-orange-500 hover:bg-orange-700 text-white font-bold flex justify-center items-center px-4 min-h-[2.5em] rounded-full min-w-[8rem] w-full mx-auto whitespace-nowrap"
+      disabled={disabled}
+      className={`${!disabled && !loading ? 'bg-orange-500 text-white' : 'bg-orange-900 cursor-not-allowed text-gray-500'} hover:bg-orange-700 font-bold flex justify-center items-center px-4 min-h-[2.5em] rounded-full min-w-[8rem] w-full mx-auto whitespace-nowrap`}
     >
       {loading ? 
         <BeatLoader 

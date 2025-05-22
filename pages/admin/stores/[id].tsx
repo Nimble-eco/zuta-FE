@@ -8,6 +8,7 @@ import { toast } from "react-toastify"
 import { managementApproveVendorAction, managementUnApproveVendorAction } from "../../../requests/vendor/vendor.request"
 import axiosInstance from "../../../Utils/axiosConfig"
 import { parse } from "cookie"
+import { toIntNumberFormat } from "../../../Utils/helper"
 
 interface IShowVendorPageProps {
     vendor: any;
@@ -55,8 +56,8 @@ const showVendor = ({vendor}: IShowVendorPageProps) => {
     return (
         <div className="min-h-screen bg-gray-100 overflow-scroll flex flex-row relative">
             <AdminSideNavPanel />
-            <div className="min-h-screen bg-gray-100 flex flex-col gap-6 w-full md:w-[80%] absolute right-0 md:left-[20%] rounded-md px-4">
-                <div className='flex flex-col bg-white mt-6 rounded-md'>
+            <div className="min-h-screen bg-gray-100 flex flex-col gap-6 w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%] rounded-md px-4">
+                <div className='flex flex-col bg-white rounded-md mt-20 lg:mt-6'>
                     <div className="flex flex-row justify-between items-center border-b border-gray-200 py-4 px-4">
                         <h2 className="text-xl font-semibold align-center align-baseline my-auto capitalize">{vendor.vendor_name}</h2>
                         <div className="flex flex-row ">
@@ -80,7 +81,7 @@ const showVendor = ({vendor}: IShowVendorPageProps) => {
                     </div>
         
                     <div className='flex flex-col'>
-                        <div className='flex flex-col md:grid md:grid-cols-2 lg:grid-cols-4 gap-2'>
+                        <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2'>
                             <TextCard label='Name' value={vendor.vendor_name} />
                             <TextCard label='Email' value={vendor.vendor_email} />
                             <TextCard label='Phone Number' value={vendor.vendor_phone} />
@@ -93,6 +94,8 @@ const showVendor = ({vendor}: IShowVendorPageProps) => {
                             <TextCard label='Order Trains' value={vendor.openOrder?.length} />
                             <TextCard label='Flag(s)' value={vendor.flags} />
                             <TextCard label='Management Approved' value={vendor.management_approved ? 'True' : 'False'} />
+                            <TextCard label='User Approved' value={vendor.user_approved ? 'True' : 'False'} />
+                            <TextCard label='Visibility' value={vendor.visibility} />
                         </div>
                     </div>
                 </div>
@@ -116,7 +119,7 @@ const showVendor = ({vendor}: IShowVendorPageProps) => {
                 </div>
         
                 <div className="flex flex-col gap-4 bg-white rounded-md">
-                    <div className="flex flex-row gap-4 text-gray-600 mt-8 pl-4 items-center">
+                    <div className="flex flex-row gap-4 text-gray-600 mt-8 pl-4 !text-base items-center">
                         <h4 className={`font-medium ${orderTab === 'order' && 'text-orange-700 text-lg font-semibold'} cursor-pointer`} onClick={()=>setOrderTab('order')}>Orders</h4>
                         <h4 className={`font-medium ${orderTab === 'train' && 'text-orange-700 text-lg font-semibold'} cursor-pointer`} onClick={()=>setOrderTab('train')}>Order Train</h4>
                         <h4 
@@ -131,11 +134,14 @@ const showVendor = ({vendor}: IShowVendorPageProps) => {
                         orderTab === 'order' &&
                         <div className="flex flex-col pb-8 bg-white overflow-y-auto">
                             <MyTable
-                                headings={['sn', 'Vendor_price_paid', 'quantity', 'order_amount', 'order_sub_amount', 'order_delivery_fee', 'order_service_fee', 'order_payment_method', 'order_paid', 'order_payment_confirmed', 'created_at']}
-                                content={vendor?.orders?.map((order: any, index: number) => ({
+                                headings={['sn', 'quantity', 'order_amount', 'order_sub_amount', 'order_delivery_fee', 'order_service_fee', 'order_payment_method', 'order_paid', 'order_payment_confirmed', 'created_at']}
+                                content={vendor?.order?.map((order: any, index: number) => ({
                                     ...order,
                                     id: order.id,
                                     sn: index + 1,
+                                    order_amount: toIntNumberFormat(order?.order_amount),
+                                    order_delivery_fee: toIntNumberFormat(order?.order_delivery_fee),
+                                    order_service_fee: toIntNumberFormat(order?.order_service_fee),
                                     order_payment_confirmed: order.order_payment_confirmed ? 'True' : 'False',
                                     created_at: new Date(order.created_at).toDateString(),
                                 }))} 
@@ -149,10 +155,12 @@ const showVendor = ({vendor}: IShowVendorPageProps) => {
                         <div className="flex flex-col pb-8 bg-white overflow-y-auto">
                             <MyTable
                                 headings={['sn', 'open_order_price', 'open_order_discount', 'status', 'created_at']}
-                                content={vendor?.openOrders?.map((order: any, index: number) => ({
+                                content={vendor?.openOrder?.map((order: any, index: number) => ({
                                     ...order,
                                     id: order.id,
                                     sn: index + 1,
+                                    open_order_price: toIntNumberFormat(order.open_order_price),
+                                    open_order_discount: toIntNumberFormat(order.open_order_discount),
                                     created_at: new Date(order.created_at).toDateString()
                                 }))} 
                                 onRowButtonClick={(order: any) => router.push(`/admin/order-trains/${order.id}`)}
@@ -165,10 +173,12 @@ const showVendor = ({vendor}: IShowVendorPageProps) => {
                         <div className="flex flex-col pb-8 bg-white overflow-y-auto">
                             <MyTable
                                 headings={['sn',  'product_name', 'product_price', 'vendor_approved', 'quantity', 'management_approved', 'created_at']}
-                                content={vendor?.products?.map((product: any, index: number) => ({
+                                content={vendor?.product?.map((product: any, index: number) => ({
                                     ...product,
                                     id: product.id,
                                     sn: index + 1,
+                                    management_approved: product?.management_approved ? 'True' : 'False',
+                                    user_approved: product?.user_approved ? 'True' : 'False',
                                     created_at: new Date(product.created_at).toDateString()
                                 }))} 
                                 onRowButtonClick={(product: any) => router.push(`/admin/products/${product.id}`)}

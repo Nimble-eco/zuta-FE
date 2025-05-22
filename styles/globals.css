@@ -151,3 +151,52 @@ a{
     left: 50%;
     transform: translateX(-50%);
   }
+
+  
+.bottom-left-ellipse {
+  position: absolute;
+  top: -300px;
+  right: -420px;
+  height: 550.65px;
+  width: 707.65px;
+  background-color: #ea580c;
+  border-radius: 100%;
+  filter: blur(80px);
+}
+
+.top-right-ellipse {
+  position: absolute;
+  top: -150px;
+  left: -400px;
+  height: 500.65px;
+  width: 1000.65px;
+  /* background-color: #403D58; */
+  background-color: #ea580c;
+  border-radius: 100%;
+  filter: blur(80px);
+}
+
+.middle-left-ellipse {
+  position: absolute;
+  top: -200px;
+  left: 260px;
+  height: 350.65px;
+  width: 350.65px;
+  /* background-color: #403D58; */
+  background-color: #b13e01;
+  border-radius: 100%;
+  filter: blur(80px);
+}
+
+.modal-top-ellipse {
+  position: absolute;
+  top: -380px;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 550px;
+  width: 550px;
+  background-color: #888dff33;
+  border-radius: 100%;
+  filter: blur(120px);
+  z-index: 0;
+}

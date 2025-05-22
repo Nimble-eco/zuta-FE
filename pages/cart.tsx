@@ -4,25 +4,18 @@ import CartComponent from "../Components/cart/Cart";
 import Total from "../Components/cart/Total";
 import Header from "../Components/Header";
 import HorizontalSlider from "../Components/lists/HorizontalSlider";
-import { openOrderProductsDummyData } from "../data/openOrderProducts";
 import Cookies from "js-cookie";
 import { useRouter } from "next/router";
 import { formatAmount } from "../Utils/formatAmount";
 import axiosInstance from "../Utils/axiosConfig";
-
+import { processImgUrl } from "../Utils/helper";
 
 const cart = () => {
     const [items, setItems] = useState<any>({});
     const [similar_products, setSimilarProducts] = useState<any>({});
-    const [openOrderProducts, setOpenOrderProducts] = useState<any[]>(openOrderProductsDummyData.splice(0, 4));
+    const [openOrderProducts, setOpenOrderProducts] = useState<any[]>([]);
     const [featuredProducts, setFeaturedProducts] = useState<any>({});
     const router = useRouter();
-  
-    let user: any = {};
-
-    if(typeof window !== 'undefined') {
-        user = Cookies.get('user') ? JSON.parse(Cookies.get('user')!) : null;
-    }
 
     const handleQuantityChange = (key: string, index: number, newQuantity: number) => {
         const updatedItems: any = JSON.parse(localStorage.getItem("cart")!);
@@ -46,8 +39,8 @@ const cart = () => {
         for (const [propertyName, propertyArray] of Object.entries(items)) {
             if (Array.isArray(propertyArray)) {
                 for (const objectItem of propertyArray) {
-                    categoryList.push(objectItem.product_categories);
-                    tagsList.push(objectItem.product_tags)
+                    categoryList.push(objectItem?.product_categories ?? objectItem.product?.product_categories);
+                    tagsList.push(objectItem?.product_tags ?? objectItem.product?.product_tags);
                 }
             }
         }
@@ -65,12 +58,21 @@ const cart = () => {
             product_tags: tagsList
         });
 
+        const openOrdersRes = await axiosInstance.post('/api/open-order/filter/index', {
+            product_categories: categoryList, 
+            product_tags: tagsList
+        });
+
         if(productsRes.status === 200) {
             setSimilarProducts(productsRes.data?.data?.splice(0, 6));
         }
 
         if(showcaseRes.status === 200) {
             setFeaturedProducts(showcaseRes?.data?.data?.splice(0, 6));
+        }
+
+        if(openOrdersRes?.status === 200) {
+            setOpenOrderProducts(openOrdersRes?.data?.data?.data);
         }
     }
 
@@ -90,9 +92,9 @@ const cart = () => {
     }, []);
 
   return (
-    <div className="flex flex-col bg-gray-100 relative min-h-screen overflow-scroll">
+    <div className="flex flex-col bg-gray-100 relative min-h-screen overflow-scroll pb-40">
         <Header />
-        <div className="flex flex-col bg-white py-4 px-3 h-fit w-[90%] fixed bottom-0 left-[5%] right-[5%] shadow-md z-50 mb-4 lg:hidden">
+        <div className="flex flex-col gap-1 bg-white py-2 px-3 h-fit w-[90%] fixed bottom-0 left-[5%] right-[5%] shadow-md z-40 mb-4 lg:hidden">
             <Total items={items} />
             <button
                 className="bg-orange-500 px-4 py-3 text-white rounded cursor-pointer"
@@ -123,44 +125,47 @@ const cart = () => {
                     </button>
                 </div>
                 <div className="flex flex-col py-3 bg-white pl-2 rounded-md">
-                    <h4 className="font-semibold my-3 text-sm text-center">Join these order train</h4>
-                    <div className="flex flex-row overflow-x-scroll lg:flex-col gap-4">
+                    <h4 className="font-semibold my-3 text-lg text-center">Join these order train</h4>
+                    <div className="flex flex-col overflow-x-scroll lg:flex-col gap-4">
                         {
-                            openOrderProducts?.map((product) => (
-                                <div
-                                    className='flex flex-col lg:flex-row cursor-pointer lg:h-28 text-sm bg-gray-100 lg:bg-transparent px-2 py-3 min-w-[10rem] '
-                                    // onClick={() => goToProductPage(product?.id)}
-                                    key={product.id}
+                            openOrderProducts?.map((order) => (
+                                <a
+                                    className='flex flex-col lg:flex-row cursor-pointer lg:h-28 text-sm bg-slate-800 rounded-md px-1 py-1 min-w-[10rem] '
+                                    href={`/openOrder?id=${order?.id}`}
+                                    key={order.id}
                                 >
                                     <img
-                                        src={product?.image}
+                                        src={
+                                            order?.product?.product_images?.length ?
+                                            processImgUrl(order?.product?.product_images[0]) : ''
+                                        }
                                         alt="product image"
-                                        className='lg:mr-3 h-24 lg:h-full rounded-md'
+                                        className='lg:mr-3 h-40 lg:h-full rounded-md !object-cover !object-center'
                                     />
                                     
                                     <div 
-                                        className="flex flex-col py-2"
+                                        className="flex flex-col gap-1 py-2"
                                     >
-                                        <div className='flex flex-col mb-2'>
-                                            <h3 className='text-sm font-mono line-clamp-1 mb-1'>
-                                                {product?.name}
+                                        <div className='flex flex-col'>
+                                            <h3 className='text-sm font-mono text-white line-clamp-2 capitalize'>
+                                                {order?.product?.product_name}
                                             </h3>
-                                            { product.rating && <RatingsCard rating={product.rating} /> }
+                                            { order?.product.rating && <RatingsCard rating={order?.product.rating} /> }
                                         </div>
                                         <div 
-                                            className='flex flex-col'
+                                            className='flex flex-row lg:flex-col'
                                         >
                                             <p 
                                                 className='text-orange-300 font-semibold mr-4'
                                             >
-                                                {formatAmount(product.price)}
+                                                {formatAmount(order?.product?.product_price)}
                                             </p>
-                                            <span className="text-xs">
-                                                {product.discount}% Off
+                                            <span className="text-xs text-gray-300">
+                                                {order?.product?.product_discount}% Off
                                             </span>
                                         </div>
                                     </div>
-                                </div>
+                                </a>
                             ))
                         }
                     </div>
@@ -174,6 +179,7 @@ const cart = () => {
                     <HorizontalSlider
                         list={featuredProducts}
                         list_name='Recommended for you'
+                        page='/product?id='
                     />
                 </div>
             )
@@ -185,6 +191,7 @@ const cart = () => {
                     <HorizontalSlider
                         list={similar_products}
                         list_name='You might also like'
+                        page='/product?id='
                     />
                 </div>
             )
@@ -194,53 +201,3 @@ const cart = () => {
 };
 
 export default cart;
-
-export async function getServerSideProps(context: any) {
-    try{
-        const search = context.query.search;
-
-        const getProducts = await axiosInstance.post(
-            `/api/public/product/search/index`,
-            {search}
-        );
-
-        const getOpenOrders = await axiosInstance.post(
-            '/api/open-order/search/index',
-            {search}
-        );
-
-        const getFeaturedProducts = await axiosInstance.post(
-            '/api/featured/product/search/index',
-            {search}
-        );
-
-        const [productsResult, openOrderProductsResult, featuredProductsResult] = await Promise.allSettled([
-            getProducts.data,
-            getOpenOrders.data,
-            getFeaturedProducts.data
-        ]);
-
-        const products = productsResult.status === 'fulfilled' && productsResult.value.data ? productsResult.value.data?.data : [];
-        const openOrderProducts = openOrderProductsResult.status === 'fulfilled' && openOrderProductsResult.value.data ? openOrderProductsResult.value.data?.data : [];
-        const featuredProducts = featuredProductsResult.status === 'fulfilled' && featuredProductsResult.value.data ? featuredProductsResult.value.data?.data : [];
-        console.log({products, openOrderProducts, featuredProducts})
-
-        return {
-            props: {
-                products,
-                openOrderProducts,
-                featuredProducts
-            },
-        }
-    }
-    catch(err) {
-        console.log({err})
-        return {
-            props: {
-                products: [],
-                openOrderProducts: [],
-                featuredProducts: []
-            },
-        }
-    }
-}

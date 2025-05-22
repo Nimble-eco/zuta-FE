@@ -1,10 +1,11 @@
 import { useRouter } from 'next/router';
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { HiSearch, HiUser, HiUserAdd, HiMenu, HiOutlineLogout } from "react-icons/hi";
 import { BsShop } from "react-icons/bs";
 import { MdOutlineShoppingCart } from "react-icons/md";
 import { AiFillCloseCircle } from "react-icons/ai";
 import Cookies from 'js-cookie';
+import { GiWorld } from 'react-icons/gi';
 
 interface INavBarProps {
     search?: boolean;
@@ -35,9 +36,32 @@ const Header = ({search = true, onSearch}: INavBarProps) => {
         setCartCount((cart?.products?.length + cart?.subscriptions?.length) || 0);
     }, []);
 
+    const ref = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        let isMounted = true
+
+        const handleClickOutside = (event: any) => {
+            if (isMounted) {
+                if (
+                ref.current &&
+                !ref.current!.contains(event.target)
+                )
+                showMobileMenu(false)
+            }
+        }
+
+        document.addEventListener('mousedown', handleClickOutside);
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside)
+            isMounted = false
+        }
+    }, []);
+
     return (
         <div
-            className='flex flex-col w-full relative shadow-md'
+            className='flex flex-col w-full shadow-md z-50 h-fit'
         >
             <div className='flex flex-row w-full justify-between px-4 py-3 bg-slate-800'>
                 <div className='flex flex-row my-auto'>
@@ -80,49 +104,47 @@ const Header = ({search = true, onSearch}: INavBarProps) => {
                 }
             
                 <div className="flex flex-row my-auto gap-4">
-                    <div className='flex flex-col relative' onClick={() => goToCartPage()}>
+                    <div className='relative' onClick={() => goToCartPage()}>
                         <span className='text-base text-orange-500 z-10 absolute -top-4 p-1  -right-2'>{cartCount}</span>
                         <MdOutlineShoppingCart 
-                            className='text-3xl text-white cursor-pointer'
+                            className='text-white cursor-pointer text-2xl'
                         />
                     </div>
                     {
                         user?.vendor && (
                             <a href="/vendor/product">
-                                <BsShop className="text-3xl text-white"/>
+                                <BsShop className="text-2xl text-white"/>
                             </a>
                         )
                     }
                     {user?.access_token ? (
-                        <div className="flex flex-row gap-4">   
-                            <a 
-                                href="/profile"
-                            >
-                                <HiUser className="text-3xl text-white" />
-                            </a>
-                        
-                            <a 
-                                href="#"
-                                onClick={() => {
-                                    Cookies.remove('user')
-                                    window.location.reload();
-                                }}
-                            >
-                                <HiOutlineLogout className="text-3xl text-white" />
-                            </a>
-                        </div>
+                        <a 
+                            href="/profile"
+                        >
+                            <HiUser className="text-2xl text-white" />
+                        </a>
                     ) : (
                         <a 
                             href="/auth/signIn"
                         >
-                            <HiUserAdd className="text-3xl text-white" />
+                            <HiUserAdd className="text-2xl text-white" />
                         </a>
                     )}
+                    <a
+                        href={'/community'}
+                        className='flex flex-row gap-1 items-center text-orange-500'
+                    >
+                        <GiWorld className='text-xl text-orange-500'/>
+                        <p className='text-orange-500 text-sm hidden lg:flex !mb-0'>Community</p>
+                    </a>
                 </div>
             </div>
             <div className='hidden md:flex flex-row bg-slate-600 py-3 !text-white pl-8 font-semibold'>
-                <a href='#0' className='mr-6'>
+                <a href='/order-train' className='mr-6'>
                     Open Orders
+                </a>
+                <a href='/departments' className='mr-6'>
+                    Categories
                 </a>
                 <a href='/customer-support' className='mr-6'>
                     Customer Service
@@ -163,7 +185,7 @@ const Header = ({search = true, onSearch}: INavBarProps) => {
             }
            
             { mobileMenu &&
-                <div className='fixed left-0 top-0 bottom-0 w-[60%] bg-white shadow-lg z-50 flex flex-col'>
+                <div ref={ref} className='fixed left-0 top-0 bottom-0 w-[60%] bg-white shadow-lg z-50 flex flex-col transition ease-in-out animate-in duration-500 duration-800 slide-in-from-left'>
                     <div className='bg-slate-800 py-10 px-4 text-white flex flex-col relative'>
                         <AiFillCloseCircle className='text-3xl w-fit text-white absolute right-3' onClick={() => showMobileMenu(false)}/>
                         <h2 className='font-bold text-xl mt-8 mb-4'>Zuta</h2>
@@ -173,7 +195,7 @@ const Header = ({search = true, onSearch}: INavBarProps) => {
                         <a href='/vendorVerification' className='mb-6'>
                             Sell
                         </a>
-                        <a className='mb-6'>
+                        <a className='mb-6' href='/order-train'>
                             Open Orders
                         </a>
 
@@ -197,7 +219,7 @@ const Header = ({search = true, onSearch}: INavBarProps) => {
                         <a className='mb-6' href={`/results?search=electronics`}>Electronics</a>
                         <a className='mb-6' href={`/results?search=food`}>Food stuffs</a>
 
-                        <a className='mb-6 !text-orange-500' href='/product-categories'>
+                        <a className='mb-6 !text-orange-500' href='/departments'>
                             See all
                         </a>
                     </div>

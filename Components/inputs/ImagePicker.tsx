@@ -1,27 +1,28 @@
 import { BsFileImage } from "react-icons/bs";
 import { HiOutlinePlusCircle } from "react-icons/hi";
-import TextButton from "../buttons/TextButton";
-import { RiCloseCircleLine } from "react-icons/ri";
+import { Trash2 } from "lucide-react";
+import ButtonFull from "../buttons/ButtonFull";
 
 interface ImagePickerProps {
   label: string;
   onSelect: (e: any) => void;
   files: any[];
   onRemove?: (e: any) => void;
+  uploadFiles?: ()=>void;
+  uploading?: boolean;
 }
 
-const ImagePicker = ({label, onSelect, files, onRemove}: ImagePickerProps) => {
+const ImagePicker = ({label, onSelect, files, onRemove, uploading, uploadFiles}: ImagePickerProps) => {
   return (
-    <div className='flex flex-col'>
-      <div className="flex flex-row relative py-2 mb-4 border-b border-gray-200">
-        <h4 className="font-semibold text-left pb-3 pl-3">{label}</h4>
-        <div className=" hidden md:flex w-fit absolute right-2 bottom-1">
-          <label
-            className=" hover:text-orange-800 text-orange-500 font-semibold py-2 px-4 min-w-fit mx-auto cursor-pointer"
-          >
-            Upload Image
-            <input type="file" onChange={onSelect} className="hidden" />
-          </label>  
+    <div className='flex flex-col gap-1'>
+      <div className="flex flex-row relative py-2 border-b border-gray-200">
+        <h4 className="font-medium text-left pb-3 text-sm">{label}</h4>
+        <div className="flex w-fit absolute right-2 bottom-1">
+          <ButtonFull
+            action="Upload Files"
+            loading={uploading}
+            onClick={uploadFiles}
+          />
         </div>
       </div>
       {
@@ -38,10 +39,10 @@ const ImagePicker = ({label, onSelect, files, onRemove}: ImagePickerProps) => {
           <div className="flex flex-row flex-wrap overflow-y-auto gap-4">
             {
               files?.map((file, index) => (
-                <div className="flex flex-col relative">
+                <div className="flex flex-col relative" key={index}>
                   {
-                    onRemove && <RiCloseCircleLine 
-                      className="text-xl absolute top-1 right-1 text-orange-500 cursor-pointer"
+                    onRemove && <Trash2 
+                      className="text-xl absolute top-1 right-1 text-red-500 cursor-pointer"
                       onClick={() => onRemove(index)}
                     />
                   }
@@ -59,14 +60,6 @@ const ImagePicker = ({label, onSelect, files, onRemove}: ImagePickerProps) => {
                 <input type="file" onChange={onSelect} className="hidden" />
               </label>
               <HiOutlinePlusCircle className="text-2xl text-center mx-auto text-orange-500 text-opacity-60" />
-            </div>
-            <div className="flex md:hidden w-fit mx-auto mt-8">
-              <label
-                className=" hover:text-orange-800 text-orange-500 font-semibold py-2 px-4 min-w-fit mx-auto cursor-pointer"
-              >
-                Upload Image
-                <input type="file" onChange={onSelect} className="hidden" />
-              </label> 
             </div>
           </div>
         )

@@ -68,8 +68,8 @@ const update = ({coupon}: IUpdateCouponProps) => {
     <div className="min-h-screen bg-gray-100 flex flex-col overflow-scroll">
         <div className="flex flex-row w-full mx-auto mt-8 relative mb-10">
             <AdminSideNavPanel />
-            <div className="flex flex-col w-[80%] absolute right-0 left-[20%]">
-                <div className="flex flex-row justify-between items-center py-4 px-4 bg-white border-b border-gray-200">
+            <div className="flex flex-col lg:w-[80%] lg:absolute right-0 lg:left-[20%]">
+                <div className="flex flex-row justify-between items-center py-4 px-4 bg-white border-b border-gray-200 mt-12 lg:mt-0">
                     <h2 className="text-lg font-bold">Coupon Details</h2>
                     <div className="flex flex-row gap-4 items-center">
                         <div className="hidden lg:flex w-fit ">

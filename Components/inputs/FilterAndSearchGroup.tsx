@@ -14,7 +14,7 @@ const FilterAndSearchGroup = ({searchInputPlaceHolder, onSearch, onFilterButtonC
     const [searchInput, setSearchInput] = useState<string>('');
 
     return (
-    <div className={`flex flex-col md:flex-row border border-gray-200 text-gray-500 items-center relative ${search ? 'w-full min-w-[30rem]' : 'w-fit'}`}>
+    <div className={`flex flex-col md:flex-row border border-gray-200 text-gray-500 lg:items-center relative ${search ? 'w-full lg:min-w-[30rem]' : 'w-fit'}`}>
         <div 
             className="flex flex-row px-4 py-2 border-r border-gray-200 cursor-pointer"
             onClick={onFilterButtonClick}

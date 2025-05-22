@@ -1,7 +1,6 @@
 import { useRouter } from "next/router";
 import Cookies from 'js-cookie';
-import { ToastContainer, toast } from 'react-toastify'
-import { injectStyle } from "react-toastify/dist/inject-style";
+import { toast } from 'react-toastify'
 import { getDateAndTimeFromISODate } from "../../../Utils/convertIsoDateToDateString";
 import { formatAmount } from "../../../Utils/formatAmount";
 import ButtonFull from "../../buttons/ButtonFull";
@@ -11,13 +10,17 @@ import {useState} from 'react'
 import { deleteProductByVendorAction, updateProductVendorApprovedAction, updateProductVendorUnApprovedAction } from "../../../requests/products/products.request";
 import SliderInput from "../../inputs/SliderInput";
 import DeleteProductModal from "../../modals/vendor/product/DeletProductModal";
-import { activateProductShowcaseAction } from "../../../requests/showcase/showcase.request";
+import { activateProductShowcaseAction, deactivateProductShowcaseAction } from "../../../requests/showcase/showcase.request";
+import { Fade } from "react-awesome-reveal";
+import { MdKeyboardArrowDown, MdKeyboardArrowUp } from "react-icons/md";
 
 interface ISingleProductProps {
     product: {
         id: number,
         product_name: string,
         product_description: string,
+        product_introduction: string,
+        product_summary: string,
         product_price: number,
         product_discount?: number,
         rating?: number,
@@ -26,6 +29,7 @@ interface ISingleProductProps {
         potential_discount?: number,
         product_categories: string[],
         product_tags: string[],
+        product_faqs: any[],
         flag: number,
         featured_status?: string,
         position: number,
@@ -45,9 +49,9 @@ export const SingleProduct = ({product} : ISingleProductProps) => {
     let vendorId: string = '';
     const [vendorApprovedStatus, setVendorApprovedStatus] = useState(product?.vendor_approved);
     const [showDeleteProductModal, setShowDeleteProductModal] = useState(false);
+    const [selectedFAQ, setSelectedFAQ] = useState(product?.product_faqs[0] ?? {});
    
     if(typeof window !== 'undefined') {
-        injectStyle();
         vendorId = JSON.parse(Cookies.get('user')!).vendor;
     }
 
@@ -105,7 +109,6 @@ export const SingleProduct = ({product} : ISingleProductProps) => {
     }
 
     const activateProductFeature = async () => {
-
         setIsLoading(true);
         await activateProductShowcaseAction(product?.featured?.id, vendorId)
         .then((response) => {
@@ -118,10 +121,23 @@ export const SingleProduct = ({product} : ISingleProductProps) => {
         })
         .finally(() => setIsLoading(false));
     }
+
+    const deactivateProductFeature = async () => {
+        setIsLoading(true);
+        await deactivateProductShowcaseAction(product?.featured?.id, vendorId)
+        .then((response) => {
+            if(response.status === 201) {
+                router.push(response.data.data.pay_stack_checkout_url);
+            }
+        })
+        .catch(error => {
+            toast.error(error?.response?.data?.message || 'Error! Try again later');
+        })
+        .finally(() => setIsLoading(false));
+    }
  
     return (
-        <div className="min-h-screen bg-gray-100 flex flex-col w-full md:w-[80%] absolute right-0 md:left-[20%] rounded-md px-4">
-            <ToastContainer />
+        <div className="min-h-screen bg-gray-100 flex flex-col w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%] rounded-md px-4">
             {
                 showDeleteProductModal && (
                     <DeleteProductModal
@@ -131,7 +147,7 @@ export const SingleProduct = ({product} : ISingleProductProps) => {
                     />
                 )
             }
-            <div className='flex flex-col bg-white'>
+            <div className='flex flex-col bg-white mt-8 lg:mt-0'>
                 <div className="flex flex-row justify-between border-b border-gray-200 p-4">
                     <h2 className="text-xl font-semibold align-center align-baseline my-auto capitalize">{product?.product_name}</h2>
                     <div className="flex flex-row ">
@@ -213,10 +229,61 @@ export const SingleProduct = ({product} : ISingleProductProps) => {
                 </div>
             </div>
 
+            <div className="flex flex-col bg-white py-4 mt-8">
+                <div className="flex flex-row justify-between items-center pb-3 mb-4 border-b border-gray-100 px-4 relative">
+                    <h3 className="font-semibold text-base lg:!text-lg mb-0">Advertisement Details</h3>
+                    <div className="h-10">
+                        {product?.featured?.status && product?.featured?.status === 'active' ? (
+                            <ButtonFull
+                                action='Stop Ads'
+                                onClick={deactivateProductFeature}
+                            />
+                            ) :
+                            product?.featured?.status === 'inactive' ? (
+                                <ButtonFull
+                                    action='Activate'
+                                    loading={isLoading}
+                                    onClick={activateProductFeature}
+                                />
+                            ) : (
+                            <ButtonGhost
+                                action='Advertise Product'
+                                onClick={() => router.push(`/vendor/showcase/store?product_id=${product?.id}`)}
+                            />
+                        )}
+                    </div>
+                </div>
+                { product?.featured ?
+                    <div className="flex flex-col md:flex-row">
+                        <div className="flex flex-row md:w-[50%] lg:w-auto">
+                            <div className="w-[60%] lg:w-auto">
+                                <TextCard label="Cost" value={product?.featured.featured_amount} />
+                            </div>
+                            <div className="w-[40%] lg:w-auto">
+                                <TextCard label="Status" value={product?.featured.status} />
+                            </div>
+                        </div>
+
+                        <div className="flex flex-row md:w-[50%] lg:w-auto">
+                            <div className="w-[60%] lg:w-auto">
+                                <TextCard label="Duration" value={product?.featured.duration_in_hours} />
+                            </div>
+                            <div className="w-[40%] lg:w-auto"> 
+                                <TextCard label="Time left" value={product?.featured.time_left} />
+                            </div>
+                        </div>
+                    </div> : (
+                        <>
+                            <p className="flex py-8 mx-auto text-center">Advertise your product to reach more customers</p>
+                        </>
+                    )
+                }
+            </div>
+
             <div className="flex flex-col px-4 mt-8 bg-white py-6">
-                <h3 className="font-semibold text-left border-b border-gray-200 mb-4 !text-lg">Product Description</h3>
+                <h3 className="font-semibold text-left border-b border-gray-200 mb-4 !text-lg">Product Introduction</h3>
                 <div className="">
-                    <p className="text-gray-700">{product?.product_description}</p>
+                    <div dangerouslySetInnerHTML={{__html: product?.product_introduction}} />
                 </div>
             </div>
 
@@ -250,76 +317,73 @@ export const SingleProduct = ({product} : ISingleProductProps) => {
                     </div>
                 </div>
             </div>
-            
-            <div className="flex flex-col bg-white py-4 mt-8">
-                <div className="flex flex-row justify-between pb-3 mb-4 border-b border-gray-100 px-4 relative">
-                    <h3 className="font-semibold !text-lg">Feature Details</h3>
-                    <div className="absolute right-2 bottom-1">
-                        {product?.featured?.status && product?.featured?.status === 'active' ? (
-                            <ButtonFull
-                                action='Stop product'
-                                onClick={() => {}}
-                            />
-                            ) :
-                            product?.featured?.status === 'inactive' ? (
-                                <ButtonFull
-                                    action='Activate'
-                                    loading={isLoading}
-                                    onClick={activateProductFeature}
-                                />
-                            ) : (
-                            <ButtonGhost
-                                action='Feature Product'
-                                onClick={() => router.push(`/vendor/showcase/store?product_id=${product?.id}`)}
-                            />
-                        )}
-                    </div>
-                </div>
-                { product?.featured ?
-                    <div className="flex flex-col md:flex-row">
-                        <div className="flex flex-row md:w-[50%] lg:w-auto">
-                            <div className="w-[60%] lg:w-auto">
-                                <TextCard label="Cost" value={product?.featured.featured_amount} />
-                            </div>
-                            <div className="w-[40%] lg:w-auto">
-                                <TextCard label="Status" value={product?.featured.status} />
-                            </div>
-                        </div>
 
-                        <div className="flex flex-row md:w-[50%] lg:w-auto">
-                            <div className="w-[60%] lg:w-auto">
-                                <TextCard label="Duration" value={product?.featured.duration_in_hours} />
-                            </div>
-                            <div className="w-[40%] lg:w-auto"> 
-                                <TextCard label="Time left" value={product?.featured.time_left} />
-                            </div>
-                        </div>
-                    </div> : (
-                        <>
-                            <p className="flex py-8 mx-auto text-center">Feature your product to reach more customers</p>
-                        </>
-                    )
-                }
+            <div className="flex flex-col px-4 mt-8 bg-white py-6">
+                <h3 className="font-semibold text-left border-b border-gray-200 mb-4 !text-lg">Product Description</h3>
+                <div className="">
+                    <div dangerouslySetInnerHTML={{__html: product?.product_description}} />
+                </div>
             </div>
 
-            <div className="flex flex-col my-8 bg-white py-6">
+            <div className="flex flex-col my-8 bg-white rounded-md py-6">
                 <h4 className="font-semibold text-left pb-3 mb-4 border-b border-gray-200 pl-3">Product Images</h4>
-                <div className="grid grid-cols-3 gap-2 lg:flex lg:flex-row px-4">
+                <div className="flex flex-row gap-3 overflow-scroll px-4">
                     {
-                        product?.product_images?.map((image) => (
-                            <div>
-                                <img src={image} alt='Product' className="h-36 w-32 mr-6 rounded-md" />
-                            </div>
+                        product?.product_images?.map((image,  index) => (
+                            <img src={image} key={index} alt='Product' className="h-36 w-36 object-cover object-center rounded-md" />
                         ))
                     }
                 </div>
             </div>
 
+            <div className="flex flex-col px-4 mt-8 bg-white py-6">
+                <h3 className="font-semibold text-left border-b border-gray-200 mb-4 !text-lg">Product Footer</h3>
+                <div className="">
+                    <div dangerouslySetInnerHTML={{__html: product?.product_summary}} />
+                </div>
+            </div>
+
+            <div className="flex flex-col gap-4 px-4 lg:px-10 xl:px-20 mt-8 bg-white p-4 rounded-md">
+                <p className="text-center text-muted text-3xl font-semibold mb-10">
+                    Frequently Asked Questions
+                </p>
+                <div className="flex flex-col gap-2">
+                    <Fade cascade triggerOnce>
+                    {
+                        product?.product_faqs?.map((faq: any, index: number) => (
+                            <div 
+                                key={faq?.question} 
+                                className="flex flex-col gap-1 border-b"
+                                onClick={()=>setSelectedFAQ(faq)}    
+                            >
+                                <div className="flex flex-row gap-4 justify-between">
+                                    <div className="flex flex-row gap-4 items-center cursor-pointer">
+                                        <p className="bg-foreground w-10 h-10 flex justify-center items-center rounded-xl text-center">{index + 1}</p>
+                                        <p className="font-semibold text-lg capitalize">{faq?.question}</p>
+                                    </div>
+                                    {
+                                        selectedFAQ?.answer === faq?.answer ?
+                                        <MdKeyboardArrowUp className="text-3xl" /> :
+                                        <MdKeyboardArrowDown className="text-3xl" /> 
+                                    }
+                                </div>
+                                {
+                                    selectedFAQ?.answer === faq?.answer && (
+                                        <p className="text-muted bg-foreground p-4 rounded-xl">{selectedFAQ?.answer}</p>
+                                    )
+                                }
+                            </div>
+                        ))
+                    }
+                    </Fade>
+                </div>
+            </div>
+
             <div className="flex md:hidden w-[60%] mx-auto mb-8">
-                    <ButtonFull
-                        action="Edit Product"
-                        onClick={() => {}} 
-                    />
+                <ButtonGhost
+                    action="Delete Product"
+                    onClick={()=>setShowDeleteProductModal(!showDeleteProductModal)} 
+                />
             </div>
         </div>
     );
