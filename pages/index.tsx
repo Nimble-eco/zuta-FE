@@ -31,31 +31,32 @@ const Home = ({products, openOrders, categories, tags, featured, catalogues}: IH
       <Header onSearch={searchProducts}/>
 
       <div
-        className='flex flex-col justify-center w-full lg:w-[90%] md:w-[80%] mx-auto px-5 lg:px-0 py-10'
+        className='flex flex-col justify-center w-full lg:w-[90%] md:w-[80%] mx-auto px-5 lg:px-0 py-4'
       >
         <div className='flex flex-col text-left'>
-          <h2 className='text-2xl md:text-4xl text-gray-600 font-bold w-full lg:w-[80%] mb-6'>
+          <h2 className='text-2xl md:text-4xl text-gray-600 font-bold w-full lg:w-[80%] mb-4'>
             Let us buy {''}
             <span className='text-orange-500'>
               Together
             </span>  
           </h2>
           <div className='flex flex-col text-base justify-start w-full lg:w-[80%] font-mono font-semibold text-left text-gray-500'>
-            <p className='pb-1'>
+            <p className='pb-1 !mb-0'>
               Enjoy Wholesale prices
             </p>
             <p>
-              Money back if the discount rate increases 
+              Get your money back if the discount goes up
             </p>
           </div>
             
         </div>
       
-        <div className='lg:h-[35vh] my-10 w-full mx-auto'>
+        <div className='lg:h-[50vh] my-10 w-full mx-auto'>
           <SwiperSlider 
             slides={cataloguesDummyData}
             // slides={catalogues?.map(catalogue => catalogue.image)}
             slidesToShow={2}
+            imageUrlSrc={false}
           />
         </div>
       </div>

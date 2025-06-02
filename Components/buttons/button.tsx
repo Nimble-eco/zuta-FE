@@ -1,4 +1,4 @@
-import { Slot } from '@radix-ui/react-slot';
+// import { Slot } from '@radix-ui/react-slot';
 import { cva, VariantProps } from 'class-variance-authority';
 import * as React from 'react';
 import { Loader2 } from 'lucide-react';
@@ -13,7 +13,7 @@ const buttonVariants = cva(
 				destructive:
 					'bg-red-700 text-destructive-foreground hover:bg-red-700/90',
 				outline:
-					'border border-input bg-background hover:bg-green-900 hover:text-accent-foreground',
+					'border border-orange-500 bg-background hover:bg-orange-500 text-orange-600 hover:text-white',
 				secondary: 'bg-secondary text-primary-foreground hover:bg-secondary/80',
 				ghost: 'hover:bg-accent hover:text-accent-foreground',
 				link: 'text-primary underline-offset-4 hover:underline',
@@ -45,7 +45,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 		{ className, variant, size, asChild = false, isLoading = false, ...props },
 		ref
 	) => {
-		const Comp = asChild ? Slot : 'button';
+		// const Comp = asChild ? Slot : 'button';
+		const Comp = 'button';
 		return (
 			<Comp
 				className={twMerge([buttonVariants({ variant, size, className })])}

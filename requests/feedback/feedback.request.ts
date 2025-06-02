@@ -7,11 +7,11 @@ export const storeFeedbackAction = async (payload: IStoreFeedbackPayloadProps) =
 
     const formData = new FormData();
     formData.append('comment', payload.comment);
-    formData.append('category', payload.category);
+    if(payload?.category) formData.append('category', payload.category);
     formData.append('type', payload.type);
-    formData.append('user_id', payload.user_id!);
-    formData.append('email', payload.email!);
-    formData.append('image', payload.image!);
+    if(payload?.user_id) formData.append('user_id', payload.user_id!);
+    if(payload?.email) formData.append('email', payload.email!);
+    if(payload?.image) formData.append('image', payload.image!);
 
     return axiosInstance.post('/api/feedback/store', formData, {
         headers: {

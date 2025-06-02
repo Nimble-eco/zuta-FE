@@ -79,15 +79,15 @@ const ShowOrderModal = ({order, setShow}: IShowOrderModalProps) => {
             <Modal.Body className='md:!min-w-[40vw] !w-[40vw] relative'>
                 <MdOutlineClose className='text-3xl cursor-pointer absolute top-3 right-3' onClick={setShow} />
                 <div className='flex flex-col min-h-[50vh]'>
-                    <div className="flex flex-col w-[95%] mx-auto px-5 py-4 mt-10 relative">
-                        <div className='w-full cursor-pointer max-w-1/3 h-full flex align-middle' onClick={() => router.push(`/product?id=${order?.product?.id}`)}>
+                    <div className="flex flex-col px-5 py-4 mt-10 relative">
+                        <div className='w-full cursor-pointer max-w-1/3 h-[40vh] flex align-middle' onClick={() => router.push(`/product?id=${order?.product?.id}`)}>
                             <SwiperSlider 
                                 slides={order?.product?.product_images}
                             />
                         </div>
                         <div className="flex flex-col gap-1 mt-4">
-                            <h1 className="text-xl md:text-2xl justify-center mb-0">{order?.product?.product_name}</h1>
-                            <p className="text-gray-600 py-2 mb-0">{order?.product?.product_description}</p>
+                            <h1 className="text-xl md:text-2xl justify-center mb-0 capitalize">{order?.product?.product_name}</h1>
+                            <p className="text-gray-600 py-2 mb-0">{order?.product?.product_introduction}</p>
                             <div className="flex flex-row gap-8 w-full">
                                 <div 
                                     className='flex flex-row gap-1'

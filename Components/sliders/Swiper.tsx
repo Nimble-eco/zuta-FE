@@ -6,11 +6,12 @@ import { processImgUrl } from "../../Utils/helper";
 interface ISwiperProps {
   slides: string[];
   slidesToShow?: number;
+  imageUrlSrc?: boolean;
 }
 
 SwiperCore.use([Autoplay, Pagination]);
 
-const SwiperSlider = ({slides, slidesToShow=1}: ISwiperProps) => {
+const SwiperSlider = ({slides, slidesToShow=1, imageUrlSrc=true}: ISwiperProps) => {
   return (
     <Swiper
       spaceBetween={10}
@@ -25,7 +26,11 @@ const SwiperSlider = ({slides, slidesToShow=1}: ISwiperProps) => {
             key={index}
             className={`rounded-md bg-gray-400 max-h-full min-h-full`}
           >
-            <img src={processImgUrl(slide)} alt='image' className='min-w-full min-h-full max-h-full rounded-md bg-gray-400 !object-center !object-cover'/>
+            <img 
+              src={imageUrlSrc ? processImgUrl(slide) : slide} 
+              alt='image' 
+              className='min-w-full min-h-full max-h-full rounded-md bg-gray-400 !object-center !object-cover'
+            />
           </SwiperSlide>
         ))
       }

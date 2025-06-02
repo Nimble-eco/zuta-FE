@@ -819,9 +819,9 @@ export async function getServerSideProps(context: any) {
         const addresses = myAddress.status === 'fulfilled' ? myAddress.value.data : [];
         const profile = myProfile.status === 'fulfilled' ? myProfile.value.data : [];
         const orders = myOrders.status === 'fulfilled' ? myOrders.value.data : [];
-        const orderTrains = myOrderTrains.status === 'fulfilled' ? myOrderTrains.value.data.data : [];
-        const reviews = myReviews.status === 'fulfilled' ? myReviews.value.data : [];
-        const myVendor = myVendorAccount.status === 'fulfilled' ? myVendorAccount.value.data : [];
+        const orderTrains = myOrderTrains.status === 'fulfilled' ? myOrderTrains.value.data : [];
+        const reviews = myReviews.status === 'fulfilled' ? myReviews.value?.data : [];
+        const myVendor = myVendorAccount.status === 'fulfilled' ? myVendorAccount.value?.data : [];
 
         return {
             props: {

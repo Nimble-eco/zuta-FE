@@ -3,7 +3,7 @@ import { HiSearch } from "react-icons/hi";
 import { MdOutlineFilterList } from "react-icons/md";
 
 interface IFilterAndSearchGroupProps {
-    searchInputPlaceHolder: string;
+    searchInputPlaceHolder?: string;
     onSearch: (input: string) => void;
     onFilterButtonClick: () => void;
     isSearching?: boolean;

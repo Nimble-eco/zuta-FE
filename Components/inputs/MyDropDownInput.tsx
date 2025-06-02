@@ -1,4 +1,3 @@
-import React from 'react'
 import { capitalizeFirstLetter } from '../../Utils/capitalizeFirstLettersOfString';
 
 interface IMyDropDownInputProps {
@@ -7,15 +6,16 @@ interface IMyDropDownInputProps {
     options: any[];
     onSelect: (e: any) => void;
     value?: string | number | boolean;
+    direction?: string;
 }
 
-const MyDropDownInput = ({label, name, options, value, onSelect}: IMyDropDownInputProps) => {
+const MyDropDownInput = ({label, name, options, value, onSelect, direction='col'}: IMyDropDownInputProps) => {
   return (
-    <div className='flex flex-col w-full'>
-        <label className='font-semibold mb-3 text-sm'>
+    <div className={`flex flex-${direction} gap-1 w-full`}>
+        <label className='whitespace-nowrap !mb-0'>
             {capitalizeFirstLetter(label)}:
         </label>
-        <select name={name ?? label} className='text-gray-500 text-sm bg-gray-100 py-2 px-4' value={value as string} onChange={(e) => onSelect(e)}>
+        <select name={name ?? label} className='text-gray-500 text-sm bg-gray-100 py-3 px-4 w-full rounded-[20px]' value={value as string} onChange={(e) => onSelect(e)}>
             <option value={''}>Select an option</option>
             {
                 options?.map((item: any, index: number) => (

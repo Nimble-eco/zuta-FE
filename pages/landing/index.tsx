@@ -8,13 +8,13 @@ import { appFaqs } from "../../Utils/data";
 
 const LandingPage = () => {
     const router = useRouter();
-    const [selectedFAQ, setSelectedFAQ] = useState<any>({});
+    const [selectedFAQ, setSelectedFAQ] = useState<any>(appFaqs[0]);
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
         <Header />
         <header className="flex relative">
-            <div className="w-full h-60 lg:h-[65vh] border-b border-white border-dashed flex justify-center items-center relative bg-[url('/images/shopping-cart.jpg')] bg-center bg-cover bg-no-repeat">
+            <div className="w-full h-60 lg:h-[90vh] flex justify-center items-center relative bg-[url('/images/hero-2.jpeg')] bg-center bg-cover bg-no-repeat">
                 <div className="absolute top-0 bottom-0 left-0 right-0 bg-black bg-opacity-70" />
                 <div className="flex flex-col gap-4 mt-10 lg:mt-0 px-4 lg:px-10 rounded-md py-6 relative z-10">
                     <Slide cascade direction="left" triggerOnce={true}>
@@ -87,22 +87,38 @@ const LandingPage = () => {
                 </div>
             </div>
 
+            <div className="w-full h-60 lg:h-[85vh] flex flex-col gap-4 justify-center items-center relative bg-[url('/images/hero-1.jpeg')] bg-center bg-cover bg-no-repeat bg-fixed">
+                <div className="absolute top-0 bottom-0 left-0 right-0 bg-black bg-opacity-30" />
+                <Slide cascade direction="left" triggerOnce={true}>
+                    <h2 className="text-4xl font-semibold text-white z-20">
+                        Lets Buy It Together
+                    </h2>
+                    <button 
+                        type="button" 
+                        className="bg-orange-600 z-20 px-20 py-4 rounded-xl text-white w-fit font-semibold"
+                        onClick={()=>router.push('/')}    
+                    >
+                        Start Shopping
+                    </button>
+                </Slide>
+            </div>
+
             <div className="flex flex-col gap-4 mt-8 w-full bg-gray-100 px-4 lg:px-20 py-10">
-                <p className="text-3xl font-semibold text-slate-800 mb-10 text-center">
+                <p className="text-3xl font-semibold text-orange-600 mb-10 text-center">
                     Frequently Asked Questions
                 </p>
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-6">
                     <Fade cascade triggerOnce>
                     {
-                        appFaqs?.map((faq: any, index: number) => (
+                        appFaqs?.slice(0,7).map((faq: any, index: number) => (
                             <div 
                                 key={faq?.question} 
                                 className="flex flex-col gap-1 border-b w-full"
                                 onClick={()=>setSelectedFAQ(faq)}    
                             >
-                                <div className="flex flex-row gap-4 justify-between items-center text-orange-600">
+                                <div className="flex flex-row gap-4 justify-between items-center text-slate-800">
                                     <div className="flex flex-row gap-4 items-center cursor-pointer">
-                                        <p className="font-semibold">{index + 1}</p>
+                                        <p className="font-semibold text-lg">{index + 1}</p>
                                         <p className="font-semibold text-lg capitalize">{faq?.question}</p>
                                     </div>
                                     {
@@ -113,7 +129,7 @@ const LandingPage = () => {
                                 </div>
                                 {
                                     selectedFAQ?.answer === faq?.answer && (
-                                        <p className="text-muted bg-foreground p-4 rounded-xl">{selectedFAQ?.answer}</p>
+                                        <p className="p-4 font-medium">{selectedFAQ?.answer}</p>
                                     )
                                 }
                             </div>
@@ -123,30 +139,21 @@ const LandingPage = () => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 h-[45vh] w-full bg-[url('/images/shopping-cart.jpg')] bg-cover bg-center">
+            <div className="grid grid-cols-1 h-[50vh] w-full bg-[url('/images/shopping-cart.jpg')] bg-cover bg-center">
                 <div className="flex flex-col gap-4 justify-center items-center relative group">
-                    <div className="absolute top-0 bottom-0 left-0 right-0 bg-black bg-opacity-70 group-hover:bg-opacity-40" />
-                    <Slide cascade direction="left" triggerOnce={true}>
-                        <h2 className="text-3xl font-semibold text-white z-20">Start Shopping</h2>
-                        <button 
-                            type="button" 
-                            className="bg-orange-600 z-20 px-20 py-2 rounded-xl text-white w-fit font-semibold"
-                            onClick={()=>router.push('/auth/register')}    
-                        >
-                            Sign up
-                        </button>
-                    </Slide>
-                </div>
-                <div className="flex flex-col gap-4 justify-center items-center relative group">
-                    <div className="absolute top-0 bottom-0 left-0 right-0 bg-black bg-opacity-70 group-hover:bg-opacity-40" />
+                    <div className="absolute top-0 bottom-0 left-0 right-0 bg-black bg-opacity-80 group-hover:bg-opacity-70" />
                     <Slide cascade direction="right" triggerOnce={true}>
-                        <h2 className="text-3xl font-semibold text-white z-20">Start Selling Now</h2>
+                        <h2 className="text-3xl font-semibold text-white z-20 text-center">
+                            Are you a 
+                            <span className="text-orange-600 mx-2">Wholesale</span> distributor? <br />
+                            <span className="text-lg">Start Selling Now</span>
+                        </h2>
                         <button 
                             type="button" 
-                            className="bg-orange-600 z-20 px-20 py-2 rounded-xl text-white w-fit font-semibold"
+                            className="bg-orange-600 z-20 px-20 py-4 rounded-xl text-white w-fit font-semibold"
                             onClick={()=>router.push('/vendorVerification')}
                         >
-                            Start Here
+                            Get Started Here
                         </button>
                     </Slide>
                 </div>

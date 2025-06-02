@@ -64,7 +64,7 @@ const cart = () => {
         });
 
         if(productsRes.status === 200) {
-            setSimilarProducts(productsRes.data?.data?.splice(0, 6));
+            setSimilarProducts(productsRes.data?.data?.data?.splice(0, 6));
         }
 
         if(showcaseRes.status === 200) {

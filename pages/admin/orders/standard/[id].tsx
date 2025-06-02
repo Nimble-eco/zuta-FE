@@ -16,7 +16,7 @@ const ShowOrder = ({order}: IShowOrderPageProps) => {
     const router = useRouter();
     const [status, setStatus] = useState(order?.status);
     const [loading, setLoading] = useState(false);
-    console.log({order})
+ 
     const updateOrderStatus = async() => {
         setLoading(true);
         if(!status) return toast.error('Select a status');

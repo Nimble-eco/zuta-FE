@@ -4,15 +4,14 @@ import Header from "../../../Components/Header"
 import { toast } from 'react-toastify';
 import axiosInstance from "../../../Utils/axiosConfig";
 import { useRouter } from "next/router";
-import { PulseLoader } from "react-spinners";
 import ButtonFull from "../../../Components/buttons/ButtonFull";
 import RatingsCard from "../../../Components/cards/RatingsCard";
 import ButtonGhost from "../../../Components/buttons/ButtonGhost";
-import { createAnOrderAction, updateOrderRequest } from "../../../requests/order/order.request";
-import { joinOrderTrainAction, updateOrderTrainStatusAction } from "../../../requests/orderTrain/orderTrain.request";
+import { updateOrderRequest } from "../../../requests/order/order.request";
+import { updateOrderTrainStatusAction } from "../../../requests/orderTrain/orderTrain.request";
 import { storeFeedbackAction } from "../../../requests/feedback/feedback.request";
-import MyDropDownInput from "../../../Components/inputs/MyDropDownInput";
 import { feedbackTypes } from "../../../Utils/data";
+import { capitalizeFirstLetter } from "../../../Utils/helper";
 
 const paystack = () => {
     const router = useRouter();
@@ -75,28 +74,14 @@ const paystack = () => {
                 setPaymentStatus(status);
 
                 const transactionData: any = response.data.data.metadata;
-                console.log({transactionData})
 
-                // transactionData?.products?.forEach(async (product: any) => {
                 transactionData?.orders?.forEach(async (order: any) => {
                     setCategory('order');
                     await updateOrderRequest({
-                        order_id: order,
+                        id: order,
                         order_paid: true,
                         order_payment_confirmed: true,
                     });
-
-                    // await createAnOrderAction({
-                    //     ...transactionData,
-                    //     product_id: Number(product.product_id),
-                    //     quantity: Number(product.quantity),
-                    //     address_id: Number(transactionData.address_id),
-                    //     order_sub_amount: Number(transactionData.order_sub_amount),
-                    //     order_service_fee: Number(transactionData.order_service_fee),
-                    //     order_delivery_fee: Number(transactionData.order_delivery_fee),
-                    //     order_paid: true,
-                    //     order_payment_confirmed: true,
-                    // })
                 });
 
                 transactionData?.order_train?.forEach(async (order_id: string) => {
@@ -106,18 +91,6 @@ const paystack = () => {
                         order_paid: true,
                         order_payment_confirmed: true,
                     });
-
-                    // await joinOrderTrainAction({
-                    //     ...transactionData,
-                    //     product_id: Number(product.product_id),
-                    //     quantity: Number(product.quantity),
-                    //     address_id: Number(transactionData.address_id),
-                    //     order_sub_amount: Number(transactionData.order_sub_amount),
-                    //     order_service_fee: Number(transactionData.order_service_fee),
-                    //     order_delivery_fee: Number(transactionData.order_delivery_fee),
-                    //     order_paid: true,
-                    //     order_payment_confirmed: true,
-                    // })
                 });
 
                 toast.success('Order stored successfully')
@@ -126,30 +99,52 @@ const paystack = () => {
         .finally(() => localStorage.removeItem('cart'));
     }, []);
 
+    const getShowcase = async () => {
+        const showcaseRes = await axiosInstance.get('/api/featured/product/index?properties=1');
+
+        if(showcaseRes.status === 200) {
+            setFeaturedProducts(showcaseRes?.data?.data?.splice(0, 6));
+        }
+    }
+
+    useEffect(()=>{
+       getShowcase();
+    },[]);
+
   return (
-    <div className="bg-gray-200 min-h-screen flex flex-col relative">
+    <div className="bg-gray-200 min-h-screen flex flex-col relative overflow-scroll">
         <Header />
 
         <div 
-            className="w-[95%] flex flex-col lg:flex-row mx-auto mt-12"
+            className="w-full flex flex-col lg:flex-row gap-6 lg:gap-10 mx-auto mt-12 px-4"
         >
-            <div className="flex flex-col w-[90%] mx-auto lg:w-[65%] lg:mr-[2%] mb-4 min-h-fit">
+            <div className="flex flex-col w-[90%] mx-auto lg:w-[65%] mb-4 min-h-fit">
                 <div className="flex flex-col gap-4 bg-white rounded-md px-4 py-4 relative min-h-[75%]">
-                    <div className="flex flex-row justify-start gap-4 ">
-                        <h2 className="text-lg font-semibold">Your Feedback</h2>
-                    </div>
+                    <h2 className="text-lg font-semibold text-center">Please drop us a message</h2>
 
                     <div className="flex flex-col gap-4">
-                        <MyDropDownInput
-                            label="Type of feedback"
-                            name="type"
-                            value={type}
-                            onSelect={(e: any)=>setType(e.target?.value)}
-                            options={feedbackTypes}
-                        />
+                        <select 
+                            name={'type'} 
+                            className='text-gray-500 text-sm bg-gray-100 rounded-md py-2 px-4 w-full' 
+                            value={type as string} 
+                            onChange={(e) => setType(e.target.value)}
+                        >
+                            <option value={''}>Type of feedback</option>
+                            {
+                                feedbackTypes?.map((item: any, index: number) => (
+                                    <option 
+                                        value={item.value ?? item.name} 
+                                        key={`${item.value ?? item.name} ${index}`}
+                                        className="mb-3 border-b border-gray-200 py-2"
+                                    >
+                                        {capitalizeFirstLetter(item.title || item.name)}
+                                    </option>
+                                ))
+                            }
+                        </select>
                         <textarea 
                             name="user-experience"
-                            className="h-48 rounded-[16px] bg-gray-100 outline-none px-4 py-5"
+                            className="h-48 rounded-md bg-gray-100 outline-none px-4 py-5"
                             placeholder="Tell us about your experience"
                             onChange={(e)=>setComment(e.target.value)}
                         />
@@ -158,12 +153,13 @@ const paystack = () => {
                                 <ButtonFull
                                     action="Submit"
                                     loading={isLoading}
+                                    disabled={!comment || isLoading}
                                     onClick={submitFeedback}
                                 />
                             </div>
                             {
                                 paymentStatus === 'success' ? (
-                                <div className="h-10 w-[80%] lg:w-[50%]">
+                                <div className="h-12 w-[80%] lg:w-[50%]">
                                     <ButtonGhost
                                         action="View my orders"
                                         loading={isLoading}
@@ -174,7 +170,6 @@ const paystack = () => {
                         </div>
                     </div>
                 </div>
-                <div className="bg-white h-full w-full rounded-md" />
             </div>
 
             <div className="flex flex-col w-[90%] mx-auto lg:w-[35%]">
@@ -182,13 +177,13 @@ const paystack = () => {
                     <p className="font-medium text-center">Featured Products</p>
                     {
                         featuredProducts?.map((product) => (
-                            <div
+                            <a
+                                href={`/product?id=${product?.id}`}
                                 className='flex flex-row cursor-pointer mb-6 h-28 text-sm'
-                                // onClick={() => goToProductPage(product?.id)}
                                 key={product.id}
                             >
                                 <img
-                                    src={product?.image}
+                                    src={product?.product?.product_images[0]}
                                     alt="product image"
                                     className='mr-3 h-full rounded-md'
                                 />
@@ -198,9 +193,9 @@ const paystack = () => {
                                 >
                                     <div className='flex flex-col mb-2'>
                                         <h3 className='text-base font-mono line-clamp-1 mb-1'>
-                                            {product?.name}
+                                            {product?.product_name}
                                         </h3>
-                                        { product.rating && <RatingsCard rating={product.rating} /> }
+                                        { product?.product?.reviews && <RatingsCard rating={product?.product?.reviews} /> }
                                     </div>
                                     <div 
                                         className='flex flex-col'
@@ -208,14 +203,14 @@ const paystack = () => {
                                         <p 
                                             className='text-orange-300 font-semibold mr-4'
                                         >
-                                            {product.price}
+                                            {product?.product?.product_price}
                                         </p>
                                         <span>
-                                            {product.discount}% Off
+                                            {product?.product?.product_discount}% Off
                                         </span>
                                     </div>
                                 </div>
-                            </div>
+                            </a>
                         ))
                     }
                 </div>

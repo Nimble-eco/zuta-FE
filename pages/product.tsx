@@ -122,6 +122,7 @@ function product({product, similar_products, featured_similar_products}: IProduc
                     Authorization: user.access_token
                 }
             })
+            .catch((error)=>{console.log({error})})
         }
     }
     

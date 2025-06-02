@@ -15,7 +15,7 @@ export interface ICreateOrderProps {
 }
 
 export interface IUpdateOrderProps {
-    order_id: string,
+    id: string,
     product_name?: string;
     quantity?: number;
     address_id?: number;
