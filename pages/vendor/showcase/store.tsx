@@ -11,6 +11,7 @@ import ButtonGhost from "../../../Components/buttons/ButtonGhost";
 import Cookies from "js-cookie";
 import { storeProductShowcaseAction } from "../../../requests/showcase/showcase.request";
 import { useRouter } from "next/router";
+import VendorNavBar from "../../../Components/vendor/layout/VendorNavBar";
 
 interface IStoreProductFeaturePageProps {
     product: any;
@@ -75,10 +76,11 @@ const store = ({product, rate}: IStoreProductFeaturePageProps) => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-        <div className="flex flex-row w-full mx-auto lg:mt-8 relative">
+        <div className="flex flex-row w-full mx-auto relative">
             <VendorSideNavPanel />
             <div className="flex flex-col lg:w-[80%] lg:absolute right-0 lg:left-[20%]">
-                <div className='flex flex-row bg-white items-center justify-between py-4 px-4 rounded-md mb-4 mt-20 lg:mt-0'>
+                <VendorNavBar />
+                <div className='flex flex-row bg-white items-center justify-between py-4 !px-4 rounded-md mb-4'>
                     <h2 className="text-xl font-semibold text-gray-700">Showcase: 
                         <span className="font-bold text-slate-700 ml-2">{capitalizeFirstLetter(product.product_name)}</span>
                     </h2>

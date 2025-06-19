@@ -14,6 +14,7 @@ import { sendAxiosRequest } from "../../../Utils/sendAxiosRequest";
 import { filterProductsByVendorAction, searchProductsByVendorAction } from "../../../requests/products/products.request";
 import Cookies from "js-cookie";
 import { processImgUrl } from "../../../Utils/helper";
+import VendorNavBar from "../../../Components/vendor/layout/VendorNavBar";
 
 interface IProductsIndexPageProps {
     products: any;
@@ -201,9 +202,10 @@ const index = ({products, categories, tags}: IProductsIndexPageProps) => {
                 ]}
             />
         }
-        <div className="flex flex-row w-full mx-auto mt-8 relative mb-10">
+        <div className="flex flex-row w-full mx-auto relative mb-10">
             <VendorSideNavPanel />
             <div className="flex flex-col w-full lg:w-[80%] lg:absolute lg:right-0 lg:left-[20%]">
+                <VendorNavBar />
                 <div className="flex flex-row justify-between items-center bg-white py-2 px-4 mb-1 mt-14 lg:mt-0">
                     <h2 className="text-2xl font-bold text-slate-700 mb-4">Products</h2>
                     <div className="w-fit h-12">
@@ -214,7 +216,7 @@ const index = ({products, categories, tags}: IProductsIndexPageProps) => {
                     </div>
                 </div>
                 
-                <div className="flex flex-row text-sm font-semibold !text-gray-400 px-4 py-5 bg-white">
+                {/* <div className="flex flex-row text-sm font-semibold !text-gray-400 px-4 py-5 bg-white">
                     <a href="#0" className="hover:!text-orange-500 mr-3">
                         Active
                     </a>
@@ -227,7 +229,7 @@ const index = ({products, categories, tags}: IProductsIndexPageProps) => {
                     <a href="#0" className="hover:!text-orange-500 mr-3">
                         Featured
                     </a>
-                </div>
+                </div> */}
 
                 <div className="flex flex-row py-3 px-4 relative bg-white justify-between">
                     <FilterAndSearchGroup 

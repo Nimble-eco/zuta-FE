@@ -9,6 +9,7 @@ import { convertToBase64 } from "../../../Utils/convertImageToBase64";
 import { toast } from "react-toastify";
 import { useRouter } from "next/router";
 import { storeBannerAction } from "../../../requests/banners/banner.request";
+import AdminNavBar from "../../../Components/admin/layout/AdminNavBar";
 
 const create = () => {
     const router = useRouter();
@@ -54,9 +55,10 @@ const create = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col overflow-scroll">
-        <div className="flex flex-row w-full mx-auto mt-8 relative mb-10">
+        <div className="flex flex-row w-full mx-auto relative mb-10">
             <AdminSideNavPanel />
-            <div className="flex flex-col w-full px-4 lg:px-0 lg:w-[80%] lg:absolute lg:right-0 lg:left-[20%]">
+            <div className="flex flex-col w-full !px-4 lg:!px-0 lg:w-[80%] lg:absolute lg:right-0 lg:left-[20%]">
+                <AdminNavBar />
                 <div className="flex flex-row relative items-center pr-2 py-4 mb-3 border-b border-gray-200 mt-10 lg:mt-0">
                     <h2 className="text-lg font-bold">Banner Details</h2>
                     <div className="w-fit absolute right-1 bottom-2">

@@ -7,6 +7,7 @@ import { toast } from "react-toastify"
 import axiosInstance from "../../../Utils/axiosConfig"
 import { parse } from "cookie"
 import { confirmPaymentAction, unconfirmPaymentAction } from "../../../requests/payments/payments.request"
+import AdminNavBar from "../../../Components/admin/layout/AdminNavBar"
 
 interface IShowTransactionPageProps {
     payment: any;
@@ -51,7 +52,8 @@ const showTransaction = ({payment}: IShowTransactionPageProps) => {
     return (
         <div className="min-h-screen bg-gray-100 overflow-scroll flex flex-row relative">
             <AdminSideNavPanel />
-            <div className="min-h-screen bg-gray-100 flex flex-col gap-6 w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%] rounded-md px-4">
+            <div className="min-h-screen bg-gray-100 flex flex-col gap-6 w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%] rounded-md !px-2 lg:px-0">
+                <AdminNavBar />
                 <div className='flex flex-col bg-white rounded-md mt-20 lg:mt-6'>
                     <div className="flex flex-row justify-between items-center border-b border-gray-200 py-4 px-4">
                         <h2 className="text-xl font-semibold align-center align-baseline my-auto capitalize">{payment.id}</h2>

@@ -83,7 +83,7 @@ const ShowOrderTrainModal = ({orderTrain, setShow}: IShowOrderTrainModalProps) =
         setShow();
         setTimeout(() => router.push('/profile?path=orders'), 3000);
     }
-    console.log({orderTrain})
+
   return (
     <div className="!rounded-md">
         <Modal show={true} onHide={setShow} dialogClassName='md:modal-lg'>

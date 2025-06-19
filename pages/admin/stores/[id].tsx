@@ -9,6 +9,7 @@ import { managementApproveVendorAction, managementUnApproveVendorAction } from "
 import axiosInstance from "../../../Utils/axiosConfig"
 import { parse } from "cookie"
 import { toIntNumberFormat } from "../../../Utils/helper"
+import AdminNavBar from "../../../Components/admin/layout/AdminNavBar"
 
 interface IShowVendorPageProps {
     vendor: any;
@@ -56,7 +57,8 @@ const showVendor = ({vendor}: IShowVendorPageProps) => {
     return (
         <div className="min-h-screen bg-gray-100 overflow-scroll flex flex-row relative">
             <AdminSideNavPanel />
-            <div className="min-h-screen bg-gray-100 flex flex-col gap-6 w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%] rounded-md px-4">
+            <div className="min-h-screen bg-gray-100 flex flex-col gap-6 w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%] rounded-md !px-2 lg:!px-0">
+                <AdminNavBar />
                 <div className='flex flex-col bg-white rounded-md mt-20 lg:mt-6'>
                     <div className="flex flex-row justify-between items-center border-b border-gray-200 py-4 px-4">
                         <h2 className="text-xl font-semibold align-center align-baseline my-auto capitalize">{vendor.vendor_name}</h2>
@@ -203,9 +205,8 @@ export async function getServerSideProps(context: any) {
         const getMyVendor = await axiosInstance.get('/api/vendor/show?id=' + id, {
             headers: {Authorization: token}
         });
-        console.log({getMyVendor})
+
         const vendor = getMyVendor.data?.data;
-        console.log({vendor})
   
         return {
             props: { vendor }

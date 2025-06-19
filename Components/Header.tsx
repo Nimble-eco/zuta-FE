@@ -112,7 +112,7 @@ const Header = ({search = true, onSearch}: INavBarProps) => {
                     </div>
                     {
                         user?.vendor && (
-                            <a href="/vendor/product">
+                            <a href="/vendor">
                                 <BsShop className="text-2xl text-white"/>
                             </a>
                         )
@@ -130,13 +130,13 @@ const Header = ({search = true, onSearch}: INavBarProps) => {
                             <HiUserAdd className="text-2xl text-white" />
                         </a>
                     )}
-                    <a
+                    {/* <a
                         href={'/community'}
                         className='flex flex-row gap-1 items-center text-orange-500'
                     >
                         <GiWorld className='text-xl text-orange-500'/>
                         <p className='text-orange-500 text-sm hidden lg:flex !mb-0'>Community</p>
-                    </a>
+                    </a> */}
                 </div>
             </div>
             <div className='hidden md:flex flex-row bg-slate-600 py-3 !text-white pl-8 font-semibold'>

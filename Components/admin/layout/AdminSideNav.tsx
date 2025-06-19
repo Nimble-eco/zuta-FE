@@ -5,7 +5,7 @@ import { IoIosArrowDown, IoIosArrowUp, IoMdCloseCircleOutline } from "react-icon
 
 const AdminSideNavPanel = () => {
     const router = useRouter();
-    const activeStyle = "bg-orange-600 rounded-tr-[20px] rounded-br-[20px] !text-white py-3 mr-2 hover:!text-white";
+    const activeStyle = "bg-slate-600 rounded-tr-[20px] rounded-br-[20px] !text-white py-3 mr-2 hover:!text-white";
     const [showMobileMenu, setShowMobileMenu] = useState(false);
     const [showDropdown, setShowDropdown] = useState<any>({
         users: false,
@@ -23,10 +23,10 @@ const AdminSideNavPanel = () => {
 
   return (
     <>
-        <div className="lg:hidden fixed top-2 left-4 bg-white p-4 rounded-full cursor-pointer shadow-xl z-20">
+        <div className="lg:hidden absolute top-2 left-4 cursor-pointer z-20">
             <MenuIcon className="h-6 w-6 text-slate-700" onClick={()=>setShowMobileMenu(!showMobileMenu)}/>
         </div>
-        <div className={`${showMobileMenu ? 'flex' : 'hidden'} lg:flex flex-col bg-white py-2 w-[60%] lg:w-[19%] mr-[1%] fixed left-0 top-0 bottom-0 z-20 overflow-scroll text-sm gap-6 transition ease-in-out animate-in duration-500 duration-800 slide-in-from-left lg:!animate-none`}>
+        <div className={`${showMobileMenu ? 'flex' : 'hidden'} lg:flex flex-col bg-slate-800 text-white py-2 w-[60%] lg:w-[19%] mr-[1%] fixed left-0 top-0 bottom-0 z-20 overflow-scroll text-sm gap-6 transition ease-in-out animate-in duration-500 duration-800 slide-in-from-left lg:!animate-none`}>
             <IoMdCloseCircleOutline className="h-8 w-8 text-gray-500 cursor-pointer absolute top-6 right-4 lg:hidden" onClick={()=>setShowMobileMenu(!showMobileMenu)}/>
             <a href="/" className="mb-2 !text-orange-500 text-xl font-serif mt-10 lg:mt-0 px-4 lg:px-16">Zuta</a>
             <a 
@@ -57,12 +57,12 @@ const AdminSideNavPanel = () => {
             </a>
             {
                 (showDropdown.stores || router.pathname.includes('stores')) && (
-                    <div className="flex flex-col gap-2 text-[#495046] pl-4 lg:pl-16 w-full mx-auto">
-                        <a href="/admin/stores" className={` ${router.pathname.includes('/stores') ? 'font-semibold' : 'opacity-50'} no-underline text-[#495046] cursor-pointer flex flex-row  relative`}>
+                    <div className="flex flex-col gap-2 text-slate-400 font-medium pl-4 lg:pl-16 w-full mx-auto">
+                        <a href="/admin/stores" className={`no-underline cursor-pointer flex flex-row  relative`}>
                             <div className={`w-3 h-3 rounded-full my-auto bg-orange-600 absolute -left-5 top-2 ${router.pathname.includes('/stores') ? 'flex' : 'hidden' } `} />
                             All Stores
                         </a>
-                        <a href={"#0"} className={` ${router.pathname.includes('/stores-stats') ? 'font-semibold' : 'opacity-50'} no-underline text-[#495046] cursor-pointer flex flex-row  relative`}>
+                        <a href={"#0"} className={`no-underline cursor-pointer flex flex-row  relative`}>
                             <div className={`w-3 h-3 rounded-full my-auto bg-orange-600 absolute -left-5 top-2 ${router.pathname.includes('/stores-stats') ? 'flex' : 'hidden' } `} />
                             Stats
                         </a>
@@ -85,12 +85,12 @@ const AdminSideNavPanel = () => {
             </a>
             {
                 (showDropdown.products || router.pathname.includes('products')) && (
-                    <div className="flex flex-col gap-2 text-[#495046] pl-4 lg:pl-16 w-full mx-auto">
-                        <a href="/admin/products" className={` ${router.pathname.includes('/products') ? 'font-semibold' : 'opacity-50'} no-underline text-[#495046] cursor-pointer flex flex-row  relative`}>
+                    <div className="flex flex-col gap-2 text-slate-400 font-medium pl-4 lg:pl-16 w-full mx-auto">
+                        <a href="/admin/products" className={`no-underline cursor-pointer flex flex-row  relative`}>
                             <div className={`w-3 h-3 rounded-full my-auto bg-orange-600 absolute -left-5 top-2 ${router.pathname.includes('/products') ? 'flex' : 'hidden' } `} />
                             All Products
                         </a>
-                        <a href={"#0"} className={` ${router.pathname.includes('/products-stats') ? 'font-semibold' : 'opacity-50'} no-underline text-[#495046] cursor-pointer flex flex-row  relative`}>
+                        <a href={"#0"} className={`no-underline  cursor-pointer flex flex-row  relative`}>
                             <div className={`w-3 h-3 rounded-full my-auto bg-orange-600 absolute -left-5 top-2 ${router.pathname.includes('/products-stats') ? 'flex' : 'hidden' } `} />
                             Stats
                         </a>
@@ -113,16 +113,16 @@ const AdminSideNavPanel = () => {
             </a>
             {
                 (showDropdown.orders || router.pathname.includes('orders')) && (
-                    <div className="flex flex-col gap-2 text-[#495046] pl-4 lg:pl-16 w-full mx-auto">
-                        <a href={"/admin/orders/standard"} className={` ${router.pathname.includes('/standard') ? 'font-semibold' : 'opacity-50'} no-underline text-[#495046] cursor-pointer flex flex-row  relative`}>
+                    <div className="flex flex-col gap-2 text-slate-400 font-medium pl-4 lg:pl-16 w-full mx-auto">
+                        <a href={"/admin/orders/standard"} className={`no-underline cursor-pointer flex flex-row  relative`}>
                             <div className={`w-3 h-3 rounded-full my-auto bg-orange-600 absolute -left-5 top-2 ${router.pathname.includes('/standard') ? 'flex' : 'hidden' } `} />
                             Standard
                         </a>
-                        <a href="/admin/orders/order-train" className={` ${router.pathname.includes('/order-train') ? 'font-semibold' : 'opacity-50'} no-underline text-[#495046] cursor-pointer flex flex-row  relative`}>
+                        <a href="/admin/orders/order-train" className={`no-underline cursor-pointer flex flex-row  relative`}>
                             <div className={`w-3 h-3 rounded-full my-auto bg-orange-600 absolute -left-5 top-2 ${router.pathname.includes('/order-train') ? 'flex' : 'hidden' } `} />
                             Order Train
                         </a>
-                        <a href="#0" className={` ${router.pathname.includes('/order-stats') ? 'font-semibold' : 'opacity-50'} no-underline text-[#495046] cursor-pointer flex flex-row  relative`}>
+                        <a href="#0" className={`no-underline cursor-pointer flex flex-row relative`}>
                             <div className={`w-3 h-3 rounded-full my-auto bg-orange-600 absolute -left-5 top-2 ${router.pathname.includes('/order-stats') ? 'flex' : 'hidden' } `} />
                             Stats
                         </a>

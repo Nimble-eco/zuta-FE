@@ -187,7 +187,6 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
 
         return () => { isMounted = false }
     }, []);
-    console.log({profile})
 
     return (
         <div className="min-h-screen bg-gray-100">
@@ -312,7 +311,7 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                                     >
                                         <div className="rounded-full h-24 w-24 mx-auto relative group">
                                             <img 
-                                                src={user?.picture ?? 'https://via.placeholder.com/100'}
+                                                src={user?.picture || 'https://via.placeholder.com/100'}
                                                 alt="profile" 
                                                 className="h-full w-full rounded-full object-cover object-center" 
                                             />
@@ -350,8 +349,8 @@ function profile({profile, orders, orderTrains, addresses, reviews}: IProfilePag
                                             </div>
                                             {
                                                 isVendor && <div 
-                                                    className={`flex flex-row items-center cursor-pointer px-4 py-2 pb-1 rounded-[20px] font-medium bg-orange-500 bg-opacity-20 justify-center align-middle`}
-                                                    onClick={() => getPage('vendor/product/')}
+                                                    className={`flex flex-row items-center cursor-pointer !px-4 !py-2 rounded-[20px] font-medium bg-orange-500 bg-opacity-20 justify-center align-middle`}
+                                                    onClick={() => getPage('vendor')}
                                                 >
                                                     <MdStore className="text-2xl mr-2" />
                                                     <p className="!mb-0">My Store</p>

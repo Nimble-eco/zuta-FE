@@ -11,6 +11,7 @@ import { filterProductShowcaseAction, searchFeaturedProductsByVendorAction } fro
 import FilterContainer from "../../../Components/modals/containers/FilterContainer";
 import TextInput from "../../../Components/inputs/MyTextInput";
 import MyDropDownInput from "../../../Components/inputs/MyDropDownInput";
+import AdminNavBar from "../../../Components/admin/layout/AdminNavBar";
 
 interface IShowcaseIndexPageProps {
     items: any;
@@ -189,9 +190,10 @@ const ShowcaseIndexPage = ({items}: IShowcaseIndexPageProps) => {
             />
         }
 
-        <div className="flex flex-row w-full mx-auto mt-8 relative">
+        <div className="flex flex-row w-full mx-auto relative">
             <AdminSideNavPanel />
-            <div className="flex flex-col w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%] px-4">
+            <div className="flex flex-col w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%] !px-2 lg:!px-0">
+                <AdminNavBar />
                 <div className="flex flex-row gap-6 justify-between lg:w-[95%] items-center mb-6 mt-20 lg:mt-0">
                     <h2 className="text-2xl font-bold text-slate-700">Showcase</h2>
                     {/* <div className="w-20">

@@ -11,6 +11,7 @@ import MyDropDownInput from '../../../Components/inputs/MyDropDownInput';
 import StatsCard from '../../../Components/cards/StatsCard';
 import AdminSideNavPanel from '../../../Components/admin/layout/AdminSideNav';
 import { calculateRatio } from '../../../Utils/helper';
+import AdminNavBar from '../../../Components/admin/layout/AdminNavBar';
 
 interface IUsersIndexPageProps {
     users: any;
@@ -205,9 +206,10 @@ const index = ({users}: IUsersIndexPageProps) => {
             />
         }
 
-        <div className="flex flex-row w-full mx-auto mt-8 relative">
+        <div className="flex flex-row w-full mx-auto relative">
             <AdminSideNavPanel />
-            <div className="flex flex-col w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%]">
+            <div className="flex flex-col w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%] !px-2 lg:!px-0">
+                <AdminNavBar />
                 <h2 className="text-2xl font-bold text-slate-700 mb-4 mt-20 lg:mt-0">Users</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
                     <StatsCard

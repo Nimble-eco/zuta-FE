@@ -9,6 +9,7 @@ import { useRouter } from "next/router";
 import { capitalizeFirstLetter } from "../../../Utils/capitalizeFirstLettersOfString";
 import AdminSideNavPanel from "../../../Components/admin/layout/AdminSideNav";
 import { toast } from "react-toastify";
+import AdminNavBar from "../../../Components/admin/layout/AdminNavBar";
 
 interface IShowFeaturedProductPageProps {
   featuredProduct: any;
@@ -84,9 +85,10 @@ const show = ({featuredProduct, mostViewedInCategories}: IShowFeaturedProductPag
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col overflow-auto">
-      <div className="flex flex-row w-[95%] mx-auto mt-8 relative mb-10">
+      <div className="flex flex-row w-[95%] mx-auto relative mb-10">
         <AdminSideNavPanel />
-        <div className="min-h-screen bg-gray-100 flex flex-col w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%] rounded-md px-4">
+        <div className="min-h-screen bg-gray-100 flex flex-col w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%] rounded-md !px-2 lg:!px-0">
+          <AdminNavBar />
           <div className="flex flex-row gap-4 flex-wrap mt-20 lg:mt-0">
             <div className="bg-white rounded-md shadow-md flex flex-col gap-1 px-4 py-2">
               <p className="text-lg font-semibold text-orange-600">Total Views before</p>

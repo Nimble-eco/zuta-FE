@@ -12,6 +12,7 @@ import MyDropDownInput from "../../../../Components/inputs/MyDropDownInput"
 import TextInput from "../../../../Components/inputs/MyTextInput"
 import { filterOrderTrainByVendorAction } from "../../../../requests/orderTrain/orderTrain.request"
 import { formatAmount } from "../../../../Utils/formatAmount"
+import AdminNavBar from "../../../../Components/admin/layout/AdminNavBar"
 
 interface IStandardOrdersIndexPageProps {
     orders: any
@@ -142,9 +143,10 @@ const index = ({orders}: IStandardOrdersIndexPageProps) => {
                 ]}
             />
         }
-        <div className="flex flex-row w-full mx-auto mt-8 relative">
+        <div className="flex flex-row w-full mx-auto relative">
             <AdminSideNavPanel />
-            <div className="flex flex-col w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%]">
+            <div className="flex flex-col w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%] !px-2 lg:!px-0">
+                <AdminNavBar />
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6 mt-20 lg:mt-0">
                     <StatsCard
                         title='All Orders'

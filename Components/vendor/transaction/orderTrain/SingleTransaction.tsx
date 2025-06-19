@@ -9,6 +9,7 @@ import { getDateAndTimeFromISODate } from '../../../../Utils/convertIsoDateToDat
 import ButtonFull from '../../../buttons/ButtonFull';
 import ButtonGhost from '../../../buttons/ButtonGhost';
 import { closeOpenOrderByVendorAction, markOpenOrderAsReadyByVendorAction } from '../../../../requests/orderTrain/orderTrain.request';
+import VendorNavBar from '../../layout/VendorNavBar';
 
 interface ISingleTransactionProps {
   transaction: {
@@ -83,8 +84,9 @@ const SingleOpenOrderTransaction = ({transaction, reviews}: ISingleTransactionPr
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%] rounded-md px-4 text-sm">
-      <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 !text-base mt-20 lg:mt-0">
+    <div className="min-h-screen bg-gray-100 flex flex-col w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%] rounded-md !px-2 lg:!px-4 text-sm">
+      <VendorNavBar />
+      <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 !text-base">
         <div className="flex flex-col px-4 bg-white rounded-md w-full mb-4 lg:mb-0 mx-auto pb-6">
           <div className="flex flex-row justify-between py-2 border-b border-gray-100 mb-4 items-center">
             <h4 className="font-semibold !text-base text-left my-auto">Order Details</h4>

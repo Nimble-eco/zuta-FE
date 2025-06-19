@@ -10,6 +10,7 @@ import TextAreaInput from "../../../Components/inputs/TextAreaInput";
 import TextCard from "../../../Components/texts/TextCard";
 import { updateFeedbackAction } from "../../../requests/feedback/feedback.request";
 import { toast } from "react-toastify";
+import AdminNavBar from "../../../Components/admin/layout/AdminNavBar";
 
 interface IShowFeedbackProps {
     feedback: any;
@@ -52,9 +53,10 @@ const Show = ({feedback}: IShowFeedbackProps) => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col overflow-scroll">
-        <div className="flex flex-row w-full mx-auto mt-8 relative mb-10">
+        <div className="flex flex-row w-full mx-auto relative mb-10">
             <AdminSideNavPanel />
-            <div className="flex flex-col w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%] gap-4">
+            <div className="flex flex-col w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%] gap-4 !px-2 lg:px-0">
+                <AdminNavBar />
                 <div className="flex flex-row justify-between items-center py-4 px-4 bg-white border-b border-gray-200 mt-14 lg:mt-0">
                     <h2 className="text-lg font-bold">Feedback Details</h2>
                     <div className="flex flex-row gap-4 items-center">

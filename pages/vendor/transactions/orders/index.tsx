@@ -15,6 +15,7 @@ import ColumnTextInput from "../../../../Components/inputs/ColumnTextInput";
 import { filterOrdersByVendorAction, searchOrdersByVendorAction } from "../../../../requests/order/order.request";
 import Cookies from "js-cookie";
 import { formatAmount } from "../../../../Utils/formatAmount";
+import VendorNavBar from "../../../../Components/vendor/layout/VendorNavBar";
 
 interface IOrdersIndexPageProps {
     orders: any;
@@ -225,12 +226,13 @@ const index = ({orders}: IOrdersIndexPageProps) => {
                 ]}
             />
         }
-        <div className="flex flex-row w-full mx-auto mt-8 relative mb-10">
+        <div className="flex flex-row w-full mx-auto relative mb-10">
             <VendorSideNavPanel />
             <div className="flex flex-col w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%]">
-                <div className='flex flex-col gap-2 bg-white pt-4 px-4 mt-20 lg:mt-0'>
+                <VendorNavBar />
+                <div className='flex flex-col gap-2 bg-white pt-4 !px-2 lg:!px-4'>
                     <h2 className="text-2xl font-bold text-slate-700 mb-4">Standard Orders</h2>
-                    <div className="flex flex-row text-sm font-semibold !text-gray-400 pb-5 bg-white">
+                    {/* <div className="flex flex-row text-sm font-semibold !text-gray-400 pb-5 bg-white">
                         <a href="#0" className="hover:!text-orange-500 mr-3">
                             Completed
                         </a>
@@ -243,7 +245,7 @@ const index = ({orders}: IOrdersIndexPageProps) => {
                         <a href="#0" className="hover:!text-orange-500 mr-3">
                             Rejected
                         </a>
-                    </div>
+                    </div> */}
                 </div>
                 <div className="flex flex-row py-3 px-4 relative bg-white justify-between">
                     <div className="w-[full]">
@@ -289,6 +291,15 @@ export async function getServerSideProps(context: any) {
     const cookies = parse(context.req.headers.cookie || ''); 
     const user = JSON.parse(cookies.user || 'null');
     const token = user?.access_token;
+
+    if(!user?.vendor) {
+        return {
+            redirect: {
+                destination: '/auth/signIn',
+                permanent: false
+            }
+        }
+    }
 
     try {
         const getMyOrders = await axiosInstance.post('/api/order/filter/index', {vendor_id: user?.vendor}, {

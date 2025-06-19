@@ -334,6 +334,12 @@ const processImgUrl = (imageStr: string) => {
 	else return `${process.env.NEXT_PUBLIC_API_BASEURL!}/${imageStr}`
 }
 
+function getMonthName(dateString: string) {
+	const [year, month] = dateString.split('-');
+	const date = new Date(Number(year), Number(month) - 1);
+	return date.toLocaleString('en-US', { month: 'long' });
+}
+
 export {
 	getDayOfYear,
 	getDatesInRange,
@@ -358,5 +364,6 @@ export {
 	obfuscateEmail,
 	filterTruthyProps,
 	copyToClipboard,
-	processImgUrl
+	processImgUrl,
+	getMonthName
 };

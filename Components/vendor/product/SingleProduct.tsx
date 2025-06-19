@@ -13,6 +13,7 @@ import DeleteProductModal from "../../modals/vendor/product/DeletProductModal";
 import { activateProductShowcaseAction, deactivateProductShowcaseAction } from "../../../requests/showcase/showcase.request";
 import { Fade } from "react-awesome-reveal";
 import { MdKeyboardArrowDown, MdKeyboardArrowUp } from "react-icons/md";
+import VendorNavBar from "../layout/VendorNavBar";
 
 interface ISingleProductProps {
     product: {
@@ -137,7 +138,8 @@ export const SingleProduct = ({product} : ISingleProductProps) => {
     }
  
     return (
-        <div className="min-h-screen bg-gray-100 flex flex-col w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%] rounded-md px-4">
+        <div className="min-h-screen bg-gray-100 flex flex-col w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%] rounded-md !px-2 lg:!px-4">
+            <VendorNavBar />
             {
                 showDeleteProductModal && (
                     <DeleteProductModal
@@ -147,7 +149,7 @@ export const SingleProduct = ({product} : ISingleProductProps) => {
                     />
                 )
             }
-            <div className='flex flex-col bg-white mt-8 lg:mt-0'>
+            <div className='flex flex-col bg-white'>
                 <div className="flex flex-row justify-between border-b border-gray-200 p-4">
                     <h2 className="text-xl font-semibold align-center align-baseline my-auto capitalize">{product?.product_name}</h2>
                     <div className="flex flex-row ">

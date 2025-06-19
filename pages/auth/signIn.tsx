@@ -11,6 +11,7 @@ import ButtonFull from "../../Components/buttons/ButtonFull";
 import { useRouter } from 'next/router';
 import axiosInstance from '../../Utils/axiosConfig';
 import TextInput from '../../Components/inputs/MyTextInput';
+import LoginSelectWorkSpaceModal from '../../Components/modals/switch-worskapce/LoginSelectWorkSpaceModal';
 
 export default function SignIn({ providers }: any) {
     const router = useRouter();
@@ -19,6 +20,7 @@ export default function SignIn({ providers }: any) {
         email: '',
         password: '',
     });
+    const [showSwitchProfileModal, setShowSwitchProfileModal] = useState(false);
 
     const handleDataChange = (e: any) => {
         setData({...data, [e.target.name]: e.target.value});
@@ -67,13 +69,18 @@ export default function SignIn({ providers }: any) {
                 setIsLoading(false);
                 Cookies.set('user', JSON.stringify(response.data.data))
                 toast.success('Login successful');
-                setTimeout(() => {
-                    if (router && router.asPath && 
-                        (router.asPath !== '/' && router.asPath !== '/auth/register') &&
-                        (router.asPath !== '/' && router.asPath !== '/auth/signIn')
-                    ) router.back();
-                    else router.push('/');
-                }, 5000);
+
+                if(response?.data?.data?.vendor) {
+                    setShowSwitchProfileModal(true);
+                } else {
+                    setTimeout(() => {
+                        if (router && router.asPath && 
+                            (router.asPath !== '/' && router.asPath !== '/auth/register') &&
+                            (router.asPath !== '/' && router.asPath !== '/auth/signIn')
+                        ) router.back();
+                        else router.push('/');
+                    }, 5000);
+                }
             }
         })
         .catch(error => {
@@ -89,15 +96,21 @@ export default function SignIn({ providers }: any) {
   return (
     <div className="min-h-screen flex flex-row my-0 mx-0 overflow-y-scroll">
         <ToastContainer />
+        
+        <LoginSelectWorkSpaceModal
+            show={showSwitchProfileModal}
+            setShow={setShowSwitchProfileModal}
+        />
+
         <div className='hidden lg:flex w-[50%] bg-orange-700'>
 
         </div>
 
         <div className="flex flex-col-reverse lg:flex-col w-full md:w-[80%] md:mx-auto lg:w-[50%] lg:mx-0 px-8 py-6 align-middle my-auto !bg-white">
-            <div className="flex flex-col gap-8">
+            <div className="flex flex-col gap-4">
                 <p className="font-semibold opacity-30 text-lg text-center lg:hidden flex justify-center">OR</p>
-                <h2 className="text-orange-600 text-lg lg:text-2xl text-center font-semibold">Sign In Here</h2>
-                <p className='text-xs lg:text-sm text-gray-700 font-medium opacity-30 text-center'>Buy with a community and enjoy whole sale discounts</p>
+                <h2 className="text-orange-600 text-lg lg:text-2xl text-center font-semibold !mb-0">Sign In Here</h2>
+                <p className='text-xs lg:text-sm text-gray-700 font-medium opacity-30 text-center !mb-0'>Buy with a community and enjoy whole sale discounts</p>
                 
                 <TextInput
                     label="Email"

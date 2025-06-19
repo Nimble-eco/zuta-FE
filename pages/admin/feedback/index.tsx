@@ -13,6 +13,7 @@ import ColumnTextInput from '../../../Components/inputs/ColumnTextInput'
 import StatsCard from '../../../Components/cards/StatsCard'
 import { feedbackCategories, feedbackTypes } from '../../../Utils/data'
 import { filterTruthyProps } from '../../../Utils/helper'
+import AdminNavBar from '../../../Components/admin/layout/AdminNavBar'
 
 interface IFeedbackIndexProps {
     feedback: any;
@@ -46,7 +47,6 @@ const FeedbackIndex = ({feedback}: IFeedbackIndexProps) => {
         const payload = filterTruthyProps(filterByDetails);
         await filterFeedbackAction(payload)
         .then((response: any) => {
-            console.log({response})
             if(response.status === 200) {
                 toast.success('Action successful');
                 setFeedbackData(response.data);
@@ -147,9 +147,10 @@ const FeedbackIndex = ({feedback}: IFeedbackIndexProps) => {
             />
         }
 
-        <div className="flex flex-row w-full mx-auto mt-8 relative">
+        <div className="flex flex-row w-full mx-auto relative">
             <AdminSideNavPanel />
-            <div className="flex flex-col w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%] px-4">
+            <div className="flex flex-col w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%] !px-2 lg:px-0">
+                <AdminNavBar />
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6 mt-14 lg:mt-0">
                     <StatsCard
                         title='All Feedback'

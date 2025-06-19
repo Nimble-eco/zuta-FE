@@ -15,6 +15,7 @@ import ColumnTextInput from "../../../../Components/inputs/ColumnTextInput";
 import Cookies from "js-cookie";
 import { formatAmount } from "../../../../Utils/formatAmount";
 import { filterOrderTrainByVendorAction, searchOrderTrainByVendorAction } from "../../../../requests/orderTrain/orderTrain.request";
+import VendorNavBar from "../../../../Components/vendor/layout/VendorNavBar";
 
 interface IOrdersIndexPageProps {
     orders: any;
@@ -227,9 +228,10 @@ const index = ({orders}: IOrdersIndexPageProps) => {
         <div className="flex flex-row w-full mx-auto relative">
             <VendorSideNavPanel />
             <div className="flex flex-col w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%]">
-                <div className="flex flex-col gap-2 bg-white px-4 rounded-t-md pt-4 mt-20 lg:mt-0">
+                <VendorNavBar />
+                <div className="flex flex-col gap-2 bg-white px-4 rounded-t-md pt-4">
                     <h2 className="text-2xl font-bold text-slate-700 mb-4">Order Train</h2>
-                    <div className="flex flex-row text-sm font-semibold !text-gray-400">
+                    {/* <div className="flex flex-row text-sm font-semibold !text-gray-400">
                         <a href="#0" className="hover:!text-orange-500 mr-3">
                             Completed
                         </a>
@@ -242,7 +244,7 @@ const index = ({orders}: IOrdersIndexPageProps) => {
                         <a href="#0" className="hover:!text-orange-500 mr-3">
                             Rejected
                         </a>
-                    </div>
+                    </div> */}
                 </div>
 
                 <div className="flex flex-row py-3 px-4 relative bg-white justify-between">
@@ -291,6 +293,15 @@ export async function getServerSideProps(context: any) {
     const cookies = parse(context.req.headers.cookie || ''); 
     const user = JSON.parse(cookies.user || 'null');
     const token = user?.access_token;
+    
+    if(!user?.vendor) {
+        return {
+            redirect: {
+                destination: '/auth/signIn',
+                permanent: false
+            }
+        }
+    }
 
     try {
         const getMyOpenOrders = await axiosInstance.post('/api/open-order/filter/index', {vendor_id: user?.vendor}, {

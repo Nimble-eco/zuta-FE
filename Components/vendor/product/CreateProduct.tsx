@@ -22,6 +22,7 @@ import TextAreaInput from '../../inputs/TextAreaInput'
 import { storeMediaAction, storeVideosRequest } from '../../../requests/media/media.requests'
 import VideoPicker from '../../inputs/VideoPicker'
 import ButtonGhost from '../../buttons/ButtonGhost'
+import VendorNavBar from '../layout/VendorNavBar';
 
 const Editor = dynamic(()=>import('react-simple-wysiwyg'), {
     ssr: false
@@ -40,7 +41,8 @@ const CreateProduct = () => {
     let vendorId: string = '';
 
     if(typeof window !== 'undefined') {
-        vendorId = JSON.parse(Cookies.get('user')!).vendor;
+        const cookie = Cookies.get('user');
+        vendorId = cookie ? JSON.parse(cookie).vendor : null;
     }
     
     const [newProduct, setNewProduct] = useState<any>({
@@ -68,7 +70,6 @@ const CreateProduct = () => {
         }))
     }
 
-    const [product_images, setProductImages] = useState<string[]>([])
     const [product_videos, setProductVideos] = useState<any[]>([])
     const [product_testimonial_videos, setProductTestimonialVideos] = useState<any[]>([])
 
@@ -300,8 +301,9 @@ const CreateProduct = () => {
     }, []);
 
   return (
-    <div className="flex flex-col gap-4 min-h-screen w-[95%] mx-auto lg:w-[80%] lg:mx-0 lg:absolute right-0 lg:left-[20%] pb-20 px-4">
-        <div className="flex flex-row justify-between items-center relative py-4 px-4 lg:px-0 bg-white mt-20 lg:mt-0">
+    <div className="flex flex-col gap-4 min-h-screen w-full mx-auto lg:w-[80%] lg:mx-0 lg:absolute right-0 lg:left-[20%] pb-20 !px-2 lg:!px-4">
+        <VendorNavBar />
+        <div className="flex flex-row justify-between items-center relative !px-2 lg:!px-0 !py-4 lg:!py-0 bg-white">
             <h2 className="text-lg font-bold">Product Details</h2>
             <div className="w-fit">
                 <ButtonFull 

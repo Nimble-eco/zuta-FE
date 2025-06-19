@@ -12,6 +12,7 @@ import { parse } from "cookie";
 import axiosInstance from "../../../Utils/axiosConfig";
 import { filterProductShowcaseAction, searchFeaturedProductsByVendorAction } from "../../../requests/showcase/showcase.request";
 import MyDropDownInput from "../../../Components/inputs/MyDropDownInput";
+import VendorNavBar from "../../../Components/vendor/layout/VendorNavBar";
 
 interface IProductShowcaseIndexPageProps {
     featured_products: any
@@ -28,7 +29,8 @@ const index = ({featured_products}: IProductShowcaseIndexPageProps) => {
     })
     
     if(typeof window !== 'undefined') {
-        vendorId = JSON.parse(Cookies.get('user')!).vendor;
+        const cookie = Cookies.get('user');
+        vendorId = cookie ? JSON.parse(cookie).vendor : null;
     }
 
     const [showFilterInput, setShowFilterInput] = useState<boolean>(false);
@@ -176,12 +178,13 @@ const index = ({featured_products}: IProductShowcaseIndexPageProps) => {
             />
         }
 
-        <div className="flex flex-row w-full mx-auto lg:mt-8 relative">
+        <div className="flex flex-row w-full mx-auto relative">
             <VendorSideNavPanel />
             <div className="flex flex-col w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%]">
-                <div className="flex flex-col gap-2 pt-4 px-4 rounded-t-md bg-white mt-20 lg:mt-0">
+                <VendorNavBar />
+                <div className="flex flex-col gap-2 pt-4 px-4 rounded-t-md bg-white">
                     <h2 className="text-2xl font-bold text-slate-700 mb-4">Product Showcase</h2>
-                    <div className="flex flex-row text-sm font-semibold !text-gray-400">
+                    {/* <div className="flex flex-row text-sm font-semibold !text-gray-400">
                         <a href="#0" className="hover:!text-orange-500 mr-3">
                             All
                         </a>
@@ -194,7 +197,7 @@ const index = ({featured_products}: IProductShowcaseIndexPageProps) => {
                         <a href="#0" className="hover:!text-orange-500 mr-3">
                             Closed
                         </a>
-                    </div>
+                    </div> */}
                 </div>
 
                 <div className="flex py-3 px-4 bg-white">
@@ -238,6 +241,15 @@ export async function getServerSideProps(context: any) {
     const cookies = parse(context.req.headers.cookie || ''); 
     const user = JSON.parse(cookies.user || 'null');
     const token = user?.access_token;
+    
+    if(!user?.vendor) {
+        return {
+            redirect: {
+                destination: '/auth/signIn',
+                permanent: false
+            }
+        }
+    }
 
     try {
         const getMyFeaturedProducts = await axiosInstance.get('/api/featured/product/me', {

@@ -6,8 +6,6 @@ const NaijaStates = require('naija-state-local-government');
 import { HiOutlineInformationCircle } from "react-icons/hi"
 import ButtonGhost from "../../../Components/buttons/ButtonGhost"
 import AddPaymentMethodModal from "../../../Components/modals/settings/AddPaymentMethodModal"
-import { AiFillEdit } from "react-icons/ai"
-import { convertToBase64 } from "../../../Utils/convertImageToBase64"
 import ColumnTextInput from "../../../Components/inputs/ColumnTextInput"
 import TextAreaInput from "../../../Components/inputs/TextAreaInput";
 import { sendAxiosRequest } from "../../../Utils/sendAxiosRequest";
@@ -20,6 +18,7 @@ import { deleteBankDetailsAction } from '../../../requests/wallet/wallet.request
 import { useRouter } from 'next/router';
 import { FcMoneyTransfer } from 'react-icons/fc';
 import SliderInput from '../../../Components/inputs/SliderInput';
+import VendorNavBar from '../../../Components/vendor/layout/VendorNavBar';
 
 interface ISettingsPageProps {
     userProfile: any;
@@ -123,7 +122,8 @@ const index = ({vendorProfile, wallet}: ISettingsPageProps) => {
 
         <VendorSideNavPanel />
         <div className="flex flex-col w-full lg:w-[80%] lg:absolute lg:right-2 lg:left-[20%]">
-            <div className='flex flex-col gap-2 px-4 bg-white py-4 mb-2 !mt-20 lg:!mt-0'>
+            <VendorNavBar />
+            <div className='flex flex-col gap-2 px-4 bg-white py-4 mb-2'>
                 <h2 className="text-xl font-semibold text-slate-700">Settings</h2>
                 <div className="flex flex-row font-semibold text-gray-400">
                     <a 
@@ -374,8 +374,16 @@ export async function getServerSideProps(context: any) {
     const user = JSON.parse(cookies.user || 'null');
     const token = user?.access_token;
 
+    if(!user?.vendor) {
+        return {
+            redirect: {
+                destination: '/auth/signIn',
+                permanent: false
+            }
+        }
+    }
+
     try{
-       
         const getMyProfile = await sendAxiosRequest(
             '/api/user/me',
             "get",

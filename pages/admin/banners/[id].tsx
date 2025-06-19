@@ -12,6 +12,7 @@ import { deleteBannerAction, updateBannersAction } from "../../../requests/banne
 import axiosInstance from "../../../Utils/axiosConfig";
 import { parse } from "cookie";
 import ButtonGhost from "../../../Components/buttons/ButtonGhost";
+import AdminNavBar from "../../../Components/admin/layout/AdminNavBar";
 
 interface IUpdateBannerProps {
     banner: any;
@@ -77,9 +78,10 @@ const update = ({banner}: IUpdateBannerProps) => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col overflow-scroll">
-        <div className="flex flex-row w-full mx-auto mt-8 relative">
+        <div className="flex flex-row w-full mx-auto relative">
             <AdminSideNavPanel />
-            <div className="flex flex-col w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%]">
+            <div className="flex flex-col w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%] !px-2 lg:!px-0">
+                <AdminNavBar />
                 <div className="flex flex-row justify-between items-center bg-white px-4 py-3 rounded-t-md border-b border-gray-200 mt-20 lg:mt-0">
                     <h2 className="text-lg font-bold">Banner Details</h2>
                     <div className="flex flex-row gap-2 items-center">

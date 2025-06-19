@@ -11,6 +11,7 @@ import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
 import { filterPaymentAction, searchPaymentAction } from '../../../requests/payments/payments.request';
 import TextInput from '../../../Components/inputs/MyTextInput';
+import AdminNavBar from '../../../Components/admin/layout/AdminNavBar';
 
 interface ITransactionsIndexPageProps {
     payments: any
@@ -203,9 +204,10 @@ const TransactionsIndexPage = ({payments}:ITransactionsIndexPageProps) => {
             />
         }
 
-        <div className="flex flex-row w-[90%] mx-auto mt-8 relative">
+        <div className="flex flex-row w-[90%] mx-auto relative">
             <AdminSideNavPanel />
-            <div className="flex flex-col w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%]">
+            <div className="flex flex-col w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%] !px-2 lg:!px-0">
+                <AdminNavBar />
                 <h2 className="text-2xl font-bold text-slate-700 mb-4 mt-20 lg:mt-0">Transactions</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
                     <StatsCard

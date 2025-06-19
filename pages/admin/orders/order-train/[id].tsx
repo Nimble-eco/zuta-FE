@@ -9,6 +9,7 @@ import { parse } from "cookie";
 import axiosInstance from "../../../../Utils/axiosConfig";
 import OrderTrainSubscriberDataModal from "../../../../Components/modals/order-train/OrderTrainSubscriberDataModal";
 import { closeOpenOrderByVendorAction, markOpenOrderAsCancelledAction, markOpenOrderAsCompletedAction, markOpenOrderAsReadyByVendorAction, markOpenOrderAsRejectedAction } from "../../../../requests/orderTrain/orderTrain.request";
+import AdminNavBar from "../../../../Components/admin/layout/AdminNavBar";
 
 interface IShowOrderPageProps {
     order: any;
@@ -70,7 +71,8 @@ const ShowOrder = ({order, subscribers}: IShowOrderPageProps) => {
         }
         <AdminSideNavPanel />
         <div className="min-h-screen bg-gray-100 flex flex-col gap-6 w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%] rounded-md">
-            <div className='flex flex-col bg-white mt-6 rounded-md'>
+            <AdminNavBar />
+            <div className='flex flex-col bg-white rounded-md'>
                 <div className="flex flex-col gap-4 lg:flex-row justify-between lg:items-center border-b border-gray-200 py-4 px-4 mt-20 lg:mt-0">
                     <h2 className="text-xl font-semibold align-center align-baseline my-auto capitalize">{order?.id}</h2>
                     <div className="flex flex-row gap-4 items-center">

@@ -10,6 +10,7 @@ import MyDropDownInput from '../../../Components/inputs/MyDropDownInput'
 import { feedbackCategories, feedbackTypes } from '../../../Utils/data'
 import ImagePicker from '../../../Components/inputs/ImagePicker'
 import { convertToBase64 } from '../../../Utils/convertImageToBase64'
+import VendorNavBar from '../../../Components/vendor/layout/VendorNavBar'
 
 const index = () => {
     const router = useRouter();
@@ -61,7 +62,7 @@ const index = () => {
                 error?.response?.data  || 
                 'Error submitting feedback'
             );
-            if(error?.response?.status === (401 || 403)) router.push('/auth/signIn');
+            if(error?.response?.status === 401 || error?.response?.status === 403) router.push('/auth/signIn');
             if(error?.response?.status === 422) {
                 const errors = error?.response?.data?.error?.errors;
                 errors?.map((validationError: any) => {
@@ -74,11 +75,12 @@ const index = () => {
 
   return (
     <div className="min-h-screen bg-white lg:bg-gray-100 flex flex-col">
-        <div className="flex flex-row w-full mx-auto mt-4 relative">
+        <div className="flex flex-row w-full mx-auto relative">
             <VendorSideNavPanel />
             <div className="flex flex-col lg:w-[80%] lg:absolute lg:right-0 lg:left-[20%]">
+                <VendorNavBar />
                 <div className="flex flex-col gap-4 py-3 px-4 relative bg-white min-h-[50vh] h-fit">
-                    <h2 className="text-xl font-semibold text-slate-700 text-center lg:text-left">Feedback</h2>
+                    <h2 className="text-xl font-semibold text-slate-700 !text-center lg:!text-left">Feedback</h2>
                     <div className="grid grid-cols-2 gap-4">
                         <MyDropDownInput
                             label="Category"
@@ -109,7 +111,7 @@ const index = () => {
                         onRemove={removeImage}
                     />
 
-                    <div className='w-[80%] md:w-[60%] lg:w-[30%] mx-auto lg:mx-0 lg:ml-[68%]'>
+                    <div className='w-[80%] md:w-[60%] lg:w-[30%] !mx-auto lg:!mx-0 lg:!ml-[68%]'>
                         <ButtonFull 
                             action='Send'
                             loading={isLoading}

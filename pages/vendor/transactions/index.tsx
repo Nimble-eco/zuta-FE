@@ -213,6 +213,15 @@ export async function getServerSideProps(context: any) {
     const cookies = parse(context.req.headers.cookie || ''); 
     const user = JSON.parse(cookies.user || 'null');
     const token = user?.access_token;
+    
+    if(!user?.vendor) {
+        return {
+            redirect: {
+                destination: '/auth/signIn',
+                permanent: false
+            }
+        }
+    }
 
     try {
         const getMyOrders = await axiosInstance.get('/api/order/me', {
@@ -236,7 +245,7 @@ export async function getServerSideProps(context: any) {
 
         const myOrders = myOrdersResult.status === 'fulfilled' ? myOrdersResult?.value?.data : [];
         const myOrderTrains = myOrderTrainsResult.status === 'fulfilled' ? myOrderTrainsResult?.value?.data : [];
-        console.log({myOrders, myOrderTrains})
+        
         return {
             props: {
                 orders: myOrders.data ?? [],

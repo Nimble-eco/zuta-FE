@@ -99,7 +99,7 @@ const vendorVerification = () => {
         <div className="flex flex-col lg:flex-row w-full">
             <div className="flex flex-col lg:w-[50%]">
                 <div className="flex flex-col justify-center pt-8 gap-4 w-[80%] lg:w-[70%] mx-auto">
-                    <div className="hidden lg:flex h-44 flex-row items-center gap-4 w-full bg-orange-500 rounded-md">
+                    <div className="hidden lg:flex h-44 flex-row items-center gap-4 w-full bg-slate-600 rounded-md">
                         <div className="text-white w-1/2 flex items-center justify-center">
                             <h2 className="font-semibold text-3xl">Sell on <br /> Zuta</h2>
                         </div>
@@ -112,22 +112,22 @@ const vendorVerification = () => {
                     </div>
                     <p className="text-center font-semibold text-black mb-0">Why sell on Zuta?</p>
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="flex h-14 justify-center items-center rounded-md bg-red-600 text-white font-medium text-center text-xs lg:text-base">
+                        <div className="flex h-14 justify-center items-center rounded-md bg-slate-800 text-white font-medium text-center text-xs lg:text-base">
                             Connect with more buyers
                         </div>
-                        <div className="flex h-14 justify-center items-center rounded-md bg-red-600 text-white font-medium text-center text-xs lg:text-base">
+                        <div className="flex h-14 justify-center items-center rounded-md bg-slate-800 text-white font-medium text-center text-xs lg:text-base">
                             Sell more product
                         </div>
-                        <div className="flex h-14 justify-center items-center rounded-md bg-red-600 text-white font-medium text-center text-xs lg:text-base">
+                        <div className="flex h-14 justify-center items-center rounded-md bg-slate-800 text-white font-medium text-center text-xs lg:text-base">
                             Product delivery on us
                         </div>
-                        <div className="flex h-14 justify-center items-center rounded-md bg-red-600 text-white font-medium text-center text-xs lg:text-base">
+                        <div className="flex h-14 justify-center items-center rounded-md bg-slate-800 text-white font-medium text-center text-xs lg:text-base">
                             Make more money
                         </div>
-                        <div className="flex h-14 justify-center items-center rounded-md bg-red-600 text-white font-medium text-center text-xs lg:text-base">
+                        <div className="flex h-14 justify-center items-center rounded-md bg-slate-800 text-white font-medium text-center text-xs lg:text-base">
                             Benefit from our marketting
                         </div>
-                        <div className="flex h-14 justify-center items-center rounded-md bg-red-600 text-white font-medium text-center text-xs lg:text-base">
+                        <div className="flex h-14 justify-center items-center rounded-md bg-slate-800 text-white font-medium text-center text-xs lg:text-base">
                             Seller support
                         </div>
                     </div>

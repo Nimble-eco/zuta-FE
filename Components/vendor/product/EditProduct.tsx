@@ -23,6 +23,7 @@ import TextAreaInput from '../../inputs/TextAreaInput';
 import { storeMediaAction, storeVideosRequest } from '../../../requests/media/media.requests';
 import VideoPicker from '../../inputs/VideoPicker';
 import ButtonGhost from '../../buttons/ButtonGhost';
+import VendorNavBar from '../layout/VendorNavBar';
 
 const Editor = dynamic(()=>import('react-simple-wysiwyg'), {
     ssr: false
@@ -370,8 +371,9 @@ const EditProduct = ({product}: IEditProductProps) => {
     }
 
   return (
-    <div className="flex flex-col w-full gap-4 lg:w-[80%] md:absolute lg:right-0 lg:left-[20%] pb-20">
-        <div className="flex flex-row relative bg-white px-2 py-4 mb-3 border-b border-gray-200 mt-20 lg:mt-0">
+    <div className="flex flex-col w-full gap-4 lg:w-[80%] md:absolute lg:right-0 lg:left-[20%] pb-20 !px-2 lg:!px-4">
+        <VendorNavBar />
+        <div className="flex flex-row relative bg-white !px-2 lg:!px-0 !py-4 lg:!py-0 mb-3 border-b border-gray-200">
             <h2 className="text-lg font-bold">Product Details</h2>
             <div className="w-fit absolute right-1 bottom-2">
                 <ButtonFull 

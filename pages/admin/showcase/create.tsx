@@ -9,6 +9,7 @@ import { showcaseByAdminAction } from '../../../requests/showcase/showcase.reque
 import { formatAmount } from '../../../Utils/formatAmount';
 import { parse } from 'cookie';
 import axiosInstance from '../../../Utils/axiosConfig';
+import AdminNavBar from '../../../Components/admin/layout/AdminNavBar';
 
 interface ICreateProductFeaturePageProps {
     product: any;
@@ -69,9 +70,10 @@ const CreateFeaturedProduct = ({product, rate}: ICreateProductFeaturePageProps) 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
        
-        <div className="flex flex-row w-full mx-auto mt-8 relative mb-10">
+        <div className="flex flex-row w-full mx-auto relative mb-10">
             <AdminSideNavPanel />
-            <div className="flex flex-col w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%]">
+            <div className="flex flex-col w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%] !px-2 lg:!px-0">
+                <AdminNavBar />
                 <div className='flex flex-row my-4 justify-between items-center mt-20 lg:mt-0'>
                     <h2 className="text-2xl font-bold my-auto text-slate-700">Showcase</h2>
                     <div className="w-[15%] h-10 hidden lg:flex">
