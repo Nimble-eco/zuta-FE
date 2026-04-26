@@ -1,5 +1,4 @@
 import React from 'react';
-import { ToastContainer } from 'react-toastify';
 import Modal from 'react-bootstrap/Modal';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import ButtonFull from '../../buttons/ButtonFull';
@@ -15,10 +14,9 @@ type FilterComponentProps = {
 
 const FilterContainer: React.FC<FilterComponentProps> = ({ show, setShow, children, onFilter, isLoading }) => {
     return (
-        <div className="!rounded-md overflow-scroll">
-            <ToastContainer />
+        // <div className="!rounded-md overflow-scroll">
             <Modal show={show} onHide={setShow} backdrop="static" dialogClassName='modal-90w'>
-                <Modal.Body className='md:!min-w-[40vw] !w-[40vw] flex flex-col min-h-[40vh] relative overflow-scroll'>
+                <Modal.Body className='!w-full flex flex-col min-h-[40vh] relative overflow-scroll'>
                     <RiCloseCircleLine className='text-3xl text-orange-500 cursor-pointer absolute top-3 right-3' onClick={setShow} />
                     <div className="flex flex-col w-[90%] md:w-[80%] mx-auto my-6 overflow-x-auto !gap-4">
                         <h3 className='text-center text-slate-500 font-medium text-lg'>Filter By</h3>
@@ -42,7 +40,7 @@ const FilterContainer: React.FC<FilterComponentProps> = ({ show, setShow, childr
                     </div>
                 </Modal.Body>
             </Modal>
-        </div>
+        // </div>
     );
 }
 

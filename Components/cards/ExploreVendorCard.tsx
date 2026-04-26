@@ -1,93 +1,127 @@
-import { toast } from "react-toastify";
-import { checkVendorSubscriptionStatusAction, subscribeToVendorAction, unsubscribeFromVendorAction } from "../../requests/user/user.request";
-import { processImgUrl } from "../../Utils/helper";
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import ButtonGhost from "../buttons/ButtonGhost";
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
+import Cookies from 'js-cookie';
+import { Loader2, Store, Bell, BellOff, MapPin } from 'lucide-react';
+
+import { processImgUrl } from '../../Utils/helper';
+import {
+  checkVendorSubscriptionStatusAction,
+  subscribeToVendorAction,
+  unsubscribeFromVendorAction,
+} from '../../requests/user/user.request';
 
 interface IExploreVendorCardProps {
-    id: string;
-    image?: string;
-    name: string;
-    username?: string;
-    redirect?: any;
+  id: string;
+  image?: string;
+  name: string;
+  username?: string;
+  redirect?: any;
 }
 
-const ExploreVendorCard = ({id, image, name, username, redirect}: IExploreVendorCardProps) => {
-    const router = useRouter();
-    const [loading, setLoading] = useState(false);
-    const [subscribed, setSubscribed] = useState(false);
+const ExploreVendorCard = ({ id, image, name, username, redirect }: IExploreVendorCardProps) => {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [subscribed, setSubscribed] = useState(false);
 
-    const checkSubStatus = async () => {
-        await checkVendorSubscriptionStatusAction(id)
-        .then(response => {
-            if(response.status === 200) setSubscribed(true);
-        })
+  // ── Guard: only check subscription status if logged in ───────────────
+  const isLoggedIn = () => {
+    try {
+      const raw = Cookies.get('user');
+      if (!raw || raw === 'undefined') return false;
+      return !!JSON.parse(raw)?.access_token;
+    } catch {
+      return false;
     }
+  };
 
-    useEffect(()=>{
-        let mounted = true;
+  useEffect(() => {
+    if (!isLoggedIn()) return;
+    let mounted = true;
+    checkVendorSubscriptionStatusAction(id)
+      .then((res) => { if (mounted && res.status === 200) setSubscribed(true); })
+      .catch(() => {});
+    return () => { mounted = false; };
+  }, [id]);
 
-        if(mounted) checkSubStatus();
-
-        return () => {
-            mounted = false;
+  const handleSubscribe = async () => {
+    if (!isLoggedIn()) { router.push('/auth/signIn'); return; }
+    setLoading(true);
+    subscribeToVendorAction(id)
+      .then((res) => {
+        if (res.status === 200) {
+          setSubscribed(true);
+          toast.success('Subscribed to store');
+          if (redirect) setTimeout(() => router.push(redirect), 1500);
         }
+      })
+      .catch(() => toast.error('Could not subscribe to store'))
+      .finally(() => setLoading(false));
+  };
 
-    }, []);
-
-    const subscribeToVendor = async () => {
-        setLoading(true);
-        await subscribeToVendorAction(id)
-        .then(response => {
-            if(response.status === 200) {
-                setSubscribed(true);
-                toast.success('Subscription successfull');
-                if(redirect) setTimeout(()=>router.push(redirect), 2000);
-            }
-        })
-        .catch((error)=>{
-            console.log({error});
-            toast.error('Unable to subscribe to store');
-        })
-        .finally(()=>setLoading(false))
-    }
-
-    const unsubscribeFromVendor = async () => {
-        setLoading(true);
-        await unsubscribeFromVendorAction(id)
-        .then(response => {
-            if(response.status === 200) {
-                setSubscribed(false);
-                toast.success('Unsubscribed successfully');
-                if(redirect) setTimeout(()=>router.push(redirect), 2000);
-            }
-        })
-        .catch((error)=>{
-            console.log({error});
-            toast.error('Unable to subscribe to store');
-        })
-        .finally(()=>setLoading(false))
-    }
+  const handleUnsubscribe = async () => {
+    setLoading(true);
+    unsubscribeFromVendorAction(id)
+      .then((res) => {
+        if (res.status === 200) {
+          setSubscribed(false);
+          toast.success('Unsubscribed from store');
+          if (redirect) setTimeout(() => router.push(redirect), 1500);
+        }
+      })
+      .catch(() => toast.error('Could not unsubscribe'))
+      .finally(() => setLoading(false));
+  };
 
   return (
-    <div className="flex flex-row justify-between items-center border-b border-gray-300 py-2 px-4 w-full">
-        <div className="flex flex-row items-center gap-4">
-            <img src={image ? processImgUrl(image) : 'https://via.placeholder.com/100'} alt={name} className="h-8 w-8 rounded-full object-cover object-center" />
-            <div className="flex flex-col">
-                <h5 className="font-bold text-slate-800">{name}</h5>
-                <p className="text-xs font-medium text-gray-600">{username}</p>
-            </div>
-        </div>  
-        <div className="h-10">
-            <ButtonGhost 
-                onClick={subscribed ? unsubscribeFromVendor : subscribeToVendor}
-                action={subscribed ? "Unsubscribe" :"Subscribe"}
-                loading={loading}
+    <div className="flex items-center justify-between px-4 py-3 hover:bg-slate-50 transition-colors rounded-xl">
+      {/* Avatar + info */}
+      <div
+        className="flex items-center gap-3 cursor-pointer"
+        onClick={() => router.push(`/vendor/${id}`)}
+      >
+        <div className="w-11 h-11 rounded-xl overflow-hidden bg-orange-50 border border-orange-100 shrink-0 flex items-center justify-center">
+          {image ? (
+            <img
+              src={processImgUrl(image)}
+              alt={name}
+              className="w-full h-full object-cover"
             />
+          ) : (
+            <Store className="w-5 h-5 text-orange-400" />
+          )}
         </div>
-    </div>
-  )
-}
+        <div>
+          <p className="text-sm font-semibold text-slate-800 leading-none capitalize">{name}</p>
+          {username && (
+            <p className="text-[11px] text-slate-400 mt-0.5 flex items-center gap-0.5">
+              <MapPin className="w-3 h-3" />
+              {username}
+            </p>
+          )}
+        </div>
+      </div>
 
-export default ExploreVendorCard
+      {/* Subscribe / Unsubscribe */}
+      <button
+        onClick={subscribed ? handleUnsubscribe : handleSubscribe}
+        disabled={loading}
+        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+          subscribed
+            ? 'bg-slate-100 text-slate-600 hover:bg-red-50 hover:text-red-500'
+            : 'bg-orange-500 text-white hover:bg-orange-600'
+        }`}
+      >
+        {loading ? (
+          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+        ) : subscribed ? (
+          <><BellOff className="w-3.5 h-3.5" /> Subscribed</>
+        ) : (
+          <><Bell className="w-3.5 h-3.5" /> Subscribe</>
+        )}
+      </button>
+    </div>
+  );
+};
+
+export default ExploreVendorCard;

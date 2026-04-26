@@ -50,6 +50,7 @@
     "react-toastify": "^8.2.0",
     "swiper": "^9.0.3",
     "tailwind-merge": "^2.5.2",
+    "tailwind-scrollbar-hide": "^4.0.0",
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {

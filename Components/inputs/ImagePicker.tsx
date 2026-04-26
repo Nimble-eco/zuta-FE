@@ -17,13 +17,17 @@ const ImagePicker = ({label, onSelect, files, onRemove, uploading, uploadFiles}:
     <div className='flex flex-col gap-1'>
       <div className="flex flex-row relative py-2 border-b border-gray-200">
         <h4 className="font-medium text-left pb-3 text-sm">{label}</h4>
-        <div className="flex w-fit absolute right-2 bottom-1">
-          <ButtonFull
-            action="Upload Files"
-            loading={uploading}
-            onClick={uploadFiles}
-          />
-        </div>
+        {
+          uploadFiles && (
+            <div className="flex w-fit absolute right-2 bottom-1">
+              <ButtonFull
+                action="Upload Files"
+                loading={uploading}
+                onClick={uploadFiles}
+              />
+            </div>
+          )
+        }
       </div>
       {
         !files || files?.length === 0 || (files?.length === 1 && !files[0]) ? (

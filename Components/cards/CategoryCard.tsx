@@ -1,34 +1,38 @@
 import { useRouter } from 'next/router';
 
 interface ICategoryCardProps {
-  image: string;
+  image?: string;
   title: string;
+  emoji?: string;
 }
 
-const CategoryCard = ({image, title}: ICategoryCardProps) => {
+const CategoryCard = ({ image, title, emoji }: ICategoryCardProps) => {
   const router = useRouter();
 
-  const handleClick = (tag: string) => {
-    router.push(`/results?tag=${tag}`);
-  }
-
   return (
-    <div
-      className="flex flex-col bg-white rounded-md p-4 cursor-pointer min-w-fit min-h-fit shadow-2xl"
-      onClick={() => handleClick(title)}
+    <button
+      onClick={() => router.push(`/results?tag=${encodeURIComponent(title)}`)}
+      className="flex flex-col items-center gap-2 p-3 bg-white rounded-xl border border-slate-100 hover:border-orange-300 hover:shadow-sm transition-all duration-200 cursor-pointer group w-full"
     >
-      <img
-        src={image} 
-        alt={title}
-        className='rounded-full mb-2 h-[6rem] w-[6rem] mx-auto object-cover object-center hidden md:flex'  
-      />
-      <span
-        className='text-center text-sm font-semibold text-slate-800 '
-      >
+      {/* Icon / image */}
+      <div className="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center overflow-hidden shrink-0 group-hover:bg-orange-100 transition-colors">
+        {image ? (
+          <img
+            src={image}
+            alt={title}
+            className="w-full h-full object-cover object-center"
+          />
+        ) : (
+          <span className="text-2xl">{emoji ?? '📦'}</span>
+        )}
+      </div>
+
+      {/* Label */}
+      <span className="text-center text-[11px] font-medium text-slate-600 leading-tight line-clamp-2 group-hover:text-orange-600 transition-colors">
         {title}
       </span>
-    </div>
-  )
-}
+    </button>
+  );
+};
 
-export default CategoryCard
+export default CategoryCard;

@@ -1,98 +1,144 @@
-import { MenuIcon } from "lucide-react";
-import { useRouter } from "next/router";
-import { useState } from "react"
-import { IoIosArrowDown, IoIosArrowUp, IoMdCloseCircleOutline } from "react-icons/io";
-
-const VendorSideNavPanel = () => {
-    const router = useRouter();
-    const activeStyle = "bg-slate-600 rounded-tr-[20px] rounded-br-[20px] !text-white py-3 mr-2 hover:!text-white";
-    const [showMobileMenu, setShowMobileMenu] = useState(false);
-    const [showDropdown, setShowDropdown] = useState({
-        transactions: false
-    });
-
-    const toggleDropdown = (sectionName: string) => {
-        switch (sectionName) {
-            case 'transactions':
-                setShowDropdown({
-                    transactions: !showDropdown.transactions
-                })
-                break;
-        
-            default:
-                break;
-        }
-    }
-
-  return (
-    <>
-        <div className="lg:hidden absolute top-2 left-4 p-4 cursor-pointer z-20">
-            <MenuIcon className="h-6 w-6 text-slate-700" onClick={()=>setShowMobileMenu(!showMobileMenu)}/>
-        </div>
-        <div className={`${showMobileMenu ? 'flex' : 'hidden'} lg:flex flex-col bg-slate-800 text-white py-4 w-[60%] lg:w-[18%] mr-[2%] fixed left-0 top-0 bottom-0 z-20 overflow-auto gap-6 text-center transition ease-in-out animate-in duration-500 duration-800 slide-in-from-left lg:!animate-none`}>
-            <IoMdCloseCircleOutline className="h-8 w-8 text-gray-500 cursor-pointer absolute top-6 right-4 lg:hidden" onClick={()=>setShowMobileMenu(!showMobileMenu)}/>
-            <a href="/" className="mb-12 mt-8 font-bold !text-orange-600 text-xl font-serif">Zuta</a>
-            <a 
-                href="/vendor"
-                className={`cursor-pointer px-4 lg:px-16 ${router.pathname === '/vendor' ? activeStyle : 'hover:!text-orange-500'}`}
-            >
-                Dashboard
-            </a>
-            <a 
-                href="/vendor/product"
-                className={`cursor-pointer ${router.pathname.includes('product') && activeStyle}`}
-            >
-                Products
-            </a>
-            <a 
-                href="#0"
-                onClick={() => toggleDropdown('transactions')}
-                className={`cursor-pointer ${router.pathname.includes('transactions') && activeStyle}`}
-            >
-                <div className="flex flex-row gap-2 w-full justify-center items-center">
-                    Orders
-                    {
-                        (showDropdown.transactions || router.pathname.includes('Transactions')) ? 
-                        <IoIosArrowUp className="w-5 h-5" /> :
-                        <IoIosArrowDown className="w-5 h-5"/>
-                    }
+import { 
+    MenuIcon, 
+    LayoutDashboard, 
+    ShoppingBag, 
+    ListOrdered, 
+    Image as ImageIcon, 
+    Settings, 
+    MessageSquare,
+    ChevronDown,
+    ChevronUp,
+    XCircle 
+  } from "lucide-react";
+  import Link from "next/link";
+  import { useRouter } from "next/router";
+  import { useState } from "react";
+  
+  const VendorSideNavPanel = () => {
+      const router = useRouter();
+      const [showMobileMenu, setShowMobileMenu] = useState(false);
+      const [showDropdown, setShowDropdown] = useState({ transactions: false });
+  
+      const toggleDropdown = () => {
+          setShowDropdown(prev => ({ transactions: !prev.transactions }));
+      };
+  
+      const isActive = (path: string) => router.pathname === path;
+      const isParentActive = (path: string) => router.pathname.startsWith(path);
+  
+      const navItemStyle = (path: string) => `
+          flex items-center gap-3 px-6 py-3 transition-all duration-200 group
+          ${isActive(path) 
+              ? "bg-orange-50 text-orange-600 border-r-4 border-orange-600 font-semibold" 
+              : "text-slate-300 hover:bg-slate-700 hover:text-white"}
+      `;
+  
+      return (
+            <>
+                {/* Mobile Toggle */}
+                <div className="lg:hidden fixed top-4 left-4 z-30">
+                    <button 
+                        onClick={() => setShowMobileMenu(!showMobileMenu)}
+                        className="p-2 bg-slate-800 rounded-lg text-white shadow-lg"
+                    >
+                        <MenuIcon className="h-6 w-6" />
+                    </button>
                 </div>
-            </a>
-            {
-                (showDropdown.transactions || router.pathname.includes('transactions')) && (
-                    <div className="flex flex-col gap-2 text-slate-400 pl-4 mx-auto font-medium">
-                        <a href={"/vendor/transactions/orders"} className={`no-underline cursor-pointer flex flex-row  relative`}>
-                            <div className={`w-3 h-3 rounded-full my-auto bg-orange-600 absolute -left-5 top-2 ${router.pathname.includes('/orders') ? 'flex' : 'hidden' } `} />
-                            Orders
-                        </a>
-                        <a href="/vendor/transactions/order-train" className={`no-underline cursor-pointer flex flex-row relative`}>
-                            <div className={`w-3 h-3 rounded-full my-auto bg-orange-600 absolute -left-5 top-2 ${router.pathname.includes('/order-train') ? 'flex' : 'hidden' } `} />
-                            Order Train
-                        </a>
+  
+                {/* Sidebar */}
+                <div className={`
+                    fixed inset-y-0 left-0 z-40 w-64 bg-slate-900 transform transition-transform duration-300 ease-in-out
+                    ${showMobileMenu ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+                    flex flex-col border-r border-slate-700
+                `}>
+                    <div className="flex items-center justify-between px-6 py-8">
+                        <Link href="/"> 
+                            <div className="text-2xl font-bold text-orange-500 font-serif flex flex-row items-center gap-1 cursor-pointer">
+                                <img
+                                    src="/images/logo.jpeg" 
+                                    alt="logo"
+                                    width={40}
+                                    height={40}
+                                    className="rounded-full"
+                                />
+                                Zuta
+                            </div>
+                        </Link>
+                        <XCircle 
+                            className="h-6 w-6 text-slate-400 cursor-pointer lg:hidden" 
+                            onClick={() => setShowMobileMenu(false)} 
+                        />
                     </div>
-                )
-            }
-            <a 
-                href="/vendor/showcase"
-                className={`cursor-pointer ${router.pathname.includes('showcase') && activeStyle}`}
-            >
-                Showcase
-            </a>
-            <a 
-                href="/vendor/setting"
-                className={`cursor-pointer ${router.pathname.includes('setting') && activeStyle}`}
-            >
-                Settings
-            </a>
-            <a 
-                href="/vendor/feedback"
-                className={`cursor-pointer ${router.pathname.includes('feedback') && activeStyle}`}
-            >
-                Feedback
-            </a>
-        </div>
-    </>
-  )
-}
-
-export default VendorSideNavPanel
+  
+                    <nav className="flex-1 space-y-1 overflow-y-auto">
+                        <Link href="/vendor"> 
+                            <div className={navItemStyle("/vendor")}>
+                                <LayoutDashboard size={20} /> Dashboard
+                            </div>
+                        </Link>
+  
+                        <Link href="/vendor/product"> 
+                            <div className={navItemStyle("/vendor/product")}>
+                                <ShoppingBag size={20} /> Products
+                            </div>
+                        </Link>
+  
+                      {/* Collapsible Orders Section */}
+                      <div>
+                          <button 
+                              onClick={toggleDropdown}
+                              className={`w-full ${navItemStyle("/vendor/transactions")} border-none`}
+                          >
+                              <ListOrdered size={20} />
+                              <span className="flex-1 text-left">Orders</span>
+                              {showDropdown.transactions ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                          </button>
+  
+                          {(showDropdown.transactions || isParentActive("/vendor/transactions")) && (
+                              <div className="bg-slate-950/50 py-2 space-y-1">
+                                    <Link href="/vendor/transactions/orders">
+                                        <div className={`block pl-14 pr-4 py-2 text-sm ${isActive("/vendor/transactions/orders") ? "text-orange-500" : "text-slate-400 hover:text-white"}`}>
+                                            All Orders
+                                        </div>
+                                    </Link>
+                                    <Link href="/vendor/transactions/order-train">
+                                        <div className={`block pl-14 pr-4 py-2 text-sm ${isActive("/vendor/transactions/order-train") ? "text-orange-500" : "text-slate-400 hover:text-white"}`}>
+                                            Order Train
+                                        </div>
+                                    </Link>
+                              </div>
+                          )}
+                      </div>
+  
+                        <Link href="/vendor/showcase"> 
+                            <div className={navItemStyle("/vendor/showcase")}>
+                                <ImageIcon size={20} /> Showcase
+                            </div>
+                        </Link>
+  
+                        <Link href="/vendor/setting"> 
+                            <div className={navItemStyle("/vendor/setting")}>
+                                <Settings size={20} /> Settings
+                            </div>
+                        </Link>
+    
+                        <Link href="/vendor/feedback">
+                            <div className={navItemStyle("/vendor/feedback")}>
+                                <MessageSquare size={20} /> Feedback
+                            </div>
+                        </Link>
+                  </nav>
+              </div>
+  
+                {/* Overlay for mobile */}
+                {showMobileMenu && (
+                    <div 
+                        className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+                        onClick={() => setShowMobileMenu(false)}
+                    />
+                )}
+            </>
+      );
+  }
+  
+  export default VendorSideNavPanel;

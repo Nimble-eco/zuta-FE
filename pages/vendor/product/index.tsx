@@ -1,7 +1,6 @@
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { toast } from 'react-toastify'
-import ButtonFull from "../../../Components/buttons/ButtonFull";
 import FilterAndSearchGroup from "../../../Components/inputs/FilterAndSearchGroup";
 import MyTable from "../../../Components/tables/MyTable";
 import VendorSideNavPanel from "../../../Components/vendor/layout/VendorSideNavPanel"
@@ -15,6 +14,7 @@ import { filterProductsByVendorAction, searchProductsByVendorAction } from "../.
 import Cookies from "js-cookie";
 import { processImgUrl } from "../../../Utils/helper";
 import VendorNavBar from "../../../Components/vendor/layout/VendorNavBar";
+import { Plus, Package, CheckCircle, Clock } from "lucide-react";
 
 interface IProductsIndexPageProps {
     products: any;
@@ -151,118 +151,160 @@ const index = ({products, categories, tags}: IProductsIndexPageProps) => {
         }
     }
 
-  return (
-    <div className="min-h-screen bg-gray-100 flex flex-col"> 
-        {
-            showFilterInput && <FilterContainer 
-                show={showFilterInput}
-                setShow={() => setShowFilterInput(!showFilterInput)}
-                onFilter={filterProductsPage}
-                isLoading={loading}
-                children={[
-                    <>  
-                        <MyDropDownInput 
-                            label="Category"
-                            onSelect={handleFilterByDetailsChange}
-                            name="product_categories"
-                            options={categories ?? []}
-                            value={filterByDetails.product_categories}
-                        />
+    return (
+        <div className="min-h-screen bg-slate-50 flex flex-row">
+            {
+                showFilterInput && <FilterContainer 
+                    show={showFilterInput}
+                    setShow={() => setShowFilterInput(!showFilterInput)}
+                    onFilter={filterProductsPage}
+                    isLoading={loading}
+                    children={[
+                        <>  
+                            <MyDropDownInput 
+                                label="Category"
+                                onSelect={handleFilterByDetailsChange}
+                                name="product_categories"
+                                options={categories ?? []}
+                                value={filterByDetails.product_categories}
+                            />
 
-                        <MyDropDownInput 
-                            label="Tags"
-                            onSelect={handleFilterByDetailsChange}
-                            name="product_tags"
-                            options={tags ?? []}
-                            value={filterByDetails.product_tags}
-                        />
+                            <MyDropDownInput 
+                                label="Tags"
+                                onSelect={handleFilterByDetailsChange}
+                                name="product_tags"
+                                options={tags ?? []}
+                                value={filterByDetails.product_tags}
+                            />
 
-                        <MyDropDownInput 
-                            label="Vendor Approved"
-                            onSelect={handleFilterByDetailsChange}
-                            name="vendor_approved"
-                            options={[
-                                {title: 'Approved', value: 1},
-                                {title: 'Unapproved', value: 0},
-                            ]}
-                            value={filterByDetails.vendor_approved}
-                        />
+                            <MyDropDownInput 
+                                label="Vendor Approved"
+                                onSelect={handleFilterByDetailsChange}
+                                name="vendor_approved"
+                                options={[
+                                    {title: 'Approved', value: 1},
+                                    {title: 'Unapproved', value: 0},
+                                ]}
+                                value={filterByDetails.vendor_approved}
+                            />
 
-                        <MyDropDownInput 
-                            label="Management Approved"
-                            onSelect={handleFilterByDetailsChange}
-                            name="management_approved"
-                            options={[
-                                {title: 'Approved', value: 1},
-                                {title: 'Unapproved', value: 0},
-                            ]}
-                            value={filterByDetails.management_approved}
-                        />
-                    </>
-                ]}
-            />
-        }
-        <div className="flex flex-row w-full mx-auto relative mb-10">
+                            <MyDropDownInput 
+                                label="Management Approved"
+                                onSelect={handleFilterByDetailsChange}
+                                name="management_approved"
+                                options={[
+                                    {title: 'Approved', value: 1},
+                                    {title: 'Unapproved', value: 0},
+                                ]}
+                                value={filterByDetails.management_approved}
+                            />
+                        </>
+                    ]}
+                />
+            }
+
             <VendorSideNavPanel />
-            <div className="flex flex-col w-full lg:w-[80%] lg:absolute lg:right-0 lg:left-[20%]">
+
+            <main className="flex-1 lg:ml-64 flex flex-col min-h-screen overflow-x-hidden">
                 <VendorNavBar />
-                <div className="flex flex-row justify-between items-center bg-white py-2 px-4 mb-1 mt-14 lg:mt-0">
-                    <h2 className="text-2xl font-bold text-slate-700 mb-4">Products</h2>
-                    <div className="w-fit h-12">
-                        <ButtonFull 
-                            action="Create Product"
+
+                <div className="p-4 lg:p-8 space-y-6">
+                    {/* Header Section */}
+                    <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h1 className="text-2xl font-bold text-slate-800">Product Catalog</h1>
+                            <p className="text-slate-500 text-sm">Manage your inventory and track approval status.</p>
+                        </div>
+                        <button 
                             onClick={() => router.push('product/createProductPage')}
+                            className="flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-5 py-2.5 rounded-xl font-semibold transition-all shadow-lg shadow-orange-200"
+                        >
+                            <Plus size={20} />
+                            <span>Add New Product</span>
+                        </button>
+                    </header>
+
+                    {/* Quick Stats (Gives the vendor immediate value) */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+                            <div className="bg-blue-50 p-3 rounded-xl text-blue-600"><Package size={24}/></div>
+                            <div>
+                                <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">Total Products</p>
+                                <p className="text-xl font-bold text-slate-800">{productsData?.meta?.total || 0}</p>
+                            </div>
+                        </div>
+                        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+                            <div className="bg-green-50 p-3 rounded-xl text-green-600"><CheckCircle size={24}/></div>
+                            <div>
+                                <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">Approved</p>
+                                <p className="text-xl font-bold text-slate-800">
+                                    {productsData?.data?.filter((p:any) => p.management_approved).length || 0}
+                                </p>
+                            </div>
+                        </div>
+                        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+                            <div className="bg-amber-50 p-3 rounded-xl text-amber-600"><Clock size={24}/></div>
+                            <div>
+                                <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">Pending</p>
+                                <p className="text-xl font-bold text-slate-800">
+                                    {productsData?.data?.filter((p:any) => !p.management_approved).length || 0}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Search and Filters */}
+                    <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                        <FilterAndSearchGroup 
+                            searchInputPlaceHolder="Search name, price, category..."
+                            onSearch={searchProducts}
+                            onFilterButtonClick={() => setShowFilterInput(!showFilterInput)}
+                            isSearching={loading}
                         />
                     </div>
-                </div>
-                
-                {/* <div className="flex flex-row text-sm font-semibold !text-gray-400 px-4 py-5 bg-white">
-                    <a href="#0" className="hover:!text-orange-500 mr-3">
-                        Active
-                    </a>
-                    <a href="#0" className="hover:!text-orange-500 mr-3">
-                        Pending
-                    </a>
-                    <a href="#0" className="hover:!text-orange-500 mr-3">
-                        Inactive
-                    </a>
-                    <a href="#0" className="hover:!text-orange-500 mr-3">
-                        Featured
-                    </a>
-                </div> */}
 
-                <div className="flex flex-row py-3 px-4 relative bg-white justify-between">
-                    <FilterAndSearchGroup 
-                        searchInputPlaceHolder="Search name, price, category"
-                        onSearch={searchProducts}
-                        onFilterButtonClick={() => setShowFilterInput(!showFilterInput)}
-                        isSearching={loading}
-                    />
-                </div>
-                {/* PRODUCTS TABLE */}
-                <div className="flex flex-col pb-8 bg-white overflow-y-auto">
-                    <MyTable
-                        isLoading={loading}
-                        headings={['product_image', 'product_name', 'product_price', 'vendor_approved', 'quantity', 'management_approved']}
-                        content={productsData?.data?.map((product: any) => ({
-                            ...product,
-                            product_image: processImgUrl(product.product_images[0]),
-                            product_price: formatAmount(product.product_price),
-                            vendor_approved: product?.vendor_approved ? 'Approved' : 'Unapproved',
-                            management_approved: product?.management_approved ? 'Approved' : 'Unapproved',
-                        }))} 
-                        onRowButtonClick={(product: any) => router.push(`product/singleProductPage?id=${product.id}`)}
-                    />
-                    <div className='flex flex-row justify-end text-sm w-[80%] mx-auto'>
-                        <button onClick={() => paginateData(productsData?.meta, 'prev')} className='mr-3 cursor-pointer'>Previous</button>
-                        <p className="text-base px-2 my-auto">{productsData?.meta?.current_page}</p>
-                        <button onClick={() => paginateData(productsData?.meta, 'next')} className='mr-3 cursor-pointer'>Next</button>
+                    {/* Table Section */}
+                    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        <MyTable
+                            isLoading={loading}
+                            headings={['product_image', 'product_name', 'product_price', 'stock', 'vendor_approved', 'management_approved']}
+                            content={productsData?.data?.map((product: any) => ({
+                                ...product,
+                                product_image: processImgUrl(product.product_images[0]),
+                                product_price: formatAmount(product.product_price),
+                                vendor_approved: product?.vendor_approved ? 'Approved' : 'Unapproved',
+                                management_approved: product?.management_approved ? 'Approved' : 'Unapproved',
+                            }))} 
+                            onRowButtonClick={(product: any) => router.push(`product/singleProductPage?id=${product.id}`)}
+                        />
+
+                        {/* Pagination */}
+                        <div className="p-4 border-t border-slate-100 flex items-center justify-between bg-slate-50/50">
+                            <p className="text-sm text-slate-500">
+                                Page <span className="font-semibold text-slate-800">{productsData?.meta?.current_page}</span> of {productsData?.meta?.last_page}
+                            </p>
+                            <div className="flex gap-2">
+                                <button 
+                                    onClick={() => paginateData(productsData?.meta, 'prev')}
+                                    disabled={!productsData?.meta?.previous_page_url}
+                                    className="px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-50"
+                                >
+                                    Previous
+                                </button>
+                                <button 
+                                    onClick={() => paginateData(productsData?.meta, 'next')}
+                                    disabled={!productsData?.meta?.next_page_url}
+                                    className="px-4 py-2 text-sm font-medium text-white bg-slate-800 rounded-lg hover:bg-slate-900 disabled:opacity-50"
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </main>
         </div>
-    </div>
-  )
+    );
 }
 
 export default index

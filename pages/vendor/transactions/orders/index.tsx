@@ -16,6 +16,7 @@ import { filterOrdersByVendorAction, searchOrdersByVendorAction } from "../../..
 import Cookies from "js-cookie";
 import { formatAmount } from "../../../../Utils/formatAmount";
 import VendorNavBar from "../../../../Components/vendor/layout/VendorNavBar";
+import { ShoppingBag, CreditCard, CheckCircle, Clock, Download, Search } from "lucide-react";
 
 interface IOrdersIndexPageProps {
     orders: any;
@@ -158,7 +159,7 @@ const index = ({orders}: IOrdersIndexPageProps) => {
     }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
+    <div className="min-h-screen bg-slate-50 flex flex-row">
         {
             showFilterInput && <FilterContainer 
                 show={showFilterInput}
@@ -226,61 +227,89 @@ const index = ({orders}: IOrdersIndexPageProps) => {
                 ]}
             />
         }
-        <div className="flex flex-row w-full mx-auto relative mb-10">
-            <VendorSideNavPanel />
-            <div className="flex flex-col w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%]">
-                <VendorNavBar />
-                <div className='flex flex-col gap-2 bg-white pt-4 !px-2 lg:!px-4'>
-                    <h2 className="text-2xl font-bold text-slate-700 mb-4">Standard Orders</h2>
-                    {/* <div className="flex flex-row text-sm font-semibold !text-gray-400 pb-5 bg-white">
-                        <a href="#0" className="hover:!text-orange-500 mr-3">
-                            Completed
-                        </a>
-                        <a href="#0" className="hover:!text-orange-500 mr-3">
-                            Pending
-                        </a>
-                        <a href="#0" className="hover:!text-orange-500 mr-3">
-                            Cancelled
-                        </a>
-                        <a href="#0" className="hover:!text-orange-500 mr-3">
-                            Rejected
-                        </a>
-                    </div> */}
-                </div>
-                <div className="flex flex-row py-3 px-4 relative bg-white justify-between">
-                    <div className="w-[full]">
-                        <FilterAndSearchGroup 
-                            searchInputPlaceHolder="Search name, price, category"
-                            isSearching={loading}
-                            onSearch={searchOrders}
-                            onFilterButtonClick={() => setShowFilterInput(!showFilterInput)}
-                        />
-                    </div>
-                    <div className="w-fit">
-                        <ButtonGhost 
-                            action="Download CSV"
-                            onClick={() => {}}
-                        />
-                    </div>
-                </div>
-                {/* PRODUCTS TABLE */}
-                <div className="flex flex-col pb-8 bg-white text-gray-700">
-                    <MyTable
-                        headings={['product_name', 'quantity', 'order_amount', 'order_paid', 'status']}
-                        content={ordersData?.data?.map((order: any) => ({
-                            ...order,
-                            order_amount: formatAmount(order.order_amount),
-                            order_paid: order.order_paid ? 'Paid' : 'not paid'
-                        }))} 
-                        onRowButtonClick={(order: any) => router.push('orders/show?id='+ order.id)}
-                    />
-                    <PaginationBar 
-                        paginator={ordersData?.meta}
-                        paginateData={paginateData}
-                    />
-                </div>
+      <VendorSideNavPanel />
+
+      <main className="flex-1 lg:ml-64 flex flex-col min-h-screen overflow-x-hidden">
+        <VendorNavBar />
+
+        <div className="p-4 lg:p-8 space-y-6">
+          {/* Header & Export */}
+          <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-bold text-slate-800">Order Management</h1>
+              <p className="text-slate-500 text-sm">Track sales, fulfillment status, and customer payments.</p>
             </div>
+            <button 
+              onClick={() => {/* CSV Logic */}}
+              className="flex items-center justify-center gap-2 bg-white border border-slate-200 text-slate-700 px-4 py-2 rounded-xl font-semibold hover:bg-slate-50 transition-all shadow-sm"
+            >
+              <Download size={18} />
+              <span>Export CSV</span>
+            </button>
+          </header>
+
+          {/* Business Health Snapshot */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+              <div className="bg-orange-50 p-3 rounded-xl text-orange-600"><ShoppingBag size={24}/></div>
+              <div>
+                <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">Total Orders</p>
+                <p className="text-xl font-bold text-slate-800">{ordersData?.meta?.total || 0}</p>
+              </div>
+            </div>
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+              <div className="bg-green-50 p-3 rounded-xl text-green-600"><CreditCard size={24}/></div>
+              <div>
+                <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">Revenue</p>
+                <p className="text-xl font-bold text-slate-800">
+                    {/* Sum logic or just a placeholder if not in meta */}
+                    {formatAmount(ordersData?.data?.reduce((acc:any, curr:any) => acc + Number(curr.order_amount), 0))}
+                </p>
+              </div>
+            </div>
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+              <div className="bg-blue-50 p-3 rounded-xl text-blue-600"><CheckCircle size={24}/></div>
+              <div>
+                <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">Completed</p>
+                <p className="text-xl font-bold text-slate-800">
+                    {ordersData?.data?.filter((o:any) => o.status === 'completed').length || 0}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Search and Filters Toolbar */}
+          <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+            <FilterAndSearchGroup 
+              searchInputPlaceHolder="Search by product, customer, or ID..."
+              onSearch={searchOrders}
+              onFilterButtonClick={() => setShowFilterInput(!showFilterInput)}
+              isSearching={loading}
+            />
+          </div>
+
+          {/* Orders Table */}
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <MyTable
+              isLoading={loading}
+              headings={['product_name', 'quantity', 'order_amount', 'order_paid', 'order_status']}
+              content={ordersData?.data?.map((order: any) => ({
+                ...order,
+                order_amount: formatAmount(order.order_amount),
+                order_paid: order.order_paid ? 'Paid' : 'not paid'
+              }))} 
+              onRowButtonClick={(order: any) => router.push('orders/show?id='+ order.id)}
+            />
+
+            <div className="p-2 bg-slate-50/50 border-t border-slate-100">
+              <PaginationBar 
+                paginator={ordersData?.meta}
+                paginateData={paginateData}
+              />
+            </div>
+          </div>
         </div>
+      </main>
     </div>
   )
 }

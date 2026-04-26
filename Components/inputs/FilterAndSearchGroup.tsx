@@ -1,6 +1,5 @@
+import { Filter, Search } from "lucide-react";
 import { useState } from "react";
-import { HiSearch } from "react-icons/hi";
-import { MdOutlineFilterList } from "react-icons/md";
 
 interface IFilterAndSearchGroupProps {
     searchInputPlaceHolder?: string;
@@ -14,40 +13,38 @@ const FilterAndSearchGroup = ({searchInputPlaceHolder, onSearch, onFilterButtonC
     const [searchInput, setSearchInput] = useState<string>('');
 
     return (
-    <div className={`flex flex-col md:flex-row border border-gray-200 text-gray-500 lg:items-center relative ${search ? 'w-full lg:min-w-[30rem]' : 'w-fit'}`}>
-        <div 
-            className="flex flex-row px-4 py-2 border-r border-gray-200 cursor-pointer"
-            onClick={onFilterButtonClick}
-        >
-            <MdOutlineFilterList className="text-xl mr-2" />
-            <p className="text-slate-600 my-auto">Filter</p>
+    <div className="flex flex-col md:flex-row gap-3 w-full">
+        <div className="relative flex-grow">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                <Search size={18} />
+            </div>
+            <input 
+                type="text" 
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && onSearch(searchInput)}
+                placeholder={searchInputPlaceHolder}
+                className="w-full pl-11 pr-24 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all" 
+            />
+            <div className="absolute inset-y-1 right-1 flex items-center">
+                <button 
+                    onClick={() => onSearch(searchInput)}
+                    className="h-full px-4 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-bold transition-colors uppercase tracking-widest"
+                >
+                    {isSearching ? '...' : 'Search'}
+                </button>
+            </div>
         </div>
-        {
-            search && (
-                <div className="flex flex-row py-1 w-full">
-                    <input 
-                        type="text" 
-                        value={searchInput}
-                        onChange={(e) => setSearchInput(e.target.value)}
-                        placeholder={searchInputPlaceHolder}
-                        className="flex-grow focus:outline-none bg-transparent w-full text-sm pl-5 text-gray-600" 
-                    />
-                    <button 
-                        type="submit" 
-                        onClick={() => onSearch(searchInput)}
-                        className='text-gray-600 text-sm absolute right-4'
-                    >
-                        {
-                            isSearching ? 
-                            <p className="text-sm text-orange-500">Searching...</p> : 
-                            <HiSearch className='text-xl hover:!text-orange-500'/>
-                        }
-                    </button>
-                </div>
-            )
-        }
+
+        <button 
+            onClick={onFilterButtonClick}
+            className="flex items-center justify-center gap-2 px-5 py-3 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors bg-white"
+        >
+            <Filter size={18} />
+            <span>Filter</span>
+        </button>
     </div>
-  )
+    )
 }
 
 export default FilterAndSearchGroup

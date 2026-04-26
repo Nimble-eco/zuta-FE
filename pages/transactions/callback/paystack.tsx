@@ -1,225 +1,209 @@
-import {useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
-import Header from "../../../Components/Header"
+import Header from "../../../Components/Header";
 import { toast } from 'react-toastify';
 import axiosInstance from "../../../Utils/axiosConfig";
 import { useRouter } from "next/router";
-import ButtonFull from "../../../Components/buttons/ButtonFull";
+import { CheckCircle, Loader2, Package, ShoppingBag, MessageSquareHeart } from "lucide-react";
 import RatingsCard from "../../../Components/cards/RatingsCard";
-import ButtonGhost from "../../../Components/buttons/ButtonGhost";
 import { updateOrderRequest } from "../../../requests/order/order.request";
 import { updateOrderTrainStatusAction } from "../../../requests/orderTrain/orderTrain.request";
 import { storeFeedbackAction } from "../../../requests/feedback/feedback.request";
 import { feedbackTypes } from "../../../Utils/data";
 import { capitalizeFirstLetter } from "../../../Utils/helper";
 
-const paystack = () => {
+const PaystackCallback = () => {
     const router = useRouter();
-    let userCookie: any = {};
-    const [isLoading, setIsLoading]= useState(false);
-    const [paymentStatus, setPaymentStatus] = useState<string>('');
+    const [isVerifying, setIsVerifying] = useState(true);
+    const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
+    const [paymentStatus, setPaymentStatus] = useState<'success' | 'error' | 'idle'>('idle');
     const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
-    const [comment, setComment] = useState('');
-    const [type, setType] = useState('');
-    const [category, setCategory] = useState('');
+    const [feedback, setFeedback] = useState({ type: '', comment: '' });
 
-    if(typeof window !== 'undefined'){
-        userCookie = Cookies.get('user') ? JSON.parse(Cookies.get('user')!) : null; 
-    }
-
-    const submitFeedback = async () => {
-        if(!comment) return toast.error('Add a comment');
-       
-        setIsLoading(true);
-
-        await storeFeedbackAction({type, category, comment})
-        .then(response => {
-            if(response.status === 201) return toast.success('Thank you for reaching out, your feedback has been noted');
-        })
-        .catch(error => {
-            console.log({error})
-            toast.error(
-                error?.response?.data?.message ||
-                error?.response?.data  || 
-                'Error submitting feedback'
-            );
-            if(error?.response?.status === 401 || error?.response?.status === 403) router.push('/auth/signIn');
-            if(error?.response?.status === 422) {
-                const errors = error?.response?.data?.error?.errors;
-                errors?.map((validationError: any) => {
-                    toast.error(`${validationError?.field} ${validationError?.rule}`);
-                })
-            }
-        })
-        .finally(()=>setIsLoading(false))
-    }
-
+    // Payment Verification Logic
     useEffect(() => {
-        const queryParams = new URLSearchParams(router.asPath.split('?')[1]);
-        const trxref = queryParams.get('trxref');
-        const reference = queryParams.get('reference');
-      
-        setIsLoading(true)
+        if (!router.isReady) return;
 
-        axiosInstance.post('/api/payment/verify/paystack', {
-            reference,
-            trxref
-        }, {
-            headers: {Authorization: userCookie.access_token}
-        })
-        .then((response) => {
-            setIsLoading(false)
-            if(response.data?.message?.toLowerCase() === 'payment successful') {
-                const status = response.data.message.toLowerCase() === 'payment successful' ? 'success' : 'unsuccessful';
-                setPaymentStatus(status);
+        const { trxref, reference } = router.query;
+        const user = Cookies.get('user') ? JSON.parse(Cookies.get('user')!) : null;
 
-                const transactionData: any = response.data.data.metadata;
+        if (!reference) return;
 
-                transactionData?.orders?.forEach(async (order: any) => {
-                    setCategory('order');
-                    await updateOrderRequest({
-                        id: order,
-                        order_paid: true,
-                        order_payment_confirmed: true,
-                    });
-                });
+        axiosInstance.post('/api/payment/verify/paystack', 
+            { reference, trxref }, 
+            { headers: { Authorization: user?.access_token } }
+        )
+        .then(async (response) => {
+            if (response.data?.message?.toLowerCase() === 'payment successful') {
+                setPaymentStatus('success');
+                const metadata = response.data.data.metadata;
 
-                transactionData?.order_train?.forEach(async (order_id: string) => {
-                    setCategory('order train');
-                    await updateOrderTrainStatusAction({
-                        id: order_id,
-                        order_paid: true,
-                        order_payment_confirmed: true,
-                    });
-                });
-
-                toast.success('Order stored successfully')
+                // Fire and forget updates
+                metadata?.orders?.forEach((id: any) => 
+                    updateOrderRequest({ id, order_paid: true })
+                );
+                metadata?.order_train?.forEach((id: string) => 
+                    updateOrderTrainStatusAction({ id, order_paid: true, status: 'unshipped' })
+                );
+                
+                localStorage.removeItem('cart');
+            } else {
+                setPaymentStatus('error');
             }
         })
-        .finally(() => localStorage.removeItem('cart'));
+        .catch(() => setPaymentStatus('error'))
+        .finally(() => setIsVerifying(false));
+    }, [router.isReady, router.query]);
+
+    // Load Featured Products
+    useEffect(() => {
+        axiosInstance.get('/api/featured/product/index?properties=1')
+            .then(res => setFeaturedProducts(res?.data?.data?.slice(0, 5)));
     }, []);
 
-    const getShowcase = async () => {
-        const showcaseRes = await axiosInstance.get('/api/featured/product/index?properties=1');
-
-        if(showcaseRes.status === 200) {
-            setFeaturedProducts(showcaseRes?.data?.data?.splice(0, 6));
+    const submitFeedback = async () => {
+        if (!feedback.comment) return toast.error('Please add a comment');
+        setIsSubmittingFeedback(true);
+        try {
+            await storeFeedbackAction({ ...feedback, category: 'order_success' });
+            toast.success('Thank you! Your feedback helps us grow.');
+            setFeedback({ type: '', comment: '' });
+        } catch (error) {
+            toast.error('Feedback submission failed.');
+        } finally {
+            setIsSubmittingFeedback(false);
         }
-    }
+    };
 
-    useEffect(()=>{
-       getShowcase();
-    },[]);
+    return (
+        <div className="bg-slate-50 min-h-screen pb-12">
+            <Header />
 
-  return (
-    <div className="bg-gray-200 min-h-screen flex flex-col relative overflow-scroll">
-        <Header />
-
-        <div 
-            className="w-full flex flex-col lg:flex-row gap-6 lg:gap-10 mx-auto mt-12 px-4"
-        >
-            <div className="flex flex-col w-[90%] mx-auto lg:w-[65%] mb-4 min-h-fit">
-                <div className="flex flex-col gap-4 bg-white rounded-md px-4 py-4 relative min-h-[75%]">
-                    <h2 className="text-lg font-semibold text-center">Please drop us a message</h2>
-
-                    <div className="flex flex-col gap-4">
-                        <select 
-                            name={'type'} 
-                            className='text-gray-500 text-sm bg-gray-100 rounded-md py-2 px-4 w-full' 
-                            value={type as string} 
-                            onChange={(e) => setType(e.target.value)}
-                        >
-                            <option value={''}>Type of feedback</option>
-                            {
-                                feedbackTypes?.map((item: any, index: number) => (
-                                    <option 
-                                        value={item.value ?? item.name} 
-                                        key={`${item.value ?? item.name} ${index}`}
-                                        className="mb-3 border-b border-gray-200 py-2"
-                                    >
-                                        {capitalizeFirstLetter(item.title || item.name)}
-                                    </option>
-                                ))
-                            }
-                        </select>
-                        <textarea 
-                            name="user-experience"
-                            className="h-48 rounded-md bg-gray-100 outline-none px-4 py-5"
-                            placeholder="Tell us about your experience"
-                            onChange={(e)=>setComment(e.target.value)}
-                        />
-                        <div className="flex flex-col justify-center lg:flex-row-reverse lg:justify-evenly gap-4 items-center">
-                            <div className="flex w-[80%] lg:w-[50%]">
-                                <ButtonFull
-                                    action="Submit"
-                                    loading={isLoading}
-                                    disabled={!comment || isLoading}
-                                    onClick={submitFeedback}
-                                />
-                            </div>
-                            {
-                                paymentStatus === 'success' ? (
-                                <div className="h-12 w-[80%] lg:w-[50%]">
-                                    <ButtonGhost
-                                        action="View my orders"
-                                        loading={isLoading}
-                                        onClick={() => router.push('/profile?path=orders')}
-                                    />
+            <main className="max-w-7xl mx-auto px-4 mt-8 lg:mt-12">
+                <div className="flex flex-col lg:flex-row gap-8">
+                    
+                    {/* Left Column: Success State & Feedback */}
+                    <div className="flex-1 space-y-6">
+                        
+                        {/* Status Card */}
+                        <div className="bg-white rounded-2xl p-8 text-center shadow-sm border border-slate-100">
+                            {isVerifying ? (
+                                <div className="flex flex-col items-center py-10">
+                                    <Loader2 className="h-12 w-12 text-orange-500 animate-spin mb-4" />
+                                    <h1 className="text-xl font-bold text-slate-800">Verifying your payment...</h1>
+                                    <p className="text-slate-500">Please do not refresh this page.</p>
                                 </div>
-                            ) : null}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div className="flex flex-col w-[90%] mx-auto lg:w-[35%]">
-                <div className="flex flex-col bg-white pl-2 rounded-md gap-3 py-3 min-h-[80vh]">
-                    <p className="font-medium text-center">Featured Products</p>
-                    {
-                        featuredProducts?.map((product) => (
-                            <a
-                                href={`/product?id=${product?.id}`}
-                                className='flex flex-row cursor-pointer mb-6 h-28 text-sm'
-                                key={product.id}
-                            >
-                                <img
-                                    src={product?.product?.product_images[0]}
-                                    alt="product image"
-                                    className='mr-3 h-full rounded-md'
-                                />
-                                
-                                <div 
-                                    className="flex flex-col py-2"
-                                >
-                                    <div className='flex flex-col mb-2'>
-                                        <h3 className='text-base font-mono line-clamp-1 mb-1'>
-                                            {product?.product_name}
-                                        </h3>
-                                        { product?.product?.reviews && <RatingsCard rating={product?.product?.reviews} /> }
+                            ) : paymentStatus === 'success' ? (
+                                <div className="animate-in fade-in zoom-in duration-500">
+                                    <div className="bg-green-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                                        <CheckCircle className="text-green-600 h-10 w-10" />
                                     </div>
-                                    <div 
-                                        className='flex flex-col'
-                                    >
-                                        <p 
-                                            className='text-orange-300 font-semibold mr-4'
+                                    <h1 className="text-3xl font-black text-slate-900 mb-2">Order Confirmed!</h1>
+                                    <p className="text-slate-500 mb-8 max-w-md mx-auto">
+                                        Your payment was successful and your order is being processed. 
+                                        A confirmation email has been sent to you.
+                                    </p>
+                                    <div className="flex flex-col sm:flex-row justify-center gap-4">
+                                        <button 
+                                            onClick={() => router.push('/profile?path=orders')}
+                                            className="flex items-center justify-center gap-2 bg-slate-900 text-white px-8 py-3 rounded-xl font-bold hover:bg-slate-800 transition-all"
                                         >
-                                            {product?.product?.product_price}
-                                        </p>
-                                        <span>
-                                            {product?.product?.product_discount}% Off
-                                        </span>
+                                            <Package size={18} /> View My Orders
+                                        </button>
+                                        <button 
+                                            onClick={() => router.push('/')}
+                                            className="flex items-center justify-center gap-2 border-2 border-slate-200 text-slate-700 px-8 py-3 rounded-xl font-bold hover:bg-slate-50 transition-all"
+                                        >
+                                            <ShoppingBag size={18} /> Continue Shopping
+                                        </button>
                                     </div>
                                 </div>
-                            </a>
-                        ))
-                    }
+                            ) : (
+                                <div className="py-10">
+                                    <h1 className="text-xl font-bold text-red-500">Payment Verification Failed</h1>
+                                    <p className="text-slate-500 mb-6">We couldn't verify your transaction. If you were debited, please contact support.</p>
+                                    <button onClick={() => router.reload()} className="text-orange-500 font-bold underline">Try Again</button>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Feedback Section */}
+                        {paymentStatus === 'success' && (
+                            <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                                <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                                    <MessageSquareHeart className="text-orange-500" /> 
+                                    How was your shopping experience?
+                                </h3>
+                                <div className="space-y-4">
+                                    <select 
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-500 transition-colors"
+                                        value={feedback.type}
+                                        onChange={(e) => setFeedback({ ...feedback, type: e.target.value })}
+                                    >
+                                        <option value="">What can we improve?</option>
+                                        {feedbackTypes?.map((item: any, i: number) => (
+                                            <option key={i} value={item.value || item.name}>
+                                                {capitalizeFirstLetter(item.title || item.name)}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <textarea 
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-500 transition-colors h-32 resize-none"
+                                        placeholder="Tell us more about your experience..."
+                                        value={feedback.comment}
+                                        onChange={(e) => setFeedback({ ...feedback, comment: e.target.value })}
+                                    />
+                                    <button 
+                                        onClick={submitFeedback}
+                                        disabled={isSubmittingFeedback || !feedback.comment}
+                                        className="w-full bg-orange-500 text-white font-bold py-3 rounded-xl disabled:opacity-50 hover:bg-orange-600 transition-all"
+                                    >
+                                        {isSubmittingFeedback ? 'Sending...' : 'Send Feedback'}
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Right Column: Featured Products */}
+                    <aside className="lg:w-[380px] space-y-4">
+                        <h3 className="font-bold text-slate-800 px-2">You might also like</h3>
+                        <div className="space-y-4">
+                            {featuredProducts?.map((product) => (
+                                <a 
+                                    key={product.id}
+                                    href={`/product?id=${product?.id}`}
+                                    className="flex gap-4 bg-white p-3 rounded-xl border border-slate-100 hover:shadow-md transition-shadow group"
+                                >
+                                    <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-slate-100">
+                                        <img 
+                                            src={product?.product?.product_images[0]} 
+                                            className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                            alt={product.product_name}
+                                        />
+                                    </div>
+                                    <div className="flex flex-col justify-center">
+                                        <h4 className="text-sm font-bold text-slate-800 line-clamp-1">{product.product_name}</h4>
+                                        <div className="mt-1">
+                                            {product?.product?.reviews && <RatingsCard rating={product?.product?.reviews} />}
+                                        </div>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <span className="text-orange-600 font-bold text-sm">₦{product?.product?.product_price}</span>
+                                            {product?.product?.product_discount > 0 && (
+                                                <span className="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-bold">
+                                                    -{product?.product?.product_discount}%
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </a>
+                            ))}
+                        </div>
+                    </aside>
                 </div>
-
-            </div>
+            </main>
         </div>
-        
-    </div>
-  )
-}
+    );
+};
 
-export default paystack
+export default PaystackCallback;

@@ -1,76 +1,117 @@
-import { useState } from "react";
-import Cookies from 'js-cookie'
+import { useState, useMemo } from "react";
+import Cookies from 'js-cookie';
 import { toast, ToastContainer } from 'react-toastify';
 import { injectStyle } from "react-toastify/dist/inject-style";
 import { usePaystackPayment } from 'react-paystack';
 import Head from "next/head";
+import { useRouter } from "next/router";
+import { 
+    RiCoupon2Line, 
+    RiTruckLine, 
+    RiUserSharedLine, 
+    RiInformationLine 
+} from "react-icons/ri";
+import { 
+    Star, 
+    MessageCircle, 
+    LoaderCircle, 
+    MessageCirclePlus
+} from "lucide-react";
+
+// Components & Utils
 import Header from "../../Components/Header";
 import MyGallery from "../../Components/sliders/MyGallery";
 import SwiperSlider from "../../Components/sliders/Swiper";
-import { calculateNextDiscount } from "../../Utils/calculateDiscount";
 import HorizontalSlider from "../../Components/lists/HorizontalSlider";
-import { sendAxiosRequest } from "../../Utils/sendAxiosRequest";
-import axiosInstance from "../../Utils/axiosConfig";
 import SelectAddressModal from "../../Components/modals/address/SelectAddressModal";
-import ButtonGhost from "../../Components/buttons/ButtonGhost";
-import { useRouter } from "next/router";
-import { formatAmount } from "../../Utils/formatAmount";
 import NewAddressModal from "../../Components/modals/address/NewAddressModal";
-import { RiCoupon2Line } from "react-icons/ri";
-import { couponValidateAction } from "../../requests/coupons/coupons.requests";
-import { BiLoaderCircle } from "react-icons/bi";
-import { BsChat } from "react-icons/bs";
+import { calculateNextDiscount, calculateNextDiscountPercent } from "../../Utils/calculateDiscount";
+import { formatAmount } from "../../Utils/formatAmount";
+import { processImgUrl } from "../../Utils/helper";
+import axiosInstance from "../../Utils/axiosConfig";
 import generateRandomKey from "../../Utils/generateRandowmKey";
+import { sendAxiosRequest } from "../../Utils/sendAxiosRequest";
+import { couponValidateAction } from "../../requests/coupons/coupons.requests";
 
-interface ICreateOrderTrainPageProps {
-    product: {
-        id: number,
-        vendor_id: string,
-        product_name: string,
-        product_description: string,
-        product_price: number,
-        product_discount: number,
-        quantity: number,
-        status: string,
-        featured_status: string,
-        product_categories: string[],
-        product_tags: string[],
-        product_images: string[],
-        openOrders: any,
-        reviews: any[]
-    };
-    similar_products: any[];
-}
+/* ─── UI Helpers from Product Page ─────────────────────────────────────── */
 
-const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps) => {
+const StarRow = ({ rating, height = 4, width = 4 }: { rating: number; height?: number; width?: number }) => (
+    <div className="flex gap-0.5">
+        {[1, 2, 3, 4, 5].map((star) => (
+            <Star
+                key={star}
+                className={`w-${width} h-${height} ${star <= Math.round(rating) ? 'text-amber-400 fill-amber-400' : 'text-slate-200 fill-slate-200'}`}
+            />
+        ))}
+    </div>
+);
+
+const RatingBar = ({ label, pct }: { label: string; pct: number }) => (
+    <div className="flex items-center gap-3">
+        <span className="text-xs text-slate-500 w-12 shrink-0">{label}</span>
+        <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+            <div className="h-full bg-amber-400 rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
+        </div>
+        <span className="text-xs text-slate-400 w-8 text-right shrink-0">{Math.round(pct)}%</span>
+    </div>
+);
+
+/* ─── Main Page ────────────────────────────────────────────────────────── */
+
+const CreateOpenOrder = ({ product, similar_products }: any) => {
     const router = useRouter();
-    const [showImageGallery, setShowImageGallery] = useState<boolean>(false);
-    const nextDiscount = calculateNextDiscount(4, product.product_discount, product.product_price);
-    const [quantity, setQuantity] = useState<number | string>(1);
+    const [showImageGallery, setShowImageGallery] = useState(false);
+    const [quantity, setQuantity] = useState(1);
     const [selectedAddress, setSelectedAddress] = useState<any>({});
     const [showSelectAddressModal, setShowSelectAddressModal] = useState(false);
     const [showCreateAddressModal, setShowCreateAddressModal] = useState(false);
     const [deliveryFee, setDeliveryFee] = useState(1000);
-    const [totalAmount, setTotalAmount] = useState(0);
-    const [isLoading, setIsLoading] = useState(false);
     const [couponCode, setCouponCode] = useState('');
+    const [couponDiscount, setCouponDiscount] = useState(0);
     const [validatingCoupon, setValidatingCoupon] = useState(false);
-
-    const [paymentReference, setPaymentReference] = useState(generateRandomKey(8));
-    const pay_stack_key = process.env.NEXT_PUBLIC_PAY_STACK_KEY!;
-
-    const toggleImageGallery = () => setShowImageGallery(!showImageGallery);
+    const [isLoading, setIsLoading] = useState(false);
     const [currentReviewPage, setCurrentReviewPage] = useState(0);
+    
+    // Review Calculations
+    const itemsPerPage = 6;
+    const totalReviews = product?.reviews?.length || 0;
+    const averageScore = totalReviews > 0 
+        ? (product?.reviews.reduce((acc: number, r: any) => acc + r.score, 0) / totalReviews).toFixed(1) 
+        : '0';
+    
+    const reviewPages = [];
+    for (let i = 0; i < (product?.reviews?.length || 0); i += itemsPerPage) {
+        reviewPages.push(product?.reviews.slice(i, i + itemsPerPage));
+    }
 
+    const pctForScore = (s: number) => {
+        const count = product?.reviews?.filter((r: any) => r.score === s).length || 0;
+        return totalReviews > 0 ? (count / totalReviews) * 100 : 0;
+    };
+
+    // Payment Setup
+    const pay_stack_key = process.env.NEXT_PUBLIC_PAY_STACK_KEY!;
+    const [paymentReference] = useState(generateRandomKey(8));
+    
     let user: any = {};
+    if (typeof window !== 'undefined') {
+        injectStyle();
+        user = Cookies.get('user') ? JSON.parse(Cookies.get('user')!) : null;
+    }
+    // Calculate the actual Next Price drop
+    const nextDiscountPercent = calculateNextDiscountPercent(4, product?.product_discount);
+    const nextDiscountPrice = product?.product_price - calculateNextDiscount(4, product?.product_discount, product?.product_price);
+    // const nextDiscountPrice = product?.product_price * (1 - (nextDiscountPercent / 100));
 
+    // Memoized total to ensure consistency across payment configs
+    const totalAmount = useMemo(() => {
+        return (quantity * product?.product_price) + deliveryFee - couponDiscount;
+    }, [quantity, product?.product_price, deliveryFee, couponDiscount]);
+    
     if(typeof window !== 'undefined') {
         injectStyle();
         user = Cookies.get('user') ? JSON.parse(Cookies.get('user')!) : null;
     }
-
-    const itemsPerPage = 8;
-    const reviewPages = [];
 
     for (let i = 0; i < product?.reviews?.length; i += itemsPerPage) {
         reviewPages.push(product?.reviews?.slice(i, i + itemsPerPage));
@@ -78,23 +119,10 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
 
     const selectAddressAndGetDeliveryCharge = async (address: any) => {
         // TODO: CALL NIMBLE ENDPOINT AND GET DELIVERY FEE
-        setDeliveryFee(1000)
+        setDeliveryFee(1000);
 
-        setTotalAmount((Number(quantity) * product.product_price) + 1000)
-    }
-
-    const openOrderTrain = async () => {
-        return axiosInstance.post('/api/open-order/store', {
-            product_id: product.id,
-            quantity,
-            address_id: selectedAddress.id,
-            order_delivery_fee: deliveryFee,
-            reference: paymentReference
-        }, {
-            headers: {
-                Authorization: user.access_token
-            }
-        })
+        setSelectedAddress(address);
+        setShowSelectAddressModal(false);
     }
 
     const config = {
@@ -103,35 +131,35 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
         amount: (totalAmount * 100),
         publicKey: pay_stack_key,
     };
-
-    const onSuccess = async () => {
-        setIsLoading(true);
-        await openOrderTrain()
-        .then(() => {
-            toast.success('Payment successful')
-            router.push(`/profile?path=orders`)
-        })
-        .catch(error => {
-            console.log({error})
-            toast.error(error?.response?.message || 'Error try agin later');
-        })
-        .finally(()=>setIsLoading(false))
-    };
     
-    const onClose = () => {
-        console.log('çlosed');
-    }
-
     const initializePayment = usePaystackPayment(config);
+    
+    const handlePaymentSuccess = async () => {
+        setIsLoading(true);
+        try {
+            await axiosInstance.post('/api/open-order/store', {
+                product_id: product?.id,
+                quantity,
+                address_id: selectedAddress.id,
+                order_delivery_fee: deliveryFee,
+                reference: paymentReference
+            }, { headers: { Authorization: user.access_token } });
+            toast.success('Train started successfully!');
+            router.push(`/profile?path=orders`);
+        } catch (error: any) {
+            toast.error(error?.response?.data?.message || 'Error starting train');
+        } finally {
+            setIsLoading(false);
+        }
+    };    
     
     const vailidateCoupon = async () => {
         setValidatingCoupon(true);
         couponValidateAction(couponCode)
         .then(response => {
-            console.log({response})
             if(response.status === 200) {
                 const coupon = response?.data?.data;
-                setTotalAmount(totalAmount - coupon?.amount);
+                setCouponDiscount(coupon?.amount);
                 toast.success('Coupon validated');
             }
         })
@@ -142,44 +170,32 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
         .finally(()=>setValidatingCoupon(false))
     }
 
-
   return (
-    <div
-        className='w-full bg-white min-h-screen relative'
-    >
+    <div className='w-full bg-slate-50 min-h-screen pb-20 overflow-scroll'>
         <Head>
-            <title>{product.product_name}</title>
-            <meta name="viewport" content="initial-scale=1.0, width=device-width" />
+            <title>Start Order Train | {product?.product_name}</title>
         </Head>
 
         <Header search={false} />
-
         <ToastContainer />
 
-        {
-            product?.product_images && (
-                <MyGallery 
-                    show={showImageGallery}
-                    setShow={toggleImageGallery}
-                    slides={product?.product_images}
-                />
-            )
-        }
+        <MyGallery 
+            show={showImageGallery} 
+            setShow={() => setShowImageGallery(false)} 
+            slides={product?.product_images || []} 
+        />
 
-        {
-            showSelectAddressModal && <SelectAddressModal
-                setShow={() => setShowSelectAddressModal(!showSelectAddressModal)}
-                selectAddress={(address: any) => {
-                    setSelectedAddress(address)
-                    selectAddressAndGetDeliveryCharge(address)
-                    setShowSelectAddressModal(false)
-                }}
+        {/* Modals */}
+        {showSelectAddressModal && (
+            <SelectAddressModal
+                setShow={() => setShowSelectAddressModal(false)}
+                selectAddress={(addr: any) => selectAddressAndGetDeliveryCharge(addr)}
                 showNewAddressModal={() => {
                     setShowSelectAddressModal(false);
                     setShowCreateAddressModal(true);
                 }}
             />
-        }
+        )}
 
         {
             showCreateAddressModal && <NewAddressModal
@@ -187,198 +203,271 @@ const createOpenOrder = ({product, similar_products}: ICreateOrderTrainPageProps
             />
         }
 
-        <div className='w-full h-fit lg:h-[60vh] cursor-pointer flex align-middle mt-2' onClick={toggleImageGallery}>
-            <SwiperSlider 
-                slides={product?.product_images}
-                slidesToShow={product?.product_images?.length > 2 ? 2 : 1}
-            />
-        </div>
-
-        <div 
-            className="flex flex-col md:flex-row w-full lg:w-[95%] mx-auto px-3 lg:px-5 py-4 mt-6 relative"
-        >
-            <div className="w-full md:w-[60%] flex flex-col lg:px-4">
-                <h1 className="text-xl md:text-2xl justify-center mb-0 !text-center lg:!text-left capitalize">
-                    {product?.product_name}
-                </h1>
-                <p className="text-gray-600 py-2 mb-0 line-clamp-4 !text-center lg:!text-left">
-                    {product?.product_description}
-                </p>
-
-                <div className="grid grid-cols-2 gap-8 w-full mr-2 my-1 lg:justify-start">
+        <main className="max-w-6xl mx-auto px-4 py-6">
+            <div className="flex flex-col lg:flex-row gap-8">
+          
+                {/* Left: Visuals & Details */}
+                <div className="w-full lg:w-3/5 space-y-6">
                     <div 
-                        className='flex flex-col lg:flex-row lg:gap-1'
+                        className="bg-white rounded-3xl overflow-hidden shadow-sm cursor-zoom-in h-[300px] md:h-[450px]"
+                        onClick={() => setShowImageGallery(true)}
                     >
-                        <p className="text-gray-600 flex flex-col md:flex-row mb-0">
-                            Price:
-                        </p>
-                        <span className='font-semibold text-green-600'>
-                            {formatAmount(product?.product_price)}
-                        </span>
-                    </div>
-                    <div 
-                        className='flex flex-col lg:flex-row lg:gap-1'
-                    >
-                        <p className="text-gray-600 flex flex-col md:flex-row mb-0">
-                            Current discount: 
-                        </p>
-                        <span className='font-semibold line-through'>
-                            {formatAmount(calculateNextDiscount(4, product?.product_discount, product?.product_price))}
-                        </span>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-8 w-full mr-2 my-1 lg:justify-start">
-                    <div 
-                        className='flex flex-col lg:flex-row lg:gap-1'
-                    >
-                        <p className="text-gray-600 flex flex-col md:flex-row mb-0">
-                            Next Price:
-                        </p>
-                        <span className='font-semibold text-orange-600 animate-pulse'>
-                            {formatAmount(product?.product_price - nextDiscount)}
-                        </span>
-                    </div>
-                    <div 
-                        className='flex flex-col lg:flex-row lg:gap-1'
-                    >
-                        <p className="text-gray-600 flex flex-col md:flex-row mb-0">
-                            Next discount: 
-                        </p>
-                        <span className='font-semibold line-through'>
-                            {formatAmount(calculateNextDiscount(3, product?.product_discount, product?.product_price))}
-                        </span>
-                    </div>
-                </div>
-            </div>
-
-            <div className="flex flex-col gap-3 lg:px-4 w-full md:w-[40%] md:px-4 py-3 md:border-[1px] border-gray-200 shadow-sm">
-                <p className="text-sm mb-0">
-                    Buy this product at the current price and encourage others to do the same. As more people buy, the price lowers. <br />
-                    You'll receive a refund for the price difference upon order completion.
-                </p>
-
-                <div className="flex flex-row items-center gap-2">
-                    <div className="flex flex-row items-center gap-2">
-                        <p className="mr-4 lg:mr-0 mb-0 text-sm md:text-base">Quantity:</p>
-                        <input
-                            type="number"
-                            value={quantity}
-                            onChange={event => setQuantity(Number(event.target.value))}
-                            className='outline-none bg-gray-100 border-gray-200 rounded-md w-fit py-2 pl-3 text-sm md:mr-4'
+                        <SwiperSlider 
+                            slides={product?.product_images} 
+                            slidesToShow={1} 
                         />
                     </div>
-                    <div className="flex flex-row gap-1 justify-center lg:justify-end text-sm md:text-base">
-                        <p className="mb-0">=</p>
-                        <p className="text-green-400 mb-0 block lg:flex">{formatAmount(totalAmount)}</p>
-                    </div>
-                </div>
 
-                {
-                    deliveryFee && (
-                        <div className="flex flex-row gap-1 lg:justify-start">
-                            <p className="font-medium mb-0">Delivery Fee:
-                                <span className="text-orange-500 font-semibold ml-1">{formatAmount(deliveryFee)}</span>
-                            </p>
+                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                        <div className="flex items-center gap-2 mb-2">
+                            <StarRow rating={Number(averageScore)} />
+                            <span className="text-sm font-bold text-slate-700">{averageScore}</span>
+                            <span className="text-sm text-slate-400">({totalReviews} reviews)</span>
                         </div>
-                    )
-                }
-
-                <div className='flex flex-row gap-2 items-center'>
-                    <div className="flex flex-row gap-2 items-center py-2 px-4 border-gray-200 border rounded-md w-full">
-                        <RiCoupon2Line className="text-lg text-gray-500" />
-                        <input className="bg-transparent border-0 outline-none" placeholder="Enter coupon code here" onChange={(e)=>setCouponCode(e.target.value)}/>
+                        <h1 className="text-2xl font-bold text-slate-900 capitalize">{product?.product_name}</h1>
+                        <p 
+                            dangerouslySetInnerHTML={{__html: product?.product_description}}
+                        />
                     </div>
-                    <button 
-                        className={`border-0 font-semibold w-fit ${couponCode ? 'text-orange-600' : 'text-gray-400'}`}
-                        onClick={vailidateCoupon}
-                        disabled={validatingCoupon}
-                    >
-                        {validatingCoupon ? 'Validatin...' : 'Apply'}
-                    </button>
-                </div>
 
-                <div className="flex flex-row gap-2">
-                    {
-                        selectedAddress?.address && (
-                            <div className="h-12 w-fit mx-auto">
-                                <ButtonGhost
-                                    action="Change address"
-                                    onClick={() => setShowSelectAddressModal(true)}
-                                />
+                    {/* Testimonials (Video Social Proof) */}
+                    {product?.product_testimonials?.length > 0 && (
+                    <section className="bg-slate-900 rounded-2xl p-6 text-white">
+                        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                        <MessageCircle className="w-5 h-5 text-orange-400" />
+                        Real Reviews from the Community
+                        </h2>
+                        <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar">
+                        {product?.product_testimonials.map((video: string, i: number) => (
+                            <div key={i} className="shrink-0 rounded-xl overflow-hidden bg-black">
+                            <video 
+                                src={processImgUrl(video)} 
+                                className="h-48 w-64 object-cover" 
+                                controls 
+                            />
                             </div>
-                        )
-                    }
-                    <button
-                        onClick={async () => {
-                            if(!selectedAddress?.address) {
-                                setShowSelectAddressModal(true)
-                            }
-                            else initializePayment(onSuccess, onClose)
-                        }}
-                        disabled={isLoading}
-                        className="bg-orange-500 hover:bg-orange-700 text-white font-medium py-2 px-4 h-12 rounded-full w-[60%] !mx-auto whitespace-nowrap fixed bottom-4 left-4 right-4 lg:static"
-                    >
-                        {
-                            selectedAddress?.address ? 
-                            `Checkout ${formatAmount(totalAmount) }` : 
-                            isLoading ? 
-                            <BiLoaderCircle className="h-6 w-6 animate-spin" /> :
-                            'Start Order Train'
-                        }
-                    </button>
+                        ))}
+                        </div>
+                    </section>
+                    )}
                 </div>
 
-            </div>
-            
-                        
-        </div>
-        
-        {
-            similar_products && similar_products.length > 0 && (
-                <div className='mt-10 w-[95%] ml-[5%]'>
-                    <HorizontalSlider 
-                        list={similar_products}
-                        list_name='Similar items'
-                    />
-                </div>
-            )
-        }
+                {/* Right: Train Controls & Pricing */}
+                <div className="w-full lg:w-2/5 space-y-4">
+                    <div className="bg-white sticky top-24 p-6 rounded-2xl shadow-md border-t-4 border-orange-500">
+                        <div className="flex items-center gap-2 text-orange-600 bg-orange-50 w-fit px-3 py-1 rounded-full mb-4">
+                            <RiUserSharedLine className="animate-pulse" />
+                            <span className="text-xs font-bold uppercase tracking-wider">Order Train Mode</span>
+                        </div>
 
-        { reviewPages.length > 0 ?
-            <div className="my-10 flex flex-col w-[90%] mx-auto mb-10">
-                <h2 className="text-2xl font-mono text-orange-500 text-left mb-6">
-                    Reviews
-                </h2> 
-                { reviewPages[currentReviewPage]?.map((review: any, index: number) => ( 
-                    <div className="flex flex-col mb-4" key={`${review.name}${index}`}>
-                        <h3 className="text-black justify-start font-normal text-base">
-                            {review.name}
-                        </h3>
-                        <p className="text-gray-600">
-                            {review.message}
-                        </p>
+                        <div className="space-y-4">
+                            <div className="flex justify-between items-end">
+                                <div>
+                                    <p className="text-xs text-slate-400 font-medium uppercase">Current Price</p>
+                                    <p className="text-3xl font-black text-slate-900">{formatAmount(product?.product_price)}</p>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-xs text-green-600 font-bold">Next Milestone Price</p>
+                                    {/* Showing the actual currency value instead of just % */}
+                                    <p className="text-lg font-bold text-green-600">{formatAmount(nextDiscountPrice)}</p>
+                                    <p className="text-[10px] text-slate-400 uppercase">Save {nextDiscountPercent}% more</p>
+                                </div>
+                            </div>
+
+                            <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 flex gap-3">
+                                <RiInformationLine className="text-blue-500 shrink-0 mt-1" />
+                                <p className="text-xs text-blue-800 leading-snug">
+                                    Open this train and share. Once the train hits the next milestone, 
+                                    you'll be paying <strong>{formatAmount(nextDiscountPrice)}</strong>.
+                                </p>
+                            </div>
+
+                            <hr className="border-slate-100" />
+
+                            {/* Coupon Input Section */}
+                            <div className="space-y-2">
+                                <label className="text-sm font-semibold text-slate-700">Have a coupon?</label>
+                                <div className="flex gap-2">
+                                    <div className="relative flex-1">
+                                        <RiCoupon2Line className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                                        <input 
+                                            type="text"
+                                            placeholder="Enter code"
+                                            value={couponCode}
+                                            onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                                            className="w-full pl-10 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-orange-200 outline-none transition-all"
+                                        />
+                                    </div>
+                                    <button 
+                                        onClick={vailidateCoupon}
+                                        disabled={validatingCoupon || !couponCode}
+                                        className="px-4 py-2 bg-slate-900 text-white rounded-xl text-sm font-bold disabled:bg-slate-200 transition-colors"
+                                    >
+                                        {validatingCoupon ? <LoaderCircle className="w-4 h-4 animate-spin" /> : 'Apply'}
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Quantity & Address */}
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <label className="text-sm font-semibold text-slate-700">Quantity</label>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        value={quantity}
+                                        onChange={e => setQuantity(Math.max(1, Number(e.target.value)))}
+                                        className="w-20 p-2 bg-slate-50 border border-slate-200 rounded-lg text-center font-bold"
+                                    />
+                                </div>
+
+                                <div className="flex flex-col gap-2">
+                                    <label className="text-sm font-semibold text-slate-700">Delivery Address</label>
+                                    {selectedAddress?.address ? (
+                                        <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex justify-between items-center">
+                                            <div className="truncate pr-4">
+                                                <p className="text-xs font-bold text-slate-800">{selectedAddress.name}</p>
+                                                <p className="text-xs text-slate-500 truncate">{selectedAddress.address}</p>
+                                            </div>
+                                            <button onClick={() => setShowSelectAddressModal(true)} className="text-xs text-orange-600 font-bold">Change</button>
+                                        </div>
+                                    ) : (
+                                        <button 
+                                            onClick={() => setShowSelectAddressModal(true)}
+                                            className="w-full p-3 border-2 border-dashed border-slate-200 rounded-xl text-slate-400 text-sm hover:border-orange-300 hover:text-orange-500 transition-all flex items-center justify-center gap-2"
+                                        >
+                                            <RiTruckLine /> Select Delivery Address
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Total Section */}
+                            <div className="pt-4 border-t border-slate-100">
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-slate-500">Subtotal</span>
+                                    <span className="font-medium">{formatAmount(quantity * product?.product_price)}</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-slate-500">Delivery Fee</span>
+                                    <span className="font-medium">{formatAmount(deliveryFee)}</span>
+                                </div>
+                                {couponDiscount > 0 && (
+                                    <div className="flex justify-between text-sm text-green-600">
+                                        <span>Coupon Discount</span>
+                                        <span>-{formatAmount(couponDiscount)}</span>
+                                    </div>
+                                )}
+                                <div className="flex justify-between items-center pt-2">
+                                    <span className="font-bold text-slate-900">Total to Pay</span>
+                                    <span className="text-2xl font-black text-orange-600">{formatAmount(totalAmount)}</span>
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={() => !selectedAddress?.address ? setShowSelectAddressModal(true) : initializePayment(handlePaymentSuccess, () => {})}
+                                disabled={isLoading}
+                                className="w-full h-14 bg-orange-500 hover:bg-orange-600 disabled:bg-slate-300 text-white rounded-2xl font-bold text-lg shadow-lg shadow-orange-200 transition-all flex items-center justify-center gap-3"
+                            >
+                                {isLoading ? <LoaderCircle className="animate-spin" /> : (
+                                    <>
+                                        <RiUserSharedLine />
+                                        {selectedAddress?.address ? `Pay ${formatAmount(totalAmount)}` : 'Start Order Train'}
+                                    </>
+                                )}
+                            </button>
+                        </div>
                     </div>
-                ))} 
-                <div className='flex flex-row justify-end text-sm w-[80%] mx-auto'>
-                    <button disabled={currentReviewPage === 0} onClick={() => setCurrentReviewPage(currentReviewPage - 1)} className='mr-3 cursor-pointer'>Previous</button>
-                    <button disabled={currentReviewPage === reviewPages.length - 1} onClick={() => setCurrentReviewPage(currentReviewPage + 1)} className='mr-3 cursor-pointer'>Next</button>
                 </div>
-            </div> : 
-            <div className='flex flex-col justify-center items-center gap-2 my-16'>
-                <BsChat className='text-5xl text-orange-500'/>
-                <p className='text-center text-xl font-medium text-orange-500'>No reviews yet</p>
             </div>
-        }
-    </div>
-  )
-}
 
-export default createOpenOrder
+            {/* Similar Items */}
+            {similar_products?.length > 0 && (
+            <div className='mt-16'>
+                <HorizontalSlider list={similar_products} list_name='People also viewed' />
+            </div>
+            )}
+
+            {/* Reviews Section */}
+            <section className="mt-16">
+            <h2 className="text-2xl font-bold text-slate-800 mb-8 flex items-center gap-3">
+                <Star className="w-6 h-6 text-amber-400 fill-amber-400" />
+                Customer Experience
+            </h2>
+
+            {reviewPages.length > 0 ? (
+                <div className="flex flex-col lg:flex-row gap-12">
+                {/* Summary */}
+                <div className="lg:w-80 shrink-0 space-y-6">
+                    <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm text-center lg:text-left">
+                    <p className="text-5xl font-black text-slate-900 mb-2">{averageScore}</p>
+                    <div className="flex justify-center lg:justify-start mb-2"><StarRow rating={Number(averageScore)} /></div>
+                    <p className="text-sm text-slate-400">Based on {totalReviews} verified purchases</p>
+                    </div>
+                    <div className="space-y-3 px-2">
+                    {[5, 4, 3, 2, 1].map((star) => (
+                        <RatingBar key={star} label={`${star} star`} pct={pctForScore(star)} />
+                    ))}
+                    </div>
+                </div>
+
+                {/* Feed */}
+                <div className="flex-1 space-y-4">
+                    {reviewPages[currentReviewPage]?.map((review: any, i: number) => (
+                    <div key={i} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+                        <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold">
+                            {review.user?.name?.[0] || 'U'}
+                        </div>
+                        <div>
+                            <p className="text-sm font-bold text-slate-900">{review.user?.name || review.name}</p>
+                            <StarRow rating={review.score} height={3} width={3} />
+                        </div>
+                        </div>
+                        <p className="text-slate-600 text-sm leading-relaxed">{review.comment || review.message}</p>
+                    </div>
+                    ))}
+
+                    {/* Pagination */}
+                    {reviewPages.length > 1 && (
+                    <div className="flex justify-end items-center gap-4 pt-4">
+                        <button 
+                        disabled={currentReviewPage === 0}
+                        onClick={() => setCurrentReviewPage(p => p - 1)}
+                        className="p-2 text-sm font-bold text-slate-500 disabled:opacity-20"
+                        >
+                        Previous
+                        </button>
+                        <span className="text-xs font-mono bg-slate-100 px-3 py-1 rounded-full">{currentReviewPage + 1} / {reviewPages.length}</span>
+                        <button 
+                        disabled={currentReviewPage === reviewPages.length - 1}
+                        onClick={() => setCurrentReviewPage(p => p + 1)}
+                        className="p-2 text-sm font-bold text-slate-500 disabled:opacity-20"
+                        >
+                        Next
+                        </button>
+                    </div>
+                    )}
+                </div>
+                </div>
+            ) : (
+                <div className="bg-white rounded-3xl py-20 flex flex-col items-center border border-slate-100">
+                <MessageCirclePlus className="text-5xl text-slate-200 mb-4" />
+                <p className="text-slate-400 font-medium text-lg">No reviews yet. Be the trendsetter!</p>
+                </div>
+            )}
+            </section>
+        </main>
+    </div>
+  );
+};
+
+export default CreateOpenOrder;
 
 export async function getServerSideProps(context: any) {
     try{
         const { product_id } = context.query
+        console.log({product_id})
 
         const getProduct = await sendAxiosRequest(
             `/api/public/product/show?id=${product_id}`,
@@ -390,8 +479,8 @@ export async function getServerSideProps(context: any) {
        
         return {
             props: {
-                product: getProduct.data.product,
-                similar_products: getProduct.data.similar_products
+                product: getProduct?.data.product,
+                similar_products: getProduct?.data.similar_products
             }
         }
     }

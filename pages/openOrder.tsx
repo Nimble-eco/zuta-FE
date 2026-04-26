@@ -1,34 +1,36 @@
-import Head from 'next/head'
-import Cookies from 'js-cookie'
-import { useRef, useState } from 'react';
+import Head from 'next/head';
+import Cookies from 'js-cookie';
+import { useRef, useState, useMemo } from 'react';
 import { toast } from 'react-toastify';
-import Header from "../Components/Header"
-import TimeAgo from 'javascript-time-ago'
-import en from 'javascript-time-ago/locale/en'
+import { BsShieldCheck, BsTruck, BsArrowRight } from 'react-icons/bs';
+import { MdKeyboardArrowDown, MdKeyboardArrowUp } from 'react-icons/md';
+
+// Components & Utils
+import Header from "../Components/Header";
 import SwiperSlider from '../Components/sliders/Swiper';
 import MyGallery from '../Components/sliders/MyGallery';
 import VerticalTextSlider from '../Components/sliders/VerticalTextSlider';
 import axiosInstance from '../Utils/axiosConfig';
 import SimilarProductsHorizontalSlider from '../Components/lists/SimilarProductsHorizontalSlider';
-import { formatAmount } from '../Utils/formatAmount';
 import ProductDetailsSideDrawer from '../Components/drawer/ProductDetailsSideDrawer';
-import { BsChat } from 'react-icons/bs';
 import RatingsCard from '../Components/cards/RatingsCard';
+import { formatAmount } from '../Utils/formatAmount';
 import { processImgUrl } from '../Utils/helper';
-import { Fade } from 'react-awesome-reveal';
-import { MdKeyboardArrowDown, MdKeyboardArrowUp } from 'react-icons/md';
+import en from 'javascript-time-ago/locale/en'
+import TimeAgo from 'javascript-time-ago';
 
 interface IOpenOrderProductPageProps {
     product: any;
     similar_products: any[];
 }
 
-const openOrder = ({product, similar_products}: IOpenOrderProductPageProps) => {
+const openOrder = ({ product, similar_products }: IOpenOrderProductPageProps) => {
     const [showImageGallery, setShowImageGallery] = useState<boolean>(false);
+    const [selectedFAQ, setSelectedFAQ] = useState(product?.product?.product_faqs?.[0] || null);
+    const [currentReviewPage, setCurrentReviewPage] = useState(0);
     const ProductDetailsSideDrawerRef = useRef<any>(null);
     TimeAgo.addLocale(en)
     const timeAgo = new TimeAgo('en-US');
-    const [selectedFAQ, setSelectedFAQ] = useState(product?.product_faqs?.length ? product?.product_faqs[0] : {});
 
     let user: any = {};
 
@@ -38,49 +40,30 @@ const openOrder = ({product, similar_products}: IOpenOrderProductPageProps) => {
 
     const toggleImageGallery = () => setShowImageGallery(!showImageGallery);
 
-    const [currentReviewPage, setCurrentReviewPage] = useState(0);
+    // Logic for reviews
+    const itemsPerPage = 6;
+    const reviewPages = useMemo(() => {
+        const pages = [];
+        for (let i = 0; i < (product?.reviews?.length || 0); i += itemsPerPage) {
+            pages.push(product?.reviews?.slice(i, i + itemsPerPage));
+        }
+        return pages;
+    }, [product?.reviews]);
 
-    const itemsPerPage = 8;
-    const reviewPages = [];
+    const averageScore = useMemo(() => {
+        if (!product?.reviews?.length) return 0;
+        return (product.reviews.reduce((acc: number, r: any) => acc + r.score, 0) / product.reviews.length).toFixed(1);
+    }, [product?.reviews]);
 
-    for (let i = 0; i < product?.reviews?.length; i += itemsPerPage) {
-        reviewPages.push(product?.reviews?.slice(i, i + itemsPerPage));
-    }
-
-    const totalReviews = product?.reviews?.length || 0;
-    const fiveStarReviews = product?.reviews?.filter((review: any) => review.score === 5).length || 0;
-    const fourStarReviews = product?.reviews?.filter((review: any) => review.score === 4).length || 0;
-    const threeStarReviews = product?.reviews?.filter((review: any) => review.score === 3).length || 0;
-    const twoStarReviews = product?.reviews?.filter((review: any) => review.score === 2).length || 0;
-    const oneStarReviews = product?.reviews?.filter((review: any) => review.score === 1).length || 0;
-
-    const percentageFiveStar = totalReviews > 0 ? (fiveStarReviews / totalReviews) * 100 : 0;
-    const percentageFourStar = totalReviews > 0 ? (fourStarReviews / totalReviews) * 100 : 0;
-    const percentageThreeStar = totalReviews > 0 ? (threeStarReviews / totalReviews) * 100 : 0;
-    const percentageTwoStar = totalReviews > 0 ? (twoStarReviews / totalReviews) * 100 : 0;
-    const percentageOneStar = totalReviews > 0 ? (oneStarReviews / totalReviews) * 100 : 0;
-
-    const averageScore = totalReviews > 0 
-    ? (product.reviews.reduce((acc: number, review: any) => acc + review.score, 0) / totalReviews).toFixed(1) 
-    : 0; 
-
-    const getRecentOrderList = () => {
-        const recentOrders: string[] = [];
-        product?.subscribersList?.map((order: any) => {
-            recentOrders.push(`${order?.name} purchased about ${timeAgo.format(new Date(order?.created_at))}`)
-        });
-        return recentOrders;
-    }
-
-    const addToCart = async (newProduct:any) => {
+    const addToCart = async (newProduct: any) => {
         const cart: any = JSON.parse(localStorage.getItem('cart')!) || {products: [], bundles: [], subscriptions: []};
         let newCart = cart;
         let obj = newCart.subscriptions?.find((item: any, i: number) => {
-          if(item.id === newProduct.id){
+            if(item.id === newProduct.id){
             newCart.subscriptions[i].quantity++;
             localStorage.setItem("cart", JSON.stringify(newCart));
             return true;
-          }
+            }
         })
         if(!obj) {
             cart?.subscriptions.push({...newProduct, quantity: 1});
@@ -100,335 +83,244 @@ const openOrder = ({product, similar_products}: IOpenOrderProductPageProps) => {
                 }
             })
         }
-    }
+    };
 
     return (
-        <div
-            className='w-full bg-white min-h-screen relative overflow-auto'
-        >
+        <div className='w-full bg-slate-50 min-h-screen pb-20 lg:pb-10'>
             <Head>
-                <title>{product.product_name}</title>
-                <meta name="viewport" content="initial-scale=1.0, width=device-width" />
+                <title>{product?.product_name || 'Product Details'}</title>
             </Head>
 
+            <Header search={false} />
+            
             <ProductDetailsSideDrawer
-                title={product?.product_name}
+                title={product?.product?.product_name}
                 description={product?.product?.product_description}
                 introduction={product?.product?.product_introduction}
                 ref={ProductDetailsSideDrawerRef}
             />
 
-            <Header search={false} />
+            <MyGallery 
+                show={showImageGallery}
+                setShow={toggleImageGallery}
+                slides={product?.product?.product_images}
+            />
 
-            {
-                product?.product?.product_images && (
-                    <MyGallery 
-                        show={showImageGallery}
-                        setShow={toggleImageGallery}
-                        slides={product?.product?.product_images}
-                    />
-                )
-            }
+            <main className='max-w-7xl mx-auto px-4 pt-8 lg:pt-12'>
+                <div className='grid grid-cols-1 lg:grid-cols-12 gap-12'>
+                    
+                    {/* LEFT: Visuals & Content */}
+                    <div className='lg:col-span-7 flex flex-col gap-10'>
+                        {/* Image Section */}
+                        <section className='bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100'>
+                            <div className='aspect-square lg:aspect-video cursor-zoom-in' onClick={() => setShowImageGallery(true)}>
+                                <SwiperSlider slides={product?.product?.product_images} />
+                            </div>
+                        </section>
 
-            <div className='flex flex-col gap-6 px-4 lg:px-28'>
-                <div 
-                    className="flex flex-col md:flex-row justify-between w-full px-4 py-4 mt-10 relative"
-                >
-                    <div className='w-full md:w-1/3 md:!mr-3 cursor-pointer max-w-1/3 h-fit lg:h-60' onClick={toggleImageGallery}>
-                        <SwiperSlider 
-                            slides={product?.product?.product_images}
-                        />
+                        {/* Description Section */}
+                        <section className='space-y-4'>
+                            <h1 className='text-3xl font-bold text-slate-900 capitalize leading-tight'>
+                                {product?.product?.product_name}
+                            </h1>
+                            <div className='prose prose-slate max-w-none'>
+                                <p className='text-slate-600 leading-relaxed'>
+                                    {product?.product?.product_introduction}
+                                    <button 
+                                        onClick={() => ProductDetailsSideDrawerRef.current?.open()}
+                                        className="text-orange-600 font-semibold ml-2 hover:underline"
+                                    >
+                                        View full details
+                                    </button>
+                                </p>
+                            </div>
+                        </section>
+
+                        {/* Media Section (Videos) */}
+                        {product?.product?.product_videos?.length > 0 && (
+                            <section className='space-y-4'>
+                                <h2 className='text-xl font-bold'>Watch in Action</h2>
+                                <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+                                    {product.product.product_videos.map((video: string, i: number) => (
+                                        <video key={i} src={processImgUrl(video)} controls className='h-64 w-48 object-cover rounded-xl shadow-lg flex-shrink-0 bg-black' />
+                                    ))}
+                                </div>
+                            </section>
+                        )}
                     </div>
-                    <div className="w-[95%] mx-auto md:w-2/3 flex flex-col mt-10 md:mt-0 md:!ml-8">
-                        <h1 className="text-xl md:text-xl justify-center capitalize">
-                            {product?.product?.product_name}
-                        </h1>
-                        <p className="text-gray-600 mb-2 lg:mb-0">
-                            <span className="line-clamp-4">{product?.product?.product_introduction}</span>
-                            <span className="text-orange-500 text-sm cursor-pointer ml-1" onClick={() => ProductDetailsSideDrawerRef.current?.open()}>...more</span>
-                        </p>
-                        <div className="grid grid-cols-2 lg:flex lg:flex-row gap-8 w-full mb-2">
-                            <div 
-                                className='flex flex-col lg:flex-row lg:gap-2'
-                            >
-                                <p className="text-gray-600 flex flex-col md:flex-row mb-0">
-                                    Price:
-                                </p>
-                                <span className='font-bold text-green-500'>
-                                    {formatAmount(product.open_order_price)}
-                                </span>
-                            </div>
-                            <div 
-                                className='flex flex-col lg:flex-row lg:gap-2'
-                            >
-                                <p className="text-gray-600 mb-0">
-                                    Current discount: 
-                                </p>
-                                <span className='font-semibold line-through'>
-                                    {formatAmount(product.open_order_discount)}
-                                </span>
-                            </div>
-                            
-                        </div>
-                        <div
-                            className='grid grid-cols-2 lg:flex lg:flex-row gap-8'
-                        >
-                            <div 
-                                className='flex flex-col lg:flex-row lg:gap-2'
-                            >
-                                <p className="text-gray-600 mb-0">
-                                    Next price: {" "}
-                                </p>
-                                <span className='text-orange-500 font-semibold'>
-                                    {formatAmount(product.next_price)}
-                                </span>
-                            </div>
-                            <div 
-                                className='flex flex-col lg:flex-row lg:gap-2'
-                            >
-                                <p className="text-gray-600 flex flex-col md:flex-row mb-0">
-                                    Next discount:
-                                </p>
-                                <span className='text-orange-500 font-medium line-through'>
-                                    {formatAmount(product.next_discount)}
-                                </span>
-                            </div>   
-                        </div>
 
-                        <div className='flex flex-col md:flex-row lg:items-center gap-6 mt-4'>
-                            {
-                                getRecentOrderList().length > 0 && (
-                                    <div className='lg:max-w-[50%] !mx-auto md:!mx-0'>
+                    {/* RIGHT: Pricing & Sticky Actions */}
+                    <div className='lg:col-span-5'>
+                        <div className='sticky top-24 space-y-6'>
+                            <div className='bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-6'>
+                                {/* Price Card */}
+                                <div className='flex items-end justify-between'>
+                                    <div>
+                                        <p className='text-sm text-slate-500 font-medium'>Current Train Price</p>
+                                        <div className='flex items-center gap-2'>
+                                            <span className='text-4xl font-black text-orange-600'>{formatAmount(product.open_order_price)}</span>
+                                            <span className='text-lg text-slate-400 line-through'>{formatAmount(product.open_order_discount)}</span>
+                                        </div>
+                                    </div>
+                                    <div className='bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider'>
+                                        Live Deal
+                                    </div>
+                                </div>
+
+                                {/* Order Train Progress Visualizer */}
+                                <div className='bg-slate-50 p-4 rounded-xl border border-dashed border-slate-200'>
+                                    <p className='text-xs font-bold text-slate-600 uppercase mb-3 flex items-center gap-2'>
+                                        <BsArrowRight className='text-orange-500'/> Next Price Drop
+                                    </p>
+                                    <div className='flex justify-between items-center mb-1'>
+                                        <span className='text-sm font-semibold text-slate-700'>{formatAmount(product.next_price)}</span>
+                                        <span className='text-xs text-slate-400'>Target: Next 5 orders</span>
+                                    </div>
+                                    <div className='w-full h-2 bg-slate-200 rounded-full overflow-hidden'>
+                                        <div className='h-full bg-orange-500 w-[65%]' />
+                                    </div>
+                                </div>
+
+                                {/* Trust Badges */}
+                                <div className='grid grid-cols-2 gap-4 text-[11px] font-medium text-slate-500 uppercase'>
+                                    <div className='flex items-center gap-2'><BsTruck className='text-lg text-orange-400'/> Fast Delivery</div>
+                                    <div className='flex items-center gap-2'><BsShieldCheck className='text-lg text-orange-400'/> Secured Payment</div>
+                                </div>
+
+                                {/* CTA */}
+                                <button
+                                    onClick={() => addToCart(product)}
+                                    className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-orange-200 flex justify-center items-center gap-2 group"
+                                >
+                                    Join the Order Train
+                                    <BsArrowRight className='group-hover:translate-x-1 transition-transform'/>
+                                </button>
+                            </div>
+
+                            {/* Recent Activity */}
+                            {product?.subscribersList?.length > 0 && (
+                                <div className='bg-slate-900 rounded-2xl p-4 text-white overflow-hidden relative'>
+                                    <div className='relative z-10'>
                                         <VerticalTextSlider 
-                                            list={getRecentOrderList()}
-                                            list_name='Recent orders'
+                                            list={product?.subscribersList.map((o: any) => `${o.name} joined the train about ${timeAgo.format(new Date(o?.created_at))}`)} 
+                                            list_name='Live Activity'
                                         />
                                     </div>
-                                )
-                            }
-
-                            <button
-                                onClick={() => addToCart(product)}
-                                className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded w-[60%] !mx-auto md:w-[40%] md:!mx-0 lg:w-[30%] md:ml-4 mt-3 whitespace-nowrap fixed bottom-4 left-4 right-4 lg:static"
-                            >
-                                Add to Cart
-                            </button>
+                                    <div className='absolute top-0 right-0 p-4 opacity-10 font-black text-4xl italic leading-none'>LIVE</div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
 
-                {
-                    product?.product?.product_videos && (
-                        <div className='flex flex-col w-full lg:min-w-[500px]'>
-                            <div className="flex flex-row gap-4 overflow-x-auto justify-center">
-                                {
-                                    product?.product?.product_videos?.map((video: string)=>(
-                                        <div className='relative bg-gray-100 rounded-lg'>
-                                            <video
-                                                src={processImgUrl(video)}
-                                                className='rounded-md h-60 w-64'
-                                                controls={true}
-                                            />
-                                        </div>
-                                    ))
-                                }
-                            </div>
-                        </div>
-                    )
-                }
-
-                {
-                    product?.product?.product_testimonials && (
-                        <div className='flex flex-col w-full lg:min-w-[500px] justify-center mt-4 bg-slate-900 rounded-xl p-4'>
-                            <h3 className='font-semibold text-xl text-white text-center'>Hear from our customers</h3>
-                            <div className="flex flex-row gap-4 overflow-x-auto justify-center">
-                                {
-                                    product?.product?.product_testimonials?.map((video: string)=>(
-                                        <div className='relative bg-gray-100 rounded-lg'>
-                                            <video
-                                                src={processImgUrl(video)}
-                                                className='rounded-md h-48 !w-64'
-                                                controls={true}
-                                            />
-                                        </div>
-                                    ))
-                                }
-                            </div>
-                        </div>
-                    )
-                }
-
-                { reviewPages.length > 0 ?
-                    <div className="my-10 flex flex-col w-[90%] lg:w-full px-4 lg:px-8 mx-auto lg:mx-0 mb-10">
-                        <div className='flex flex-col lg:flex-row gap-4 lg:gap-y-20'>
-                            <div className='flex flex-col gap-4'>
-                                <h2 className="text-2xl text-orange-500 font-semibold">
-                                    Customer Reviews
-                                </h2> 
-                                <div className='flex flex-row gap-2 items-center'>
-                                    <RatingsCard 
-                                        rating={Number(averageScore)} 
-                                        hight={8}
-                                        width={8}
-                                    />
-                                    <p className='font-semibold !mb-0'>{averageScore} out of 5</p>
-                                </div>
-                                <p className='text-sm font-light !mb-4'>{totalReviews} ratings and reviews</p>
-                                <div className='flex flex-row gap-3 items-center justify-between'>
-                                    <p className='!mb-0 text-sm whitespace-nowrap'>5 Stars</p>
-                                    <div className="relative h-6 bg-gray-200 rounded w-full lg:w-72">
-                                        <div
-                                            className="absolute h-full bg-orange-500 rounded-l"
-                                            style={{ width: `${percentageFiveStar}%` }}
-                                        />
+                {/* BOTTOM SECTIONS: Full Width */}
+                <div className='mt-20 space-y-20'>
+                    
+                    {/* Reviews */}
+                    <section className='bg-white rounded-3xl p-8 lg:p-12 border border-slate-100'>
+                        <div className='flex flex-col lg:flex-row gap-12'>
+                            <div className='lg:w-1/3 space-y-6'>
+                                <h2 className='text-3xl font-bold'>Community Feedback</h2>
+                                <div className='flex items-center gap-4'>
+                                    <div className='text-5xl font-black text-slate-900'>{averageScore}</div>
+                                    <div>
+                                        <RatingsCard rating={Number(averageScore)} hight={6} width={6} />
+                                        <p className='text-sm text-slate-500'>{product?.reviews?.length} verified buyers</p>
                                     </div>
-                                    <p className='!mb-0 text-sm whitespace-nowrap'>{percentageFiveStar}%</p>
                                 </div>
-                                <div className='flex flex-row gap-2 items-center justify-between'>
-                                    <p className='!mb-0 text-sm whitespace-nowrap'>4 Stars</p>
-                                    <div className="relative h-6 bg-gray-200 rounded w-full lg:w-72">
-                                        <div
-                                            className="absolute h-full bg-orange-500 rounded-l"
-                                            style={{ width: `${percentageFourStar}%` }}
-                                        />
-                                    </div>
-                                    <p className='!mb-0 text-sm whitespace-nowrap'>{percentageFourStar}%</p>
-                                </div>
-                                <div className='flex flex-row gap-2 items-center justify-between'>
-                                    <p className='!mb-0 text-sm whitespace-nowrap'>3 Stars</p>
-                                    <div className="relative h-6 bg-gray-200 rounded w-full lg:w-72">
-                                        <div
-                                            className="absolute h-full bg-orange-500 rounded-l"
-                                            style={{ width: `${percentageThreeStar}%` }}
-                                        />
-                                    </div>
-                                    <p className='!mb-0 text-sm whitespace-nowrap'>{percentageThreeStar}%</p>
-                                </div>
-                                <div className='flex flex-row gap-2 items-center justify-between'>
-                                    <p className='!mb-0 text-sm whitespace-nowrap'>2 Stars</p>
-                                    <div className="relative h-6 bg-gray-200 rounded w-full lg:w-72">
-                                        <div
-                                            className="absolute h-full bg-orange-500 rounded-l"
-                                            style={{ width: `${percentageTwoStar}%` }}
-                                        />
-                                    </div>
-                                    <p className='!mb-0 text-sm whitespace-nowrap'>{percentageTwoStar}%</p>
-                                </div>
-                                <div className='flex flex-row gap-2 items-center justify-between'>
-                                    <p className='!mb-0 text-sm whitespace-nowrap'>1 Stars</p>
-                                    <div className="relative h-6 bg-gray-200 rounded w-full lg:w-72">
-                                        <div
-                                            className="absolute h-full bg-orange-500 rounded-l"
-                                            style={{ width: `${percentageOneStar}%` }}
-                                        />
-                                    </div>
-                                    <p className='!mb-0 text-sm whitespace-nowrap'>{percentageOneStar}%</p>
-                                </div>
-                            </div>
-                            <div className='flex flex-col gap-2 w-full lg:ml-[5%]'>
-                                <p className='text-xl font-semibold'>Latest reviews from customers</p>
-                                { reviewPages[currentReviewPage]?.map((review: any, index: number) => ( 
-                                    <div className="flex flex-col gap-3" key={`${review.name}${index}`}>
-                                        <div className='flex flex-col'>
-                                            <div className='flex flex-row gap-2 items-center'>
-                                                {
-                                                    review?.user?.picture ? (
-                                                        <img 
-                                                            src={processImgUrl(review?.user?.picture)}
-                                                            alt='reviewer'
-                                                            className='h-10 w-10 rounded-full object-cover object-center'
-                                                        />
-                                                    ) : null
-                                                }
-                                                <h3 className="text-black justify-start font-normal capitalize text-base">
-                                                    {review.user?.name}
-                                                </h3>
+                                {/* Simplified Star Bars (Map these dynamically if needed) */}
+                                <div className='space-y-2'>
+                                    {[5,4,3,2,1].map(star => (
+                                        <div key={star} className='flex items-center gap-3 text-sm'>
+                                            <span className='w-4 font-bold'>{star}</span>
+                                            <div className='flex-1 h-2 bg-slate-100 rounded-full overflow-hidden'>
+                                                <div className='h-full bg-orange-500 w-[80%]' />
                                             </div>
-                                            <RatingsCard rating={review.score} />
                                         </div>
-                                        <p className="text-gray-600">
-                                            {review.comment}
-                                        </p>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className='lg:w-2/3 space-y-8'>
+                                {reviewPages[currentReviewPage]?.map((review: any, i: number) => (
+                                    <div key={i} className='border-b border-slate-100 pb-6'>
+                                        <div className='flex items-center gap-3 mb-3'>
+                                            <img src={processImgUrl(review.user?.picture)} className='w-10 h-10 rounded-full object-cover' alt="" />
+                                            <div>
+                                                <h4 className='font-bold text-slate-900'>{review.user?.name}</h4>
+                                                <RatingsCard rating={review.score} />
+                                            </div>
+                                        </div>
+                                        <p className='text-slate-600'>{review.comment}</p>
                                     </div>
-                                ))} 
-                                <div className='flex flex-row justify-end text-sm'>
-                                    <button disabled={currentReviewPage === 0} onClick={() => setCurrentReviewPage(currentReviewPage - 1)} className='mr-3 cursor-pointer'>Previous</button>
-                                    <button disabled={currentReviewPage === reviewPages.length - 1} onClick={() => setCurrentReviewPage(currentReviewPage + 1)} className='mr-3 cursor-pointer'>Next</button>
+                                ))}
+                                {/* Pagination Controls */}
+                                <div className='flex justify-between items-center pt-4'>
+                                    <button disabled={currentReviewPage === 0} onClick={() => setCurrentReviewPage(p => p - 1)} className='px-4 py-2 text-sm font-bold disabled:opacity-30 uppercase tracking-widest'>Prev</button>
+                                    <button disabled={currentReviewPage === reviewPages.length - 1} onClick={() => setCurrentReviewPage(p => p + 1)} className='px-4 py-2 text-sm font-bold disabled:opacity-30 uppercase tracking-widest'>Next</button>
                                 </div>
                             </div>
                         </div>
-                    </div> : 
-                    <div className='flex flex-col justify-center items-center gap-2 my-16'>
-                        <BsChat className='text-5xl text-orange-500'/>
-                        <p className='text-center text-xl font-medium text-orange-500'>No reviews yet</p>
-                    </div>
-                }
+                    </section>
 
-
-                {
-                    product?.product?.product_summary && (
-                        <div className="mt-4">
-                            <div dangerouslySetInnerHTML={{__html: product?.product?.product_summary}} />
-                        </div>
-                    )
-                }
-
-                {
-                    product?.product?.product_faqs?.length ? (
-                        <div className="flex flex-col gap-4 px-4 lg:px-10 xl:px-20 mt-8 bg-white p-4 rounded-md">
-                            <p className="text-center text-muted text-3xl font-semibold mb-10">
-                                Frequently Asked Questions
-                            </p>
-                            <div className="flex flex-col gap-2">
-                                <Fade cascade triggerOnce>
-                                {
-                                    product?.product?.product_faqs?.map((faq: any, index: number) => (
-                                        <div 
-                                            key={faq?.question} 
-                                            className="flex flex-col gap-1 border-b"
-                                            onClick={()=>setSelectedFAQ(faq)}    
-                                        >
-                                            <div className="flex flex-row gap-4 justify-between">
-                                                <div className="flex flex-row gap-4 items-center cursor-pointer">
-                                                    <p className="bg-foreground w-10 h-10 flex justify-center items-center rounded-xl text-center">{index + 1}</p>
-                                                    <p className="font-semibold text-lg capitalize">{faq?.question}</p>
-                                                </div>
-                                                {
-                                                    selectedFAQ?.answer === faq?.answer ?
-                                                    <MdKeyboardArrowUp className="text-3xl" /> :
-                                                    <MdKeyboardArrowDown className="text-3xl" /> 
-                                                }
-                                            </div>
-                                            {
-                                                selectedFAQ?.answer === faq?.answer && (
-                                                    <p className="text-muted bg-foreground p-4 rounded-xl">{selectedFAQ?.answer}</p>
-                                                )
-                                            }
+                    {/* FAQ Accordion */}
+                    {product?.product?.product_faqs?.length > 0 && (
+                        <section className='max-w-3xl mx-auto'>
+                            <h2 className='text-3xl font-bold text-center mb-12'>Frequently Asked</h2>
+                            <div className='space-y-4'>
+                                {product.product.product_faqs.map((faq: any, i: number) => (
+                                    <div 
+                                        key={i} 
+                                        className={`rounded-2xl border transition-all cursor-pointer ${selectedFAQ === faq ? 'border-orange-500 bg-orange-50' : 'border-slate-200 bg-white'}`}
+                                        onClick={() => setSelectedFAQ(selectedFAQ === faq ? null : faq)}
+                                    >
+                                        <div className='p-5 flex justify-between items-center'>
+                                            <span className='font-bold text-slate-800'>{faq.question}</span>
+                                            {selectedFAQ === faq ? <MdKeyboardArrowUp size={24}/> : <MdKeyboardArrowDown size={24}/>}
                                         </div>
-                                    ))
-                                }
-                                </Fade>
+                                        {selectedFAQ === faq && (
+                                            <div className='px-5 pb-5 text-slate-600 animate-fade-in'>
+                                                {faq.answer}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
                             </div>
-                        </div>
-                    ) : null
-                }
+                        </section>
+                    )}
 
-                {
-                    similar_products && similar_products?.length > 0 && (
-                        <div className='mt-10'>
+                    {/* Similar Products */}
+                    {similar_products?.length > 0 && (
+                        <section className='pb-20'>
                             <SimilarProductsHorizontalSlider 
                                 list={similar_products}
-                                list_name='Similar items'
+                                list_name='People also viewed'
                             />
-                        </div>
-                    )
-                }
+                        </section>
+                    )}
+                </div>
+            </main>
+
+            {/* Mobile Sticky CTA */}
+            <div className='lg:hidden fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-slate-200 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] z-50'>
+                <div className='flex items-center justify-between gap-4'>
+                    <div>
+                        <p className='text-[10px] uppercase font-bold text-slate-400'>Total Price</p>
+                        <p className='text-xl font-black text-orange-600'>{formatAmount(product.open_order_price)}</p>
+                    </div>
+                    <button 
+                        onClick={() => addToCart(product)}
+                        className='bg-orange-600 text-white font-bold py-3 px-8 rounded-xl flex-1'
+                    >
+                        Join Train
+                    </button>
+                </div>
             </div>
         </div>
-  )
-}
+    );
+};
 
-export default openOrder
+export default openOrder;
 
 export async function getServerSideProps(context: any) {
     try{

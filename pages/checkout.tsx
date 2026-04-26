@@ -1,117 +1,85 @@
-import axios from "axios";
-import { useRouter } from "next/router";
 import { FC, useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import { toast } from 'react-toastify';
-import { injectStyle } from "react-toastify/dist/inject-style";
-import Header from "../Components/Header"
-import { sendAxiosRequest } from "../Utils/sendAxiosRequest";
+import Header from "../Components/Header";
 import { parse } from "cookie";
-import { MdOutlineRadioButtonChecked, MdOutlineRadioButtonUnchecked } from "react-icons/md";
+import { MdOutlineRadioButtonChecked, MdOutlineRadioButtonUnchecked, MdAddLocationAlt } from "react-icons/md";
 import { cartCheckoutAction } from "../requests/cart/cart.requests";
 import Cookies from "js-cookie";
 import { formatAmount } from "../Utils/formatAmount";
 import axiosInstance from "../Utils/axiosConfig";
 import NewAddressModal from "../Components/modals/address/NewAddressModal";
-import { RiCoupon2Line } from "react-icons/ri";
+import { RiCoupon2Line, RiTruckLine, RiSecurePaymentLine } from "react-icons/ri";
 import { couponValidateAction } from "../requests/coupons/coupons.requests";
-import { Loader2 } from "lucide-react";
-import { BiLoader } from "react-icons/bi";
+import { Loader2, ShoppingBag, TrainFront } from "lucide-react";
+import axios from "axios";
+import { sendAxiosRequest } from "../Utils/sendAxiosRequest";
 
 interface ICheckoutProps {
     user: any;
     addresses: any[];
 }
 
-const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
-    let cart: any;
+const Checkout: FC<ICheckoutProps> = ({ user, addresses }) => {
     const router = useRouter();
+    const [cart, setCart] = useState<any>({ products: [], subscriptions: [], bundles: [] });
     const [selectedAddress, setSelectedAddress] = useState<any>({});
     const [subTotal, setSubTotal] = useState<number>(0);
     const [isLoading, setIsLoading] = useState(false);
     const [showAddAddressModal, setShowAddAddressModal] = useState(false);
     const [couponCode, setCouponCode] = useState('');
     const [validatingCoupon, setValidatingCoupon] = useState(false);
-    const [totalAmount, setTotalAmount] = useState(0)
+    const [deliveryFee, setDeliveryFee] = useState<number>(0);
+    const [totalAmount, setTotalAmount] = useState(0);
+    const [deliverySummary, setDeliverySummary] = useState<any>({});
 
     let userCookie: any = {};
 
-    if(typeof window !== 'undefined'){
-        injectStyle();
-        cart = JSON.parse(localStorage.getItem('cart')!) ?? [];
-        userCookie = Cookies.get('user') ? JSON.parse(Cookies.get('user')!) : null; 
-    }
+    useEffect(() => {
+        const savedCart = JSON.parse(localStorage.getItem('cart') || '{"products":[], "subscriptions":[], "bundles":[]}');
+        setCart(savedCart);
+        
+        if (addresses.length > 0) {
+            const def = addresses.find(a => a.address_selected) || addresses[0];
+            setSelectedAddress(def);
+        }
+
+        if(typeof window !== 'undefined'){
+            userCookie = Cookies.get('user') ? JSON.parse(Cookies.get('user')!) : null; 
+        }
+    }, []);
 
     const prepareOrders = () => {
-        let orders: any[] = [];
-
-        cart?.products?.map((item: any)=>{
-            const order = {
-                pickup_state: item?.vendor?.vendor_state,
-                destination_state: selectedAddress?.state,
-
-                item_category: item?.product_categories?.length ? item?.product_categories[0] : 'other',
-                item_quantity: item?.quantity
-            };
-
-            orders?.push(order);
-        });
-
-        cart?.subscriptions?.map((item: any)=>{
-            const order = {
-                pickup_state: item?.vendor?.vendor_state,
-                destination_state: selectedAddress?.state,
-
-                item_category: item?.product?.product_categories?.length ? item?.product?.product_categories[0] : 'other',
-                item_quantity: item?.quantity
-            };
-
-            orders?.push(order);
-        });
-
-        cart?.bundles?.map((item: any)=>{
-            const order = {
-                pickup_state: item?.vendor?.vendor_state,
-                destination_state: selectedAddress?.state,
-
-                item_category: item?.product?.product_categories?.length ? item?.product?.product_categories[0] : 'other',
-                item_quantity: item?.quantity
-            };
-
-            orders?.push(order);
-        });
-
-        return orders;
-    }
-
-    const [deliveryFee, setDeliveryFee] = useState<number>(0);
-    const [deliverySummary, setDeliverySummary] = useState<number>(3000);
+        const items = [...(cart.products || []), ...(cart.subscriptions || []), ...(cart.bundles || [])];
+        return items.map((item: any) => ({
+            pickup_state: item?.vendor?.vendor_state,
+            destination_state: selectedAddress?.state,
+            item_category: item?.product_categories?.[0] || item?.product?.product_categories?.[0] || 'other',
+            item_quantity: item?.quantity || item?.order_count
+        }));
+    };
 
     const getDeliveryFee = async () => {
+        if (!selectedAddress?.state) return;
         setIsLoading(true);
-
-        const url = `${process.env.NEXT_PUBLIC_NIMBLE_API_BASEURL}/third-party/delivery/estimate-address`;
-        const orderData = prepareOrders();
-
-        const response = await axios({
-            method: 'post',
-            url,
-            data: {orders: orderData},
-            headers: {
-                'Content-Type': 'application/json',
+        try {
+            const url = `${process.env.NEXT_PUBLIC_NIMBLE_API_BASEURL}/third-party/delivery/estimate-address`;
+            const response = await axios.post(url, { orders: prepareOrders() });
+            if (response.status === 200) {
+                setDeliveryFee(response.data?.data?.total_sum);
+                setDeliverySummary(response.data?.data?.estimates);
             }
-        }).finally(()=>setIsLoading(false));
-
-        if(response.status === 200){
-            setDeliveryFee(response.data?.data?.total_sum);
-            setDeliverySummary(response.data?.data?.estimates);
+        } catch (e) {
+            toast.error("Could not calculate delivery fee");
+        } finally {
+            setIsLoading(false);
         }
-    }
+    };
 
     const vailidateCoupon = async () => {
         setValidatingCoupon(true);
         couponValidateAction(couponCode)
         .then(response => {
-            console.log({response})
             if(response.status === 200) {
                 const coupon = response?.data?.data;
                 setTotalAmount(totalAmount - coupon?.amount);
@@ -122,64 +90,39 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
             console.log({error})
             toast.error('Invalid coupon');
         })
-        .finally(()=>setValidatingCoupon(false))
+        .finally(()=>setValidatingCoupon(false));
     }
 
-    const checkOut = async () => {
-        if(addresses?.length !== 0 && !selectedAddress?.id) {
-            toast.error('Select an address');
-            return;
+    useEffect(() => {
+        if (selectedAddress?.id && cart.products?.length + cart.subscriptions?.length > 0) {
+            getDeliveryFee();
         }
-        else if(addresses?.length === 0) {
-            setShowAddAddressModal(true);
-            return;
-        }
+    }, [selectedAddress?.id, cart]);
+
+    useEffect(() => {
+        const pTotal = cart.products?.reduce((acc: number, item: any) => acc + item.price * item.quantity, 0) || 0;
+        const sTotal = cart.subscriptions?.reduce((acc: number, item: any) => acc + item.open_order_price * item.quantity, 0) || 0;
+        const bTotal = cart.bundles?.reduce((acc: number, item: any) => acc + item.product_price * item.order_count, 0) || 0;
+        
+        const sub = pTotal + sTotal + bTotal;
+        setSubTotal(sub);
+        setTotalAmount(sub + deliveryFee);
+    }, [deliveryFee, cart]);
+
+    const handleCheckout = async () => {
+        if (!selectedAddress?.id) return toast.error('Please select a delivery address');
         setIsLoading(true);
-
-        return cartCheckoutAction({
-            user_id: userCookie?.id,
-            address_id: selectedAddress.id
-        }).then((res) => {
+        try {
+            const userCookie = JSON.parse(Cookies.get('user') || '{}');
+            const res = await cartCheckoutAction({ user_id: userCookie?.id, address_id: selectedAddress.id });
             localStorage.removeItem("cart");
-            setIsLoading(false)
-            router.push(res.data.data.pay_stack_checkout_url)
-        })
-        .catch(error => {
+            router.push(res.data.data.pay_stack_checkout_url);
+        } catch (error: any) {
+            toast.error(error?.response?.data?.message || 'Checkout failed');
+        } finally {
             setIsLoading(false);
-            console.log({error})
-            toast.error(error?.response?.data?.message || 'Error! Try again later')
-        })
-    }
-
-    useEffect(() => {
-        if(selectedAddress?.id) getDeliveryFee();
-    }, [selectedAddress?.id]);
-
-    useEffect(() => {
-        let isMounted = true;
-
-        if(isMounted) {
-            
-            if(addresses.length > 1) {  
-                let defaultAddress = addresses.find((address) => {
-                    if(address.address_selected) return address;
-                })
-                if(defaultAddress) setSelectedAddress(defaultAddress);
-                else setSelectedAddress(addresses[0]);
-            }
-            else setSelectedAddress(addresses[0])
         }
-
-        return () => {isMounted = false}
-    }, [])
-
-    useEffect(() => {
-        const products_total: number = cart.products?.reduce((acc: number, item: any) => acc + item.product_price * item.quantity, 0);
-        const open_order_total: number = cart.subscriptions?.reduce((acc: number, item: any) => acc + item.open_order_price * item.quantity, 0);
-        const bundles_total: number = cart.bundles?.reduce((acc: number, item: any) => acc + item.product_price * item.order_count, 0);
-        setSubTotal(products_total + open_order_total + bundles_total);
-        setTotalAmount(deliveryFee + products_total + open_order_total + bundles_total);
-    }, [deliveryFee]);
+    };
 
     useEffect(() => {
         axiosInstance.post('/api/cart/update', {
@@ -196,209 +139,168 @@ const checkout: FC<ICheckoutProps> = ({user, addresses}) => {
         })
     }, []);
 
-  return (
-    <div className="bg-gray-200 min-h-screen flex flex-col relative">
-        <Header />
+    return (
+        <div className="bg-gray-50 min-h-screen pb-24 lg:pb-12">
+            <Header />
+            
+            {showAddAddressModal && (
+                <NewAddressModal setShow={() => setShowAddAddressModal(false)} redirect={() => router.reload()} />
+            )}
 
-        {
-            showAddAddressModal && <NewAddressModal
-                setShow={() => setShowAddAddressModal(false)}
-                redirect={() => router.push('/checkout')}
-            />
-        }
-        <div className="flex flex-col bg-white py-4 px-3 h-fit w-[90%] fixed bottom-0 left-[5%] right-[5%] shadow-md z-50 mb-4 lg:hidden">
-            <button
-                className="bg-orange-500 px-4 py-3 text-white rounded cursor-pointer text-lg"
-                onClick={checkOut}
-            >
-                {isLoading ? 'Loading...' : `Pay ${formatAmount(totalAmount)}`}
-            </button>
-        </div>
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+                <h1 className="text-2xl font-bold text-gray-900 mb-8">Checkout</h1>
 
-        <div 
-            className="w-full flex flex-col lg:flex-row mx-auto mt-12"
-        >
-            <div className="hidden lg:flex flex-col w-[90%] mx-auto lg:w-[67%] lg:mr-[2%] mb-4 bg-white rounded-md px-4 py-4">
-                <div className="flex flex-col">
-                    <h1
-                        className="text-xl text-orange-500 mb-4"
-                    >
-                        Checkout
-                    </h1>
-                </div>
-
-                <div className="flex flex-col w-[60%] justify-between">
-                    <p className="text-gray-700 text-lg font-medium opacity-40">Products</p>
-                    {
-                        cart?.products?.map((item: any, i: any) => (
-                            <div
-                                className="flex flex-col py-3 border-b border-gray-200"
-                                key={i}
-                            >
-                                <span
-                                    className="text-black text-base mb-2"
+                <div className="flex flex-col lg:flex-row gap-8">
+                    {/* Left Column: Details */}
+                    <div className="flex-1 space-y-6">
+                        
+                        {/* Section: Delivery Address */}
+                        <section className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <h2 className="text-lg font-semibold flex items-center gap-2">
+                                    <RiTruckLine className="text-orange-500" /> Delivery Address
+                                </h2>
+                                <button 
+                                    onClick={() => setShowAddAddressModal(true)}
+                                    className="text-sm font-medium text-orange-600 hover:text-orange-700 flex items-center gap-1"
                                 >
-                                    {item.product_name.toUpperCase()}
-                                </span>
-                                
-                                <div
-                                    className="flex flex-row items-center gap-4" 
-                                >
-                                    <p
-                                        className="text-gray-800 m-0"
-                                    >
-                                        {formatAmount(item.product_price)} x
-                                    </p>
-                                    <input
-                                        type="number"
-                                        className="w-[20%] py-1 px-2 text-center bg-gray-200 rounded-md"
-                                        disabled={true}
-                                        defaultValue={item.quantity}
-                                    />
-                                    <p
-                                        className="text-gray-800 mb-0"
-                                    >
-                                        = {formatAmount(item.product_price * (item.quantity))}
-                                    </p>
-                                </div>
+                                    <MdAddLocationAlt /> Add New
+                                </button>
                             </div>
-                        ))
-                    }
-                </div>
-
-                <div className="flex flex-col w-[60%] justify-between mt-4">
-                    <p className="text-gray-700 text-lg font-medium opacity-40">Order Train</p>
-                    {
-                        cart?.subscriptions?.map((item: any, i: any) => (
-                            <div
-                                className="flex flex-col py-3 border-b border-gray-200"
-                                key={i}
-                            >
-                                <span
-                                    className="text-black text-base mb-2"
-                                >
-                                    {item.product.product_name.toUpperCase()}
-                                </span>
-                                
-                                <div
-                                    className="flex flex-row items-center gap-4" 
-                                >
-                                    <p
-                                        className="text-gray-800 m-0"
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {addresses.map((addr) => (
+                                    <div 
+                                        key={addr.id}
+                                        onClick={() => setSelectedAddress(addr)}
+                                        className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                                            selectedAddress?.id === addr?.id 
+                                            ? 'border-orange-500 bg-orange-50/30' 
+                                            : 'border-gray-100 hover:border-gray-200'
+                                        }`}
                                     >
-                                        {formatAmount(item.open_order_price)} x
-                                    </p>
-                                    <input
-                                        type="number"
-                                        className="w-[20%] py-1 px-2 text-center bg-gray-200 rounded-md"
-                                        defaultValue={item.quantity }
-                                        disabled={true}
-                                    />
-                                    <p
-                                        className="text-gray-800 mb-0"
-                                    >
-                                        = {formatAmount(item.open_order_price * (item.quantity ))}
-                                    </p>
-                                </div>
+                                        <div className="flex justify-between items-start mb-2">
+                                            <span className="text-xs font-bold uppercase tracking-wider text-gray-400">{addr.title}</span>
+                                            {selectedAddress?.id === addr?.id ? <MdOutlineRadioButtonChecked className="text-orange-500" /> : <MdOutlineRadioButtonUnchecked className="text-gray-300" />}
+                                        </div>
+                                        <p className="font-semibold text-gray-800">{addr.name || user?.name}</p>
+                                        <p className="text-sm text-gray-500 leading-relaxed">{addr.address}</p>
+                                    </div>
+                                ))}
                             </div>
-                        ))
-                    }
-                </div>
-            </div>
+                        </section>
 
-            <div className="flex flex-col w-[90%] mx-auto lg:w-[30%]">
-                <div className="flex flex-col gap-4 bg-white py-4 px-3 h-fit mb-4 rounded-md">
-                    <h3 className="lg:text-center text-lg mb-0">Proceed to payment</h3>
-                    <div className="p-3 border border-blue-600 rounded-md relative flex flex-row justify-between items-center gap-4">
-                        <p>Deliver fee:</p> 
-                        <div className="flex flex-row gap-1 items-center">
-                            {
-                                isLoading && (
-                                    <Loader2 className="h-4 w-4 text-orange-600 animate-spin" />
-                                )
-                            }
-                            <p className="font-semibold text-blue-600 !mb-0">{formatAmount(deliveryFee)}</p>
-                        </div>
-                        <a
-                            href="#0"
-                            target="_blank"
-                            className="absolute bottom-[2px] center-absolute-el text-xs"
-                        >
-                            Powered by <span className="text-blue-600 italic font-medium">Nimle logistics</span>
-                        </a>
-                    </div>
-                   
-                    <div className='flex flex-row gap-2 items-center'>
-                        <div className="flex flex-row gap-2 items-center py-2 px-4 border-gray-200 border rounded-md w-full">
-                            <RiCoupon2Line className="text-lg text-gray-500" />
-                            <input className="bg-transparent border-0 outline-none" placeholder="Enter coupon code here" onChange={(e)=>setCouponCode(e.target.value)}/>
-                        </div>
-                        <button 
-                            className={`border-0 font-semibold w-fit ${couponCode ? 'text-orange-600' : 'text-gray-400'}`} 
-                            onClick={vailidateCoupon}
-                            disabled={validatingCoupon}
-                        >
-                            {validatingCoupon ? 'Validatin...' : 'Apply'}
-                        </button>
+                        {/* Section: Cart Items */}
+                        <section className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                            <div className="p-6 border-b border-gray-50">
+                                <h2 className="text-lg font-semibold flex items-center gap-2">
+                                    <ShoppingBag className="text-orange-500" size={20} /> Order Summary
+                                </h2>
+                            </div>
+                            <div className="divide-y divide-gray-50">
+                                {cart.products?.map((item: any, i: number) => (
+                                    <div key={i} className="p-6 flex items-center gap-4">
+                                        <div className="h-16 w-16 bg-gray-100 rounded-md flex-shrink-0" />
+                                        <div className="flex-1">
+                                            <h4 className="font-medium text-gray-900 text-sm uppercase">{item.product_name}</h4>
+                                            <p className="text-gray-500 text-sm">Qty: {item.quantity}</p>
+                                        </div>
+                                        <p className="font-semibold text-gray-900">{formatAmount(item.price * item.quantity)}</p>
+                                    </div>
+                                ))}
+                                {cart.subscriptions?.map((item: any, i: number) => (
+                                    <div key={i} className="p-6 flex items-center gap-4 bg-orange-50/20">
+                                        <div className="h-16 w-16 bg-orange-100 rounded-md flex items-center justify-center text-orange-600">
+                                            <TrainFront size={24} />
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2">
+                                                <h4 className="font-medium text-gray-900 text-sm uppercase">{item.product?.product_name}</h4>
+                                                <span className="text-[10px] bg-orange-500 text-white px-2 py-0.5 rounded-full font-bold">TRAIN</span>
+                                            </div>
+                                            <p className="text-gray-500 text-sm">Qty: {item.quantity}</p>
+                                        </div>
+                                        <p className="font-semibold text-gray-900">{formatAmount(item.open_order_price * item.quantity)}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
                     </div>
 
-                    <div className="hidden lg:flex flex-row justify-between items-center gap-4 text-lg font-semibold">
-                        <p className="!mb-0">
-                            Total:
-                        </p>
-                        <p className="text-orange-500 !mb-0">
-                            {formatAmount(totalAmount) ? formatAmount(totalAmount) : 0}
-                        </p>
-                    </div>
-
-                    <button 
-                        onClick={() => checkOut()}
-                        disabled={isLoading}
-                        className="hidden lg:flex lg:justify-center text-center font-medium text-[#0ba4db] cursor-pointer border-2 border-[#0ba4db] rounded-md py-2"
-                    >
-                        {isLoading ? 'Loading...' : `Pay with PayStack`}
-                    </button>
-                </div>
-
-                <div className="flex flex-col bg-white px-2 rounded-md gap-4 py-3">
-                    <h4 className="font-semibold my-2 text-sm">Delivery Address</h4>
-                    {
-                        addresses && addresses.length > 0 ? addresses?.map((address) => (
-                            <div className="flex flex-col" key={address.id}>
-                                <div className="flex flex-row gap-1">
-                                    {
-                                        selectedAddress?.id === address?.id ?
-                                        <MdOutlineRadioButtonChecked 
-                                            className="text-base mt-1 cursor-pointer" 
-                                        /> : 
-                                        <MdOutlineRadioButtonUnchecked
-                                            className="text-base mt-1 cursor-pointer"
-                                            onClick={() => setSelectedAddress(address)}
+                    {/* Right Column: Payment Summary (Sticky) */}
+                    <div className="lg:w-[380px]">
+                        <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 sticky top-24">
+                            <h3 className="text-xl font-bold text-gray-900 mb-6">Payment Details</h3>
+                            
+                            <div className="space-y-4 mb-6">
+                                <div className="flex justify-between text-gray-600">
+                                    <span>Subtotal</span>
+                                    <span>{formatAmount(subTotal)}</span>
+                                </div>
+                                <div className="flex justify-between items-center text-gray-600">
+                                    <span className="flex items-center gap-1">Delivery Fee <RiTruckLine className="text-xs" /></span>
+                                    {isLoading ? <Loader2 className="h-4 w-4 animate-spin text-orange-500" /> : <span>{formatAmount(deliveryFee)}</span>}
+                                </div>
+                                
+                                {/* Coupon Input */}
+                                <div className="flex gap-2 py-2">
+                                    <div className="flex-1 flex items-center gap-2 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg">
+                                        <RiCoupon2Line className="text-gray-400" />
+                                        <input 
+                                            className="bg-transparent text-sm w-full outline-none" 
+                                            placeholder="Coupon Code" 
+                                            onChange={(e) => setCouponCode(e.target.value)}
                                         />
-                                    }
-                                    <p className="font-medium capitalize">
-                                        {address.title}
-                                        {address.name && <span className="text-gray-600 text-sm ml-1">/{address.name}</span>}
-                                    </p>
+                                    </div>
+                                    <button 
+                                        disabled={!couponCode || validatingCoupon}
+                                        onClick={vailidateCoupon}
+                                        className="text-sm font-bold text-orange-600 disabled:opacity-30"
+                                    >
+                                        {validatingCoupon ? '...' : 'Apply'}
+                                    </button>
                                 </div>
-                                <p className="text-sm">{address.address}</p>
+
+                                <div className="pt-4 border-t border-gray-100 flex justify-between items-center">
+                                    <span className="text-lg font-bold text-gray-900">Total</span>
+                                    <span className="text-2xl font-black text-orange-600">{formatAmount(totalAmount)}</span>
+                                </div>
                             </div>
-                        )) :
-                        <p 
-                            className="text-orange-400 cursor-pointer"
-                            onClick={() => setShowAddAddressModal(!showAddAddressModal)}
-                        >
-                            Add an Address
-                        </p>
-                    }
+
+                            <button 
+                                onClick={handleCheckout}
+                                disabled={isLoading}
+                                className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-orange-100 transition-all flex items-center justify-center gap-2"
+                            >
+                                {isLoading ? <Loader2 className="animate-spin" /> : <><RiSecurePaymentLine size={20} /> Pay Now</>}
+                            </button>
+
+                            <div className="mt-6 flex flex-col items-center gap-2">
+                                <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Secure Delivery By</p>
+                                <div className="flex items-center gap-2 grayscale opacity-60">
+                                    <span className="text-blue-600 font-bold italic text-sm">Nimble Logistics</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+            </main>
+
+            {/* Mobile Sticky Button */}
+            <div className="lg:hidden fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-100 shadow-[0_-10px_20px_rgba(0,0,0,0.05)] z-50">
+                <button 
+                    onClick={handleCheckout}
+                    className="w-full bg-orange-600 text-white font-bold py-4 rounded-xl flex justify-between px-6 items-center"
+                >
+                    <span>{isLoading ? 'Processing...' : 'Complete Order'}</span>
+                    <span className="text-lg">{formatAmount(totalAmount)}</span>
+                </button>
             </div>
         </div>
-    </div>
-  )
-}
+    );
+};
 
-export default checkout
+export default Checkout;
 
 export async function getServerSideProps(context: any) {
     const cookies = parse(context.req.headers.cookie || ''); 
@@ -435,5 +337,4 @@ export async function getServerSideProps(context: any) {
             }
         }
     }
-
 }

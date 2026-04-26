@@ -1,77 +1,112 @@
-import ExploreItemCard from "../../../Components/cards/ExploreItemCard";
-import ExploreRevewCard from "../../../Components/cards/ExploreRevewCard";
-import ExploreTrainCard from "../../../Components/cards/ExploreTrainCard";
-import ExploreUserCard from "../../../Components/cards/ExploreUserCard";
-import ExploreVendorCard from "../../../Components/cards/ExploreVendorCard";
+import { Search } from 'lucide-react';
+import ExploreItemCard from '../../../Components/cards/ExploreItemCard';
+import ExploreTrainCard from '../../../Components/cards/ExploreTrainCard';
+import ExploreVendorCard from '../../../Components/cards/ExploreVendorCard';
+import ExploreReviewCard from '../../../Components/cards/ExploreRevewCard';
 
 interface ITopResultsTabProps {
-    search_string: string;
-    vendors: any[];
-    products: any[];
-    orders: any[];
-    reviews: any[];
+  search_string: string;
+  vendors: any[];
+  products: any[];
+  orders: any[];
+  reviews: any[];
 }
 
-const TopResultsTab = ({search_string, vendors, products, orders, reviews}: ITopResultsTabProps) => {
-    const mergedAndShuffledArray = [...vendors, ...products, ...orders, ...reviews]
-    .map(item => ({
-        ...item,
-        type: item.vendor_name ? 'vendor' : item.product_images?.length ? 'product' : item.open_order_price ? 'order' : 'review'
-    }))
-    .sort(() => Math.random() - 0.5);
+type ResultItem = {
+  type: 'vendor' | 'product' | 'order' | 'review';
+  [key: string]: any;
+};
 
+const TopResultsTab = ({
+  search_string,
+  vendors,
+  products,
+  orders,
+  reviews,
+}: ITopResultsTabProps) => {
+  const merged: ResultItem[] = [
+    ...orders.map((o) => ({ ...o, type: 'order' as const })),
+    ...products.map((p) => ({ ...p, type: 'product' as const })),
+    ...vendors.map((v) => ({ ...v, type: 'vendor' as const })),
+    ...reviews.map((r) => ({ ...r, type: 'review' as const })),
+  ].sort(() => Math.random() - 0.5);
+
+  if (merged.length === 0) {
     return (
-        <div className="flex flex-col gap-6 w-full">
-            {
-                mergedAndShuffledArray?.length > 0 ? mergedAndShuffledArray?.map((object) => (
-                    object?.type === 'product' ?
-                        <ExploreItemCard
-                            key={object?.id}
-                            id={object?.id}
-                            name={object?.product_name}
-                            message={object?.product_description}
-                            banner_image={object?.vendor?.user?.picture}
-                            images={object?.product_images}
-                        /> : 
-                    object?.type === 'order' ? 
-                        <ExploreTrainCard
-                            key={object?.id}
-                            id={object?.id}
-                            name={object?.product?.product_name}
-                            username={object?.community?.title ?? object?.creator?.name}
-                            message={object?.product?.product_description}
-                            banner_image={object?.community?.banner_image ?? object?.creator?.picture}
-                            images={object?.product?.product_images}
-                        /> :
-                    object?.type === 'review' ? 
-                        <ExploreRevewCard
-                            key={object?.id}
-                            name={object?.user?.name}
-                            message={object?.comment}
-                            banner_image={object?.user?.picture}
-                            images={object?.images}
-                            product={object?.product}
-                        /> :
-                    object?.type === 'vendor' ? 
-                        <ExploreVendorCard
-                            id={object.id}
-                            name={object?.vendor_name}
-                            username={`${object?.vendor_city} - ${object?.vendor_state}`}
-                            image={object?.user?.picture}
-                        /> :
-                    null
-                )) : 
-                <div className="flex flex-col justify-center px-4 gap-4">
-                    <h3 className="text-2xl font-bold text-slate-600">
-                        No results for "#{search_string}"
-                    </h3>
-                    <p className="text-xs font-medium text-gray-500">
-                        Try searching for something else
-                    </p>
-                </div>
-            }
+      <div className="flex flex-col items-center justify-center py-24 gap-4">
+        <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center">
+          <Search className="w-8 h-8 text-slate-300" />
         </div>
-    )
-}
+        <div className="text-center">
+          <p className="text-base font-semibold text-slate-600">
+            No results for &ldquo;{search_string}&rdquo;
+          </p>
+          <p className="text-sm text-slate-400 mt-1">
+            Try a different keyword or check your spelling
+          </p>
+        </div>
+      </div>
+    );
+  }
 
-export default TopResultsTab
+  return (
+    <div className="flex flex-col gap-3">
+      {merged.map((object, index) => {
+        if (object.type === 'product') {
+          return (
+            <ExploreItemCard
+              key={`${object.id}-${index}`}
+              id={object.id}
+              name={object.product_name}
+              message={object.product_description}
+              banner_image={object.vendor?.user?.picture}
+              images={object.product_images}
+            />
+          );
+        }
+        if (object.type === 'order') {
+          return (
+            <ExploreTrainCard
+              key={`${object.id}-${index}`}
+              id={object.id}
+              name={object.product?.product_name}
+              username={object.community?.title ?? object.creator?.name ?? ''}
+              message={object.product?.product_description}
+              banner_image={object.community?.banner_image ?? object.creator?.picture}
+              images={object.product?.product_images}
+              subscribers_count={object.subscribers_count}
+              discount={object.open_order_discount}
+            />
+          );
+        }
+        if (object.type === 'review') {
+          return (
+            <ExploreReviewCard
+              key={`${object.id}-${index}`}
+              name={object.user?.name}
+              message={object.comment}
+              banner_image={object.user?.picture}
+              images={object.images}
+              product={object.product}
+              score={object.score}
+            />
+          );
+        }
+        if (object.type === 'vendor') {
+          return (
+            <ExploreVendorCard
+              key={`${object.id}-${index}`}
+              id={object.id}
+              name={object.vendor_name}
+              username={`${object.vendor_city ?? ''} ${object.vendor_city && object.vendor_state ? '·' : ''} ${object.vendor_state ?? ''}`}
+              image={object.user?.picture}
+            />
+          );
+        }
+        return null;
+      })}
+    </div>
+  );
+};
+
+export default TopResultsTab;

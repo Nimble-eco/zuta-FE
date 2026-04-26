@@ -6,7 +6,6 @@ import MyNumberInput from "../../../../Components/inputs/MyNumberInput";
 import MyDropDownInput from "../../../../Components/inputs/MyDropDownInput";
 import VendorSideNavPanel from "../../../../Components/vendor/layout/VendorSideNavPanel";
 import FilterAndSearchGroup from "../../../../Components/inputs/FilterAndSearchGroup";
-import ButtonGhost from "../../../../Components/buttons/ButtonGhost";
 import MyTable from "../../../../Components/tables/MyTable";
 import { parse } from "cookie";
 import axiosInstance from "../../../../Utils/axiosConfig";
@@ -16,6 +15,7 @@ import Cookies from "js-cookie";
 import { formatAmount } from "../../../../Utils/formatAmount";
 import { filterOrderTrainByVendorAction, searchOrderTrainByVendorAction } from "../../../../requests/orderTrain/orderTrain.request";
 import VendorNavBar from "../../../../Components/vendor/layout/VendorNavBar";
+import { Train, Users, Activity, Download } from "lucide-react";
 
 interface IOrdersIndexPageProps {
     orders: any;
@@ -157,9 +157,100 @@ const index = ({orders}: IOrdersIndexPageProps) => {
         }
     }
 
-  return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
-        {
+    return (
+        <div className="min-h-screen bg-slate-50 flex flex-row">
+          <VendorSideNavPanel />
+    
+          <main className="flex-1 lg:ml-64 flex flex-col min-h-screen">
+            <VendorNavBar />
+    
+            <div className="p-4 lg:p-8 space-y-6">
+              {/* Page Header */}
+              <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                    <Train className="text-blue-600" />
+                    Order Trains
+                  </h1>
+                  <p className="text-slate-500 text-sm">Monitor group orders and track subscriber milestones.</p>
+                </div>
+                <button 
+                  onClick={() => {/* CSV Export */}}
+                  className="flex items-center justify-center gap-2 bg-white border border-slate-200 text-slate-700 px-4 py-2 rounded-xl font-semibold hover:bg-slate-50 transition-shadow shadow-sm"
+                >
+                  <Download size={18} />
+                  <span>Export Report</span>
+                </button>
+              </header>
+    
+              {/* Train Metrics */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="p-2 bg-blue-50 text-blue-600 rounded-lg"><Activity size={20}/></div>
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Trains</span>
+                  </div>
+                  <p className="text-2xl font-black text-slate-800">{ordersData?.meta?.total || 0}</p>
+                </div>
+                
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg"><Users size={20}/></div>
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Subscribers</span>
+                  </div>
+                  <p className="text-2xl font-black text-slate-800">
+                    {ordersData?.data?.reduce((acc: any, curr: any) => acc + (curr.subscribers_count || 0), 0)}
+                  </p>
+                </div>
+    
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="p-2 bg-orange-50 text-orange-600 rounded-lg"><Train size={20}/></div>
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Open for Joining</span>
+                  </div>
+                  <p className="text-2xl font-black text-slate-800">
+                    {ordersData?.data?.filter((o:any) => o.status === 'open').length || 0}
+                  </p>
+                </div>
+              </div>
+    
+                {/* Toolbar */}
+                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                    <FilterAndSearchGroup 
+                        searchInputPlaceHolder="Search trains by product name..."
+                        onSearch={searchOrders}
+                        onFilterButtonClick={() => setShowFilterInput(!showFilterInput)}
+                        isSearching={loading}
+                    />
+                </div>
+    
+              {/* Table Container */}
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <MyTable
+                    isLoading={loading}
+                    headings={['product_name', 'price', 'quantity', 'subscribers', 'order_paid', 'status']}
+                    content={ordersData?.data?.map((order: any) => ({
+                        ...order,
+                        price: formatAmount(order.open_order_price),
+                        quantity: order.order_count,
+                        subscribers: order.subscribers_count,
+                        order_paid: order.order_paid ? 'Paid' : 'not paid'
+                    }))} 
+                    onRowButtonClick={(order: any) => router.push('order-train/show?id='+ order.id)}
+                />
+                
+                <div className="p-3 bg-slate-50/50 border-t border-slate-100">
+                    <PaginationBar 
+                        paginator={ordersData?.meta}
+                        paginateData={paginateData}
+                    />
+                </div>
+              </div>
+            </div>
+          </main>
+    
+          {/* Filter Overlay */}
+          {
             showFilterInput && <FilterContainer 
                 show={showFilterInput}
                 setShow={() => setShowFilterInput(!showFilterInput)}
@@ -225,66 +316,8 @@ const index = ({orders}: IOrdersIndexPageProps) => {
                 ]}
             />
         }
-        <div className="flex flex-row w-full mx-auto relative">
-            <VendorSideNavPanel />
-            <div className="flex flex-col w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%]">
-                <VendorNavBar />
-                <div className="flex flex-col gap-2 bg-white px-4 rounded-t-md pt-4">
-                    <h2 className="text-2xl font-bold text-slate-700 mb-4">Order Train</h2>
-                    {/* <div className="flex flex-row text-sm font-semibold !text-gray-400">
-                        <a href="#0" className="hover:!text-orange-500 mr-3">
-                            Completed
-                        </a>
-                        <a href="#0" className="hover:!text-orange-500 mr-3">
-                            Pending
-                        </a>
-                        <a href="#0" className="hover:!text-orange-500 mr-3">
-                            Cancelled
-                        </a>
-                        <a href="#0" className="hover:!text-orange-500 mr-3">
-                            Rejected
-                        </a>
-                    </div> */}
-                </div>
-
-                <div className="flex flex-row py-3 px-4 relative bg-white justify-between">
-                    <div className="w-[full]">
-                        <FilterAndSearchGroup 
-                            searchInputPlaceHolder="Search name, price, category"
-                            onSearch={searchOrders}
-                            onFilterButtonClick={() => setShowFilterInput(!showFilterInput)}
-                            isSearching={loading}
-                        />
-                    </div>
-                    <div className="w-fit">
-                        <ButtonGhost 
-                            action="Download CSV"
-                            onClick={() => {}}
-                        />
-                    </div>
-                </div>
-                {/* PRODUCTS TABLE */}
-                <div className="flex flex-col pb-8 bg-white text-gray-700">
-                    <MyTable
-                        headings={['product_name', 'price', 'quantity', 'subscribers', 'order_paid', 'status']}
-                        content={ordersData?.data?.map((order: any) => ({
-                            ...order,
-                            price: formatAmount(order.open_order_price),
-                            quantity: order.order_count,
-                            subscribers: order.subscribers_count,
-                            order_paid: order.order_paid ? 'Paid' : 'not paid'
-                        }))} 
-                        onRowButtonClick={(order: any) => router.push('order-train/show?id='+ order.id)}
-                    />
-                    <PaginationBar 
-                        paginator={ordersData?.meta}
-                        paginateData={paginateData}
-                    />
-                </div>
-            </div>
         </div>
-    </div>
-  )
+    );
 }
 
 export default index

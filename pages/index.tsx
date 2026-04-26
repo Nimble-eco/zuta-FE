@@ -1,14 +1,16 @@
 import { useRouter } from 'next/router';
-import {MdArrowForward} from 'react-icons/md'
+import { ArrowRightCircle } from 'lucide-react';
 import CategoryCard from '../Components/cards/CategoryCard';
 import OpenOrderProductCard from '../Components/cards/OpenOrderProductCard';
 import Header from '../Components/Header';
 import ProductComponent from '../Components/ProductComponent';
 import SwiperSlider from '../Components/sliders/Swiper';
+import HorizontalSlider from '../Components/lists/HorizontalSlider';
+import SocialProofBar from '../Components/SocialProofBar';
+import VendorCTABanner from '../Components/VendorCTABanner';
+import BottomNav from '../Components/navigation/BottomNav';
 import { sendAxiosRequest } from '../Utils/sendAxiosRequest';
 import { cataloguesDummyData } from '../data/catalogues';
-import HorizontalSlider from '../Components/lists/HorizontalSlider';
-import { ArrowRightCircle } from 'lucide-react';
 
 interface IHomePageProps {
   products: any[];
@@ -19,237 +21,220 @@ interface IHomePageProps {
   catalogues: any[];
 }
 
-const Home = ({products, openOrders, categories, tags, featured, catalogues}: IHomePageProps) => {
+/* ─── Trust pills shown in hero ─────────────────────────────────────────── */
+const TRUST_PILLS = [
+  { label: 'Wholesale prices', icon: '✓' },
+  { label: 'Price protection', icon: '↑' },
+  { label: 'Group buying', icon: '⚡' },
+];
+
+/* ─── Section wrapper ────────────────────────────────────────────────────── */
+const SectionHeader = ({
+  title,
+  onMore,
+  moreLabel = 'See all',
+}: {
+  title: string;
+  onMore?: () => void;
+  moreLabel?: string;
+}) => (
+  <div className="flex items-center justify-between mb-4">
+    <h2 className="text-base font-semibold text-slate-800">{title}</h2>
+    {onMore && (
+      <button
+        onClick={onMore}
+        className="flex items-center gap-1 text-orange-500 text-sm font-medium hover:text-orange-600 transition-colors"
+      >
+        {moreLabel}
+        <ArrowRightCircle className="w-4 h-4" />
+      </button>
+    )}
+  </div>
+);
+
+/* ─── Page ───────────────────────────────────────────────────────────────── */
+const Home = ({ products, openOrders, categories, tags, featured, catalogues }: IHomePageProps) => {
   const router = useRouter();
 
-  const searchProducts = (searchStr: string) => {
-    router.push(`/results?search=${searchStr}`)
-  }
+  const searchProducts = (searchStr: string) => router.push(`/results?search=${searchStr}`);
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden">
-      <Header onSearch={searchProducts}/>
+    <div className="min-h-screen w-full overflow-x-hidden bg-slate-50 pb-20 md:pb-0">
+      <Header onSearch={searchProducts} />
 
-      <div
-        className='flex flex-col justify-center w-full lg:w-[90%] md:w-[80%] mx-auto px-5 lg:px-0 py-4'
-      >
-        <div className='flex flex-col text-left'>
-          <h2 className='text-2xl md:text-4xl text-gray-600 font-bold w-full lg:w-[80%] mb-4'>
-            Let us buy {''}
-            <span className='text-orange-500'>
-              Together
-            </span>  
-          </h2>
-          <div className='flex flex-col text-base justify-start w-full lg:w-[80%] font-mono font-semibold text-left text-gray-500'>
-            <p className='pb-1 !mb-0'>
-              Enjoy Wholesale prices
-            </p>
-            <p>
-              Get your money back if the discount goes up
-            </p>
-          </div>
-            
+      {/* ── HERO ──────────────────────────────────────────────────────────── */}
+      <section className="bg-white px-4 pt-5 pb-6 border-b border-slate-100">
+        {/* Headline */}
+        <div className="mb-4">
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-800 leading-tight mb-2">
+            Buy together,{' '}
+            <span className="text-orange-500">Save More</span>
+          </h1>
+          <p className="text-sm text-slate-500 leading-relaxed max-w-md">
+            Join group orders and unlock wholesale prices. Get refunded automatically if the discount grows after you join.
+          </p>
         </div>
-      
-        <div className='lg:h-[50vh] my-10 w-full mx-auto'>
-          <SwiperSlider 
+
+        {/* Trust pills */}
+        <div className="flex flex-wrap gap-2 mb-5">
+          {TRUST_PILLS.map((pill) => (
+            <span
+              key={pill.label}
+              className="inline-flex items-center gap-1 text-xs font-medium text-orange-700 bg-orange-50 border border-orange-100 px-3 py-1 rounded-full"
+            >
+              <span>{pill.icon}</span>
+              {pill.label}
+            </span>
+          ))}
+        </div>
+
+        {/* Banner slider */}
+        <div className="h-44 md:h-56 w-full rounded-2xl overflow-hidden">
+          <SwiperSlider
             slides={cataloguesDummyData}
-            // slides={catalogues?.map(catalogue => catalogue.image)}
+            // slides={catalogues?.map(c => c.image)}
             slidesToShow={2}
             imageUrlSrc={false}
           />
         </div>
-      </div>
+      </section>
 
-      <div className="flex flex-col gap-2 justify-between w-full lg:px-[5%] py-8 bg-gray-100 mb-16">
-        <div className="hidden lg:flex lg:flex-row gap-4">
-          {
-            categories.length > 0 && categories?.slice(0,8).map((category: any, index: number) => (
-              <CategoryCard 
-                key={`${category.name} ${index}`}
-                image={category?.image}
-                title={category.name}
-              />
-            ))
-          }
-          <a
-            href='/departments'
-            className='my-auto flex flex-row gap-1 items-center'
-          >
-            <p className='text-orange-600 text-sm whitespace-nowrap'>See more</p>
-            <ArrowRightCircle className='text-xl text-orange-600' />
-          </a>
-        </div>
-
-        <div className="grid grid-cols-3 gap-3 md:grid-cols-3 lg:hidden px-5 max-w-full">
-          {
-            categories.length > 0 && categories?.slice(0, 8).map((category: any, index: number) => (
-              <CategoryCard 
-                key={`${category.name} ${index}`}
-                image={category?.image}
-                title={category.name}
-              />
-            ))
-          }
-        </div>
-      </div>
-      
-      <div className='flex flex-col gap-4 w-full lg:w-[90%] mx-auto px-4'>
-        <div className='text-2xl mb-4 flex flex-row justify-between items-center'>
-          <h2 className='font-semibold text-slate-800 text-xl'>Join Order Trains</h2>
-          <a href='/order-train' className="flex flex-row gap-2 items-center text-base font-medium">
-            <p className='text-orange-600 mb-0'>More</p>
-            <ArrowRightCircle className='text-3xl text-orange-600' />
-          </a>
-        </div>
-
-        <div className='flex flex-col md:grid md:grid-cols-2 md:gap-6 lg:grid-cols-3 lg:gap-4 xl:grid-cols-4 xl:gap-6'>
-          {
-            openOrders.length > 0 && openOrders?.slice(0,8).map((order:any, index: number) => (
-              <OpenOrderProductCard
-                key={`${order.name} + ${index}`}
-                order={order} 
-              />
-            ))
-          }
-        </div>
-      </div>
-
-      <div className='mb-4 px-4 w-full lg:w-[90%] mx-auto'>
-        <HorizontalSlider
-          list_name='Showcase'
-          list={featured}
+      {/* ── CATEGORIES ────────────────────────────────────────────────────── */}
+      <section className="bg-white px-4 py-5 mt-2 border-b border-slate-100">
+        <SectionHeader
+          title="Shop by category"
+          onMore={() => router.push('/departments')}
         />
-      </div>
-      
-      <div className='flex flex-col gap-10 py-8 bg-gray-100 w-full lg:px-[5%]'>
-        <div className='flex flex-col gap-2 w-full'>
-          <div className='hidden lg:flex lg:flex-row gap-4'>
-            {
-              tags.length > 0 && tags?.slice(0,8).map((tag: any, index: number) => (
-                <CategoryCard 
-                  key={`${tag.name} ${index}`}
-                  image={tag?.image}
-                  title={tag.name}
-                />
-              ))
-            }
-            <a
-              href='/departments'
-              className='my-auto flex flex-row gap-1 items-center'
-            >
-              <p className='text-orange-600 text-sm whitespace-nowrap'>See more</p>
-              <ArrowRightCircle className='text-xl text-orange-600' />
-            </a>
-          </div>
 
-          <div className='grid grid-cols-3 gap-2 md:grid-cols-4 lg:hidden px-5'>
-            {
-              tags.length > 0 && tags?.slice(0, 8).map((tag: any, index: number) => (
-                <CategoryCard 
-                  key={`${tag.name} ${index}`}
-                  image={tag?.image}
-                  title={tag.name}
-                />
-              ))
-            }
+        {/* Desktop: single row */}
+        <div className="hidden lg:flex flex-row items-center gap-3 overflow-x-auto pb-1">
+          {categories.slice(0, 8).map((category: any, index: number) => (
+            <div key={`cat-d-${index}`} className="min-w-[90px]">
+              <CategoryCard image={category?.image} title={category.name} />
+            </div>
+          ))}
+        </div>
+
+        {/* Mobile / tablet: 4-col grid */}
+        <div className="grid grid-cols-4 md:grid-cols-8 gap-3 lg:hidden">
+          {categories.slice(0, 8).map((category: any, index: number) => (
+            <CategoryCard
+              key={`cat-m-${index}`}
+              image={category?.image}
+              title={category.name}
+            />
+          ))}
+        </div>
+      </section>
+
+      {/* ── ORDER TRAINS ──────────────────────────────────────────────────── */}
+      <section className="px-4 py-5 mt-2 bg-white border-b border-slate-100">
+        <SectionHeader
+          title="🚂 Join order trains"
+          onMore={() => router.push('/order-train')}
+          moreLabel="More"
+        />
+
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          {openOrders.slice(0, 8).map((order: any, index: number) => (
+            <OpenOrderProductCard
+              key={`order-${order.id ?? index}`}
+              order={order}
+            />
+          ))}
+        </div>
+      </section>
+
+      {/* ── SOCIAL PROOF ──────────────────────────────────────────────────── */}
+      <SocialProofBar />
+
+      {/* ── FEATURED / SHOWCASE ───────────────────────────────────────────── */}
+      <section className="bg-white px-4 py-5 mt-2 border-b border-slate-100">
+        <HorizontalSlider list_name="✨ Featured picks" list={featured} />
+      </section>
+
+      {/* ── TAGS ──────────────────────────────────────────────────────────── */}
+      {tags.length > 0 && (
+        <section className="bg-white px-4 py-5 mt-2 border-b border-slate-100">
+          <SectionHeader title="Trending now" onMore={() => router.push('/departments')} />
+
+          {/* Horizontal scrollable chips */}
+          <div className="flex flex-row gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            {tags.slice(0, 10).map((tag: any, index: number) => (
+              <button
+                key={`tag-${index}`}
+                onClick={() => router.push(`/results?tag=${encodeURIComponent(tag.name)}`)}
+                className="flex items-center gap-1.5 shrink-0 px-3 py-2 bg-slate-50 hover:bg-orange-50 border border-slate-100 hover:border-orange-300 text-slate-600 hover:text-orange-600 text-xs font-medium rounded-full transition-all duration-200"
+              >
+                {tag?.image && (
+                  <img src={tag.image} alt="" className="w-4 h-4 rounded-full object-cover" />
+                )}
+                {tag.name}
+              </button>
+            ))}
           </div>
+        </section>
+      )}
+
+      {/* ── ALL PRODUCTS ──────────────────────────────────────────────────── */}
+      <section className="px-4 py-5 mt-2 bg-white">
+        <SectionHeader title="All products" />
+
+        <div className="flex flex-col md:grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+          {products.map((product: any, index: number) => (
+            <ProductComponent
+              key={`prod-${product.id ?? index}`}
+              product={product}
+            />
+          ))}
         </div>
-          
-        <div className='flex flex-col md:grid md:grid-cols-2 gap-4 lg:grid-cols-3 lg:gap-6 px-4 lg:px-0'>
-          {
-            products.length > 0 && products?.map((product:any, index: number) => (
-              <ProductComponent 
-                key={`${product.name} + ${index}`}
-                product={product} 
-              />
-            ))
-          }
-        </div>
-      </div>
+      </section>
+
+      {/* ── VENDOR CTA ────────────────────────────────────────────────────── */}
+      <VendorCTABanner />
+
+      {/* ── MOBILE BOTTOM NAV ─────────────────────────────────────────────── */}
+      <BottomNav />
     </div>
+  );
+};
 
-  )
-}
+export default Home;
 
-export default Home
-
+/* ─── Server-side data fetching ─────────────────────────────────────────── */
 export async function getServerSideProps() {
-  try{
-      const getProducts = await sendAxiosRequest(
-        `/api/public/product/index?properties=1`,
-        "get",
-        {},
-        "",
-        ''
-      )
-      const getOpenOrders = await sendAxiosRequest(
-        '/api/open-order/index?properties=1',
-        'get',
-        {},
-        '',
-        ''
-      );
-      const getCategories = await sendAxiosRequest(
-        '/api/product/category/index',
-        'get',
-        {},
-        '',
-        ''
-      );
-      const getTags = await sendAxiosRequest(
-        '/api/product/tag/index',
-        'get',
-        {},
-        '',
-        ''
-      );
-      const getFeaturedProducts = await sendAxiosRequest(
-        '/api/featured/product/filter/index',
-        'post',
-        {status: 'active'},
-        '',
-        ''
-      );
-      const getAdvertBanners = await sendAxiosRequest(
-        '/api/advert/banners/filter/index',
-        'post',
-        {enabled: 1},
-        '',
-        ''
-      );
+  try {
+    const [
+      productsResult,
+      openOrdersResult,
+      categoriesResult,
+      tagsResult,
+      featuredResult,
+      bannersResult,
+    ] = await Promise.allSettled([
+      sendAxiosRequest('/api/public/product/index?properties=1', 'get', {}, '', ''),
+      sendAxiosRequest('/api/open-order/index?properties=1', 'get', {}, '', ''),
+      sendAxiosRequest('/api/product/category/index', 'get', {}, '', ''),
+      sendAxiosRequest('/api/product/tag/index', 'get', {}, '', ''),
+      sendAxiosRequest('/api/featured/product/filter/index', 'post', { status: 'active' }, '', ''),
+      sendAxiosRequest('/api/advert/banners/filter/index', 'post', { enabled: 1 }, '', ''),
+    ]);
 
-      const [productsResult, openOrdersResult, categoriesResult, tagsResult, featuredResult, bannersResult] = await Promise.allSettled([
-        getProducts,
-        getOpenOrders,
-        getCategories,
-        getTags,
-        getFeaturedProducts,
-        getAdvertBanners
-      ]);
+    const val = (r: PromiseSettledResult<any>) =>
+      r.status === 'fulfilled' ? r.value : null;
 
-      const products = productsResult.status === 'fulfilled' && productsResult?.value ? productsResult?.value?.data : [];
-      const openOrders = openOrdersResult.status === 'fulfilled' && openOrdersResult?.value ? openOrdersResult?.value?.data : [];
-      const categories = categoriesResult.status === 'fulfilled' ? categoriesResult?.value?.data : [];
-      const tags = tagsResult.status === 'fulfilled' ? tagsResult?.value?.data : [];      
-      const featured = featuredResult.status === 'fulfilled' ? featuredResult?.value?.data : [];      
-      const banners = bannersResult.status === 'fulfilled' ? bannersResult?.value?.data : [];      
-   
-      return {
-        props: {
-          products : products?.data ?? [],
-          openOrders: openOrders?.data ?? [],
-          categories: categories ?? [],
-          tags: tags ?? [],
-          featured: featured?.data ?? [],
-          catalogues: banners?.data ??  []
-        },
-      }
-  }
-  catch(err: any) {
-    console.log({err})
-    const error = err?.toJSON();
-    console.log({error})
+    return {
+      props: {
+        products: val(productsResult)?.data?.data ?? [],
+        openOrders: val(openOrdersResult)?.data?.data ?? [],
+        categories: val(categoriesResult)?.data ?? [],
+        tags: val(tagsResult)?.data ?? [],
+        featured: val(featuredResult)?.data?.data ?? [],
+        catalogues: val(bannersResult)?.data?.data ?? [],
+      },
+    };
+  } catch (err: any) {
+    console.error(err?.toJSON?.() ?? err);
     return {
       props: {
         products: [],
@@ -257,8 +242,8 @@ export async function getServerSideProps() {
         categories: [],
         tags: [],
         featured: [],
-        catalogues: []
+        catalogues: [],
       },
-    }
+    };
   }
 }

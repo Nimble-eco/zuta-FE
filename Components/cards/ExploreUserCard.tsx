@@ -1,91 +1,117 @@
-import { useRouter } from "next/router";
-import { processImgUrl } from "../../Utils/helper";
-import { useEffect, useState } from "react";
-import { checkUserFollowingStatusAction, followUserAction, unfollowUserAction } from "../../requests/user/user.request";
-import { toast } from "react-toastify";
-import ButtonGhost from "../buttons/ButtonGhost";
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
+import Cookies from 'js-cookie';
+import { Loader2, UserCheck, UserPlus } from 'lucide-react';
+
+import { processImgUrl } from '../../Utils/helper';
+import {
+  checkUserFollowingStatusAction,
+  followUserAction,
+  unfollowUserAction,
+} from '../../requests/user/user.request';
 
 interface IExploreUserCardProps {
-    id: string;
-    image?: string;
-    name: string;
-    redirect?: string;
+  id: string;
+  image?: string;
+  name: string;
+  redirect?: string;
 }
 
-const ExploreUserCard = ({id, image, name, redirect}: IExploreUserCardProps) => {
-    const router = useRouter();
-    const [loading, setLoading] = useState(false);
-    const [following, setFollowing] = useState(false);
+const ExploreUserCard = ({ id, image, name, redirect }: IExploreUserCardProps) => {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [following, setFollowing] = useState(false);
 
-    const checkSubStatus = async () => {
-        await checkUserFollowingStatusAction(id)
-        .then(response => {
-            if(response.status === 200) setFollowing(true);
-        })
+  // ── Guard: only check follow status if logged in ──────────────────────
+  const isLoggedIn = () => {
+    try {
+      const raw = Cookies.get('user');
+      if (!raw || raw === 'undefined') return false;
+      return !!JSON.parse(raw)?.access_token;
+    } catch {
+      return false;
     }
+  };
 
-    useEffect(()=>{
-        let mounted = true;
+  useEffect(() => {
+    if (!isLoggedIn()) return;
+    let mounted = true;
+    checkUserFollowingStatusAction(id)
+      .then((res) => { if (mounted && res.status === 200) setFollowing(true); })
+      .catch(() => {}); // silently ignore — user may not be following yet
+    return () => { mounted = false; };
+  }, [id]);
 
-        if(mounted) checkSubStatus();
-
-        return () => {
-            mounted = false;
+  const followUser = async () => {
+    if (!isLoggedIn()) { router.push('/auth/signIn'); return; }
+    setLoading(true);
+    followUserAction(id)
+      .then((res) => {
+        if (res.status === 200) {
+          setFollowing(true);
+          toast.success('Now following');
+          if (redirect) setTimeout(() => router.push(redirect), 1500);
         }
+      })
+      .catch(() => toast.error('Could not follow user'))
+      .finally(() => setLoading(false));
+  };
 
-    }, []);
-
-    const followUser = async () => {
-        setLoading(true);
-        await followUserAction(id)
-        .then(response => {
-            if(response.status === 200) {
-                setFollowing(true);
-                toast.success('Following user successfull');
-                if(redirect) setTimeout(()=>router.push(redirect), 2000);
-            }
-        })
-        .catch((error)=>{
-            console.log({error});
-            toast.error('Unable to subscribe to store');
-        })
-        .finally(()=>setLoading(false))
-    }
-
-    const unFollowUser = async () => {
-        setLoading(true);
-        await unfollowUserAction(id)
-        .then(response => {
-            if(response.status === 200) {
-                setFollowing(false);
-                toast.success('Unfollowed user');
-                if(redirect) setTimeout(()=>router.push(redirect), 2000);
-            }
-        })
-        .catch((error)=>{
-            console.log({error});
-            toast.error('Unable to subscribe to store');
-        })
-        .finally(()=>setLoading(false))
-    }
+  const unFollowUser = async () => {
+    setLoading(true);
+    unfollowUserAction(id)
+      .then((res) => {
+        if (res.status === 200) {
+          setFollowing(false);
+          toast.success('Unfollowed');
+          if (redirect) setTimeout(() => router.push(redirect), 1500);
+        }
+      })
+      .catch(() => toast.error('Could not unfollow user'))
+      .finally(() => setLoading(false));
+  };
 
   return (
-    <div className="flex flex-row justify-between items-center border-b border-gray-300 py-2 px-4">
-        <div className="flex flex-row items-center gap-4">
-            <img src={image ? processImgUrl(image) : 'https://via.placeholder.com/100'} alt={name} className="h-8 w-8 rounded-full object-cover object-center" />
-            <div className="flex flex-col">
-                <h5 className="font-bold text-slate-800">{name}</h5>
-            </div>
-        </div>  
-        <div className='h-10'>
-            <ButtonGhost 
-                action={following ? 'Unfollow' : 'Follow'}
-                onClick={following ? unFollowUser : followUser} 
-                loading={loading}
-            />
+    <div className="flex items-center justify-between px-4 py-3 hover:bg-slate-50 transition-colors rounded-xl">
+      {/* Avatar + name */}
+      <div
+        className="flex items-center gap-3 cursor-pointer"
+        onClick={() => router.push(`/user/${id}`)}
+      >
+        <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-200 shrink-0">
+          <img
+            src={image ? processImgUrl(image) : 'https://via.placeholder.com/100'}
+            alt={name}
+            className="w-full h-full object-cover"
+          />
         </div>
-    </div>
-  )
-}
+        <div>
+          <p className="text-sm font-semibold text-slate-800 leading-none capitalize">{name}</p>
+          <p className="text-[11px] text-slate-400 mt-0.5">View profile</p>
+        </div>
+      </div>
 
-export default ExploreUserCard
+      {/* Follow / Unfollow */}
+      <button
+        onClick={following ? unFollowUser : followUser}
+        disabled={loading}
+        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+          following
+            ? 'bg-slate-100 text-slate-600 hover:bg-red-50 hover:text-red-500'
+            : 'bg-orange-500 text-white hover:bg-orange-600'
+        }`}
+      >
+        {loading ? (
+          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+        ) : following ? (
+          <><UserCheck className="w-3.5 h-3.5" /> Following</>
+        ) : (
+          <><UserPlus className="w-3.5 h-3.5" /> Follow</>
+        )}
+      </button>
+    </div>
+  );
+};
+
+export default ExploreUserCard;

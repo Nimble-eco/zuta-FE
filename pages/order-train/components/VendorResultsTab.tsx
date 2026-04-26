@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axiosInstance from "../../../Utils/axiosConfig";
 import InfiniteScroll from "react-infinite-scroll-component";
-import { Loader2 } from "lucide-react";
+import { Loader2, Search } from "lucide-react";
 import ExploreVendorCard from "../../../Components/cards/ExploreVendorCard";
 
 interface IVendorResultsTabProps {
@@ -47,13 +47,18 @@ const VendorResultsTab = ({search_string, vendors}: IVendorResultsTabProps) => {
                         image={vendor?.user?.picture}
                     />
                 )) : 
-                <div className="flex flex-col justify-center px-4 gap-4">
-                    <h3 className="text-2xl font-bold text-slate-600">
-                        No results for "#{search_string}"
-                    </h3>
-                    <p className="text-xs font-medium text-gray-500">
-                        Try searching for something else
-                    </p>
+                <div className="flex flex-col items-center justify-center py-24 gap-4">
+                    <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center">
+                        <Search className="w-8 h-8 text-slate-300" />
+                    </div>
+                    <div className="text-center">
+                        <p className="text-base font-semibold text-slate-600">
+                            No results for &ldquo;{search_string}&rdquo;
+                        </p>
+                        <p className="text-sm text-slate-400 mt-1">
+                            Try a different keyword or check your spelling
+                        </p>
+                    </div>
                 </div>
             }
         </InfiniteScroll>

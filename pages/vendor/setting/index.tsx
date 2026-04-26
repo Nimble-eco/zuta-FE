@@ -1,10 +1,7 @@
 import { toast } from 'react-toastify';
-import ButtonFull from "../../../Components/buttons/ButtonFull"
 import VendorSideNavPanel from "../../../Components/vendor/layout/VendorSideNavPanel"
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 const NaijaStates = require('naija-state-local-government');
-import { HiOutlineInformationCircle } from "react-icons/hi"
-import ButtonGhost from "../../../Components/buttons/ButtonGhost"
 import AddPaymentMethodModal from "../../../Components/modals/settings/AddPaymentMethodModal"
 import ColumnTextInput from "../../../Components/inputs/ColumnTextInput"
 import TextAreaInput from "../../../Components/inputs/TextAreaInput";
@@ -12,13 +9,19 @@ import { sendAxiosRequest } from "../../../Utils/sendAxiosRequest";
 import { parse } from "cookie";
 import axiosInstance from "../../../Utils/axiosConfig";
 import { updateMyVendorAction, vendorApproveStoreAction, vendorUnapproveStoreAction } from "../../../requests/vendor/vendor.request";
-import { MdDeleteForever } from 'react-icons/md';
 import DeleteModal from '../../../Components/modals/DeleteModal';
 import { deleteBankDetailsAction } from '../../../requests/wallet/wallet.request';
-import { useRouter } from 'next/router';
-import { FcMoneyTransfer } from 'react-icons/fc';
 import SliderInput from '../../../Components/inputs/SliderInput';
 import VendorNavBar from '../../../Components/vendor/layout/VendorNavBar';
+import { 
+    User, 
+    CreditCard, 
+    Store, 
+    MapPin, 
+    Trash2, 
+    Plus, 
+    AlertTriangle,
+} from "lucide-react";
 
 interface ISettingsPageProps {
     userProfile: any;
@@ -34,10 +37,13 @@ const index = ({vendorProfile, wallet}: ISettingsPageProps) => {
     const [tab, setTab] = useState('profile');
     const [showDeleteBankDataModal, setShowDeleteBankDataModal] = useState<boolean>(false);
     const [selectedBankID, setSelectedBankID] = useState<string>('');
-    const router = useRouter();
-
+    
     const states = NaijaStates.states();
     const [lgas, setLGAs] = useState<string[]>([]);
+
+    useEffect(()=>{
+        setLGAs(NaijaStates.lgas(vendorProfile?.vendor_state).lgas);
+    }, [vendorProfile]);
 
     const handleChange = (e: any) => setVendor({...vendor, [e.target.name]: e.target.value});
 
@@ -45,7 +51,7 @@ const index = ({vendorProfile, wallet}: ISettingsPageProps) => {
         setIsLoading(true);
 
         await updateMyVendorAction(vendor)
-        .then((response) => {
+        .then(() => {
             toast.success('Profile updated')
         })
         .catch(error => {
@@ -59,7 +65,7 @@ const index = ({vendorProfile, wallet}: ISettingsPageProps) => {
         setIsLoading(true);
 
         await deleteBankDetailsAction(selectedBankID)
-        .then(response => {
+        .then(() => {
             toast.success('Bank details deleted successfully')
             setShowDeleteBankDataModal(false)
             setTimeout(()=>window.location.reload(), 2000)
@@ -75,7 +81,7 @@ const index = ({vendorProfile, wallet}: ISettingsPageProps) => {
         setIsApproving(true);
 
         await vendorApproveStoreAction(vendorProfile.id)
-        .then(response => {
+        .then(() => {
             toast.success('Store approved successfully')
             setTimeout(()=>window.location.reload(), 2000)
         })
@@ -90,7 +96,7 @@ const index = ({vendorProfile, wallet}: ISettingsPageProps) => {
         setIsApproving(true);
 
         await vendorUnapproveStoreAction(vendorProfile.id)
-        .then(response => {
+        .then(() => {
             toast.success('Store unapproved successfully')
             setTimeout(()=>window.location.reload(), 2000)
         })
@@ -102,7 +108,7 @@ const index = ({vendorProfile, wallet}: ISettingsPageProps) => {
     }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
+    <div className="min-h-screen bg-gray-50 flex flex-row">
         {
             showAddPaymentMethodModal && <AddPaymentMethodModal
                 show={showAddPaymentMethodModal}
@@ -121,248 +127,226 @@ const index = ({vendorProfile, wallet}: ISettingsPageProps) => {
         }
 
         <VendorSideNavPanel />
-        <div className="flex flex-col w-full lg:w-[80%] lg:absolute lg:right-2 lg:left-[20%]">
+        <main className="flex-1 lg:ml-64 flex flex-col min-h-screen">
             <VendorNavBar />
-            <div className='flex flex-col gap-2 px-4 bg-white py-4 mb-2'>
-                <h2 className="text-xl font-semibold text-slate-700">Settings</h2>
-                <div className="flex flex-row font-semibold text-gray-400">
-                    <a 
-                        href="#0" 
-                        className={`${tab === 'profile' && '!text-orange-500'} hover:!text-orange-500 mr-3`}
-                        onClick={() => setTab('profile')}
-                    >
-                        Profile
-                    </a>
-                    <a 
-                        href="#0" 
-                        className={`${tab === 'payment' && '!text-orange-500'} hover:!text-orange-500 mr-3`}
-                        onClick={() => setTab('payment')}
-                    >
-                        Payment
-                    </a>
-                    {/* <a 
-                        href="#0" 
-                        className={`hover:!text-orange-500 mr-3 ${tab === 'order' && '!text-orange-500'}`}
-                        onClick={() => setTab('order')}
-                    >
-                        Order
-                    </a>
-                    <a 
-                        href="#0" 
-                        className={`hover:!text-orange-500 mr-3 ${tab === 'danger' && '!text-orange-500'}`}
-                        onClick={() => setTab('danger')}
-                    >
-                        Danger
-                    </a> */}
-                </div>
+
+            {/* Header & Tabs */}
+            <div className="p-6 lg:p-10 max-w-5xl">
+            <header className="mb-8">
+                <h1 className="text-2xl font-bold text-slate-800">Settings</h1>
+                <p className="text-slate-500 text-sm">Manage your store presence and payment preferences.</p>
+            </header>
+
+            <div className="flex gap-1 bg-slate-100 p-1 rounded-xl w-fit mb-8">
+                {[
+                { id: 'profile', label: 'Store Profile', icon: User },
+                { id: 'payment', label: 'Payments', icon: CreditCard },
+                // { id: 'danger', label: 'Security', icon: AlertTriangle },
+                ].map((t) => (
+                <button
+                    key={t.id}
+                    onClick={() => setTab(t.id)}
+                    className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                    tab === t.id 
+                        ? "bg-white text-orange-600 shadow-sm" 
+                        : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
+                    }`}
+                >
+                    <t.icon size={16} />
+                    {t.label}
+                </button>
+                ))}
             </div>
 
-            {/* PROFILE SECTION */}
-            {
-                tab === 'profile' && 
-                <div className="bg-white min-h-screen pt-4 px-4">
-                    <div className="flex flex-col gap-4 w-full lg:w-[70%] mb-4">
-                        <form className="flex flex-col gap-4">
-                            <div className='flex flex-row gap-4 w-full'>
-                                <div className='w-[80%]'>
-                                    <ColumnTextInput 
-                                        label="Vendor Name"
-                                        value={vendor?.vendor_name || ""}
-                                        name="vendor_name"
-                                        placeHolder="Enter vendor name"
-                                        onInputChange={handleChange}
-                                    />
-                                </div>
-
-                                <div className="flex flex-col gap-3 w-[15%]">
-                                    <label className="text-base text-gray-700">
-                                        Approve
-                                    </label>
-                                    <SliderInput
-                                        name='user_approved'
-                                        value={vendor.user_approved}
-                                        handleChange={
-                                            vendorProfile?.user_approved ?
-                                            unapproveStore :
-                                            approveStore
-                                        }
-                                    />
-                                    {isApproving && <p className="text-orange-500 text-sm">Updating...</p>}
-                                </div>
-
-                            </div>
-                            <div className='grid grid-cols-2 gap-4'>
-                                <ColumnTextInput 
-                                    label="Phone Number"
-                                    value={vendor?.vendor_phone}
-                                    name="vendor_phone"
-                                    placeHolder="Enter vendor phone"
-                                    onInputChange={handleChange}
-                                />
-
-                                <ColumnTextInput 
-                                    label="Vendor Email"
-                                    value={vendor?.vendor_email}
-                                    name="vendor_email"
-                                    placeHolder="Enter vendor email"
-                                    onInputChange={handleChange}
-                                />
-                            </div>
-
-                            <ColumnTextInput 
-                                label="Address"
-                                value={vendor?.vendor_address}
-                                name="vendor_address"
-                                placeHolder="Enter vendor address"
-                                onInputChange={handleChange}
-                            />
-
-                            <div className='grid grid-cols-3 gap-4'>
-                                <div className="flex flex-col mb-3">
-                                    <label className="text-base text-gray-700 mt-1">
-                                        State
-                                    </label>
-                                    <select 
-                                        className="text-base text-gray-700 bg-gray-100 border border-gray-200 rounded-md px-3 py-2 outline-none"
-                                        value={vendor?.vendor_state} 
-                                        onChange={(e) => {
-                                            setVendor({...vendor, vendor_state: e.target.value})
-                                            setLGAs(NaijaStates.lgas(e.target.value).lgas)
-                                        }}
-                                    >
-                                        <option value={''}>Select a state</option>
-                                        {
-                                            states && states.map((state: string) => (
-                                                <option key={state} value={state}>{state}</option>
-                                            ))
-                                        }
-                                    </select>
-                                </div>
-
-                                <ColumnTextInput 
-                                    label="Vendor City"
-                                    value={vendor?.vendor_city}
-                                    name="vendor_city"
-                                    placeHolder="Enter vendor city"
-                                    onInputChange={handleChange}
-                                />
-
-                                <div className="flex flex-col mb-3">
-                                    <label className="text-base text-gray-700 mt-1">
-                                        Country
-                                    </label>
-                                    <input
-                                        type="text"
-                                        placeholder="your address"
-                                        className="text-base text-gray-700 bg-gray-100 border border-gray-200 rounded-md px-3 py-2 outline-none"
-                                        name="name"
-                                        defaultValue={'Nigeria'}
-                                    />
-                                </div>
-                            </div>
-
-                            <TextAreaInput
-                                label="Description"
-                                name="vendor_description"
-                                value={vendor?.vendor_description}
-                                placeHolder="Enter short description"
-                                onInputChange={handleChange}
-                            />
-
-                            <div className="w-[80%] lg:w-[30%] mx-auto h-10">
-                                <ButtonFull
-                                    action="Save"
-                                    loading={isLoading}
-                                    onClick={updateVendorProfile}
-                                />
-                            </div>
-                        </form>
+            {/* PROFILE TAB */}
+            {tab === 'profile' && (
+                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                
+                {/* Store Status Card */}
+                <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                    <div className={`p-3 rounded-full ${vendorProfile?.user_approved ? 'bg-green-50 text-green-600' : 'bg-amber-50 text-amber-600'}`}>
+                        <Store size={24} />
+                    </div>
+                    <div>
+                        <h3 className="font-semibold text-slate-800">Store Visibility</h3>
+                        <p className="text-sm text-slate-500">
+                        {vendor.user_approved ? "Your store is currently live and accepting orders." : "Your store is offline."}
+                        </p>
+                    </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-1">
+                    <SliderInput
+                        name='user_approved'
+                        value={vendor.user_approved}
+                        handleChange={vendorProfile?.user_approved ? unapproveStore : approveStore}
+                    />
+                    {isApproving && <span className="text-[10px] text-orange-500 animate-pulse font-medium">Processing...</span>}
                     </div>
                 </div>
-            }
 
-            {/* PAYMENT SECTION */}
-            {
-                tab === 'payment' &&
-                <div className='bg-white relative min-h-[60vh]'>
-                    <div className="flex flex-row py-3 px-4 relative bg-white">
-                        <div className="w-fit absolute right-4 hidden md:flex">
-                            <ButtonFull 
-                                action="Add Payment Method"
-                                onClick={() => setShowAddPaymentMethodModal(!showAddPaymentMethodModal)}
+                {/* General Information */}
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div className="p-6 border-b border-slate-100 bg-slate-50/50">
+                    <h3 className="font-semibold text-slate-800">General Information</h3>
+                    </div>
+                    <div className="p-6 space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <ColumnTextInput 
+                                label="Store Name" 
+                                value={vendor?.vendor_name || ""} 
+                                name="vendor_name" 
+                                onInputChange={handleChange} 
+                            />
+                                <ColumnTextInput 
+                                label="Contact Email" 
+                                value={vendor?.vendor_email} 
+                                name="vendor_email" 
+                                onInputChange={handleChange} 
+                            />
+                            <ColumnTextInput 
+                                label="Phone Number" 
+                                value={vendor?.vendor_phone} 
+                                name="vendor_phone" 
+                                onInputChange={handleChange} 
                             />
                         </div>
-                    </div>
-                    <div className="flex flex-col pb-8 bg-white text-gray-700 px-4">
-                        {
-                            wallet?.bank_details?.map((bank: any, index: number) => (
-                                <div className="flex flex-col w-full lg:w-[40%] border border-gray-100 px-4 py-3 relative mb-4 min-h-[6rem]" key={index}>
-                                    <div className="flex flex-row gap-3 items-center">
-                                        <span className="font-semibold text-slate-600">{bank.bank_name}</span>
-                                        <p className="text-orange-500 text-base mb-0">{bank.account_type}</p>
-                                    </div>
-                                    <p className="text-gray-800 text-sm mb-0">{bank.account_name}</p>
-                                    <p className="text-gray-600 text-sm mb-0">{bank.account_number}</p>
-
-                                    <MdDeleteForever className='absolute bottom-1 right-2 cursor-pointer text-red-400 text-2xl' onClick={() => {
-                                        setSelectedBankID(bank.id);
-                                        setShowDeleteBankDataModal(true)
-                                    }} />
-                                </div>
-                            ))
-                        }
-
-                        {
-                            wallet?.bank_details?.length === 0 && (
-                                <div className='flex flex-col gap-3 justify-center items-center pt-10'>
-                                    <FcMoneyTransfer className='h-20 w-20 transition ease-in-out animate-in duration-500 duration-800 slide-in-from-bottom' />
-                                    <p className='text-center font-medium text-xl my-auto'>No bank details</p>
-                                </div>
-                            )
-                        }
-                    </div>
-
-                    <div className="flex md:hidden w-[60%] mx-auto mb-8">
-                        <ButtonFull
-                            action="Add Payment Method"
-                            onClick={() => setShowAddPaymentMethodModal(!showAddPaymentMethodModal)} 
+                        <TextAreaInput 
+                            label="Store Description" 
+                            name="vendor_description" 
+                            value={vendor?.vendor_description} 
+                            onInputChange={handleChange} 
                         />
                     </div>
                 </div>
-            }
 
-            {/* ORDER SECTION */}
-            {
-                tab === 'order' && 
-                <div className="flex flex-col bg-white px-4 py-6 mt-4">
-                    <div className="flex flex-row">
-                        <div className="flex flex-row">
-                            <p className="text-gray-800 mr-1">Enable order accumulator</p>
-                            <HiOutlineInformationCircle className="text-lg text-gray-600 cursor-pointer" />
+                {/* Location Information */}
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex items-center gap-2 text-slate-800 font-semibold">
+                        <MapPin size={18} className="text-orange-500" />
+                        <h3>Business Location</h3>
+                    </div>
+                    <div className="p-6 space-y-6">
+                        <ColumnTextInput label="Street Address" value={vendor?.vendor_address} name="vendor_address" onInputChange={handleChange} />
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="flex flex-col gap-2">
+                                <label className="text-sm font-medium text-slate-700">State</label>
+                                <select 
+                                    className="w-full h-11 bg-slate-50 border border-slate-200 rounded-lg px-3 outline-none focus:ring-2 focus:ring-orange-500/20"
+                                    value={vendor?.vendor_state} 
+                                    onChange={(e) => {
+                                        setVendor({...vendor, vendor_state: e.target.value})
+                                        setLGAs(NaijaStates.lgas(e.target.value).lgas)
+                                    }}
+                                >
+                                    <option value="">Select State</option>
+                                    {states?.map((s: string) => <option key={s} value={s}>{s}</option>)}
+                                </select>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                <label className="text-sm font-medium text-slate-700">City</label>
+                                <select 
+                                    className="w-full h-11 bg-slate-50 border border-slate-200 rounded-lg px-3 outline-none focus:ring-2 focus:ring-orange-500/20"
+                                    value={vendor?.vendor_city} 
+                                    onChange={(e) => {
+                                        setVendor({...vendor, vendor_city: e.target.value})
+                                    }}
+                                >
+                                    <option value="">Select City</option>
+                                    {lgas?.map((s: string) => <option key={s} value={s}>{s}</option>)}
+                                </select>
+                            </div>
+                            {/* <ColumnTextInput label="City" value={vendor?.vendor_city} name="vendor_city" onInputChange={handleChange} /> */}
+                            <ColumnTextInput label="Country" value="Nigeria" name="country" onInputChange={()=>{}} />
                         </div>
                     </div>
                 </div>
-            }
 
-            {/* DANGER SECTION */}
-            {
-                tab === 'danger' &&
-                <div className="flex flex-col bg-white px-4 py-6 mt-4">
-                    <div className="flex flex-col lg:flex-row gap-4 lg:justify-between">
-                        <div className="flex flex-row mr-[5%] align-middle">
-                            <p className="mr-1 text-red-500">Delete Vendor Account</p>
-                            <HiOutlineInformationCircle className="text-lg text-red-600 cursor-pointer" />
+                <div className="flex justify-end pt-4">
+                    <button 
+                        onClick={updateVendorProfile}
+                        disabled={isLoading}
+                        className="bg-orange-600 hover:bg-orange-700 text-white px-10 py-3 rounded-xl font-semibold shadow-lg shadow-orange-200 transition-all disabled:opacity-50"
+                    >
+                        {isLoading ? "Saving Changes..." : "Save Profile"}
+                    </button>
+                </div>
+                </div>
+            )}
+
+            {/* PAYMENT TAB */}
+            {tab === 'payment' && (
+                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                    <div className="flex items-center justify-between">
+                        <h3 className="font-semibold text-slate-800 text-lg">Saved Bank Accounts</h3>
+                        <button 
+                            onClick={() => setShowAddPaymentMethodModal(true)}
+                            className="flex items-center gap-2 text-sm font-medium text-orange-600 hover:bg-orange-50 px-4 py-2 rounded-lg transition-colors"
+                        >
+                            <Plus size={18} />
+                            Add New
+                        </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {wallet?.bank_details?.map((bank: any) => (
+                        <div key={bank.id} className="group relative bg-white border border-slate-200 p-5 rounded-2xl hover:border-orange-200 hover:shadow-md transition-all">
+                            <div className="flex items-start justify-between">
+                            <div className="space-y-1">
+                                <div className="flex items-center gap-2">
+                                <span className="text-xs font-bold uppercase tracking-wider text-slate-400">{bank.account_type}</span>
+                                <span className="h-1 w-1 rounded-full bg-slate-300" />
+                                <span className="text-xs font-bold text-orange-600">{bank.bank_name}</span>
+                                </div>
+                                <h4 className="text-lg font-bold text-slate-800 leading-tight uppercase">{bank.account_name}</h4>
+                                <p className="text-slate-500 font-mono tracking-widest">{bank.account_number}</p>
+                            </div>
+                            <button 
+                                onClick={() => { setSelectedBankID(bank.id); setShowDeleteBankDataModal(true); }}
+                                className="text-slate-300 hover:text-red-500 transition-colors p-2"
+                            >
+                                <Trash2 size={20} />
+                            </button>
+                            </div>
                         </div>
-                        <div className="w-fit">
-                            <ButtonGhost
-                                action="Close Account"
-                                onClick={() => {}} 
-                            />
+                        ))}
+                    </div>
+
+                    {wallet?.bank_details?.length === 0 && (
+                        <div className="bg-white border-2 border-dashed border-slate-200 rounded-2xl p-12 flex flex-col items-center text-center">
+                            <div className="bg-slate-100 p-4 rounded-full mb-4">
+                                <CreditCard size={32} className="text-slate-400" />
+                            </div>
+                            <h4 className="text-slate-800 font-semibold">No bank details found</h4>
+                            <p className="text-slate-500 text-sm mb-6">Add a bank account to receive your payouts.</p>
+                            <button 
+                                onClick={() => setShowAddPaymentMethodModal(true)}
+                                className="bg-slate-900 text-white px-6 py-2 rounded-lg text-sm font-medium"
+                            >
+                                Add Payment Method
+                            </button>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* DANGER TAB */}
+            {tab === 'danger' && (
+                <div className="bg-red-50 border border-red-100 rounded-2xl p-6 flex items-center justify-between animate-in fade-in duration-500">
+                    <div className="flex items-center gap-4 text-red-700">
+                        <div className="bg-red-100 p-3 rounded-xl"><AlertTriangle /></div>
+                        <div>
+                            <h3 className="font-bold">Close Vendor Account</h3>
+                            <p className="text-sm opacity-80">This action is permanent and cannot be undone.</p>
                         </div>
                     </div>
+                    <button className="bg-red-600 text-white px-6 py-2.5 rounded-xl font-medium hover:bg-red-700 transition-colors">
+                        Close Account
+                    </button>
                 </div>
-            }
-        </div>
+            )}
+            </div>
+        </main>
     </div>
   )
 }

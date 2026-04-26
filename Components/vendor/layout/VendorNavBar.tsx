@@ -1,5 +1,5 @@
 import Cookies from "js-cookie";
-import { LogOutIcon, User2, UserCircle } from "lucide-react";
+import { LogOut, User, ChevronDown, Repeat } from "lucide-react";
 import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
 import LoginSelectWorkSpaceModal from "../../modals/switch-worskapce/LoginSelectWorkSpaceModal";
@@ -9,87 +9,78 @@ const VendorNavBar = () => {
     const [showDropDown, setShowDropDown] = useState(false);
     const [showSwitchProfileModal, setShowSwitchProfileModal] = useState(false);
     const dropDownRef = useRef<HTMLDivElement>(null);
-    const [user, setUser] = useState<any>({});
+    const [user, setUser] = useState<any>(null);
 
     const logout = () => {
         Cookies.remove('user');
-        setTimeout(()=>router.push('/'), 1300);
+        router.push('/');
     }
 
     useEffect(() => {
-        let userCookie = Cookies.get('user') ? JSON.parse(Cookies.get('user')!) : null;
-        setUser(userCookie);
-    }, []);
+        const userCookie = Cookies.get('user');
+        if (userCookie) setUser(JSON.parse(userCookie));
 
-    useEffect(() => {
-        let isMounted = true
-
-        const handleClickOutside = (event: any) => {
-            if (isMounted) {
-                if (
-                    dropDownRef.current &&
-                    !dropDownRef.current!.contains(event.target)
-                )
-                setShowDropDown(false)
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropDownRef.current && !dropDownRef.current.contains(event.target as Node)) {
+                setShowDropDown(false);
             }
         }
-
         document.addEventListener('mousedown', handleClickOutside);
-
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside)
-            isMounted = false
-        }
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
     return (
-        <div className="flex flex-row py-3 bg-white items-center justify-end mb-8 px-4 border-b-[1px] border-slate-800 border-opacity-40 shadow-xl">
+        <div className="h-16 flex items-center justify-end bg-white px-8 border-b border-slate-200 sticky top-0 z-10">
             <LoginSelectWorkSpaceModal
                 show={showSwitchProfileModal}
                 setShow={setShowSwitchProfileModal}
             />
-            <div className="flex flex-row gap-2 items-center">
-                {
-                    user?.picture ? (
-                        <img
-                            src={user?.picture}
-                            className="rounded-full w-8 h-8 object-center object-cover bg-gray-200"
-                        />
-                    ) : (
-                        <UserCircle className="text-slate-600 h-8 w-8" />
-                    )
-                }
-                
-                <div className="relative flex flex-col">
-                    <div 
-                        className="flex flex-row gap-1 items-center cursor-pointer"
-                        onClick={()=>setShowDropDown(!showDropDown)}
-                    >
-                        <p className="text-slate-600 text-sm font-semibold !mb-0">Logout</p>
-                        <LogOutIcon className="text-slate-600 h-5 w-5" />
+
+            <div className="relative" ref={dropDownRef}>
+                <button 
+                    onClick={() => setShowDropDown(!showDropDown)}
+                    className="flex items-center gap-3 p-1 pr-3 rounded-full hover:bg-slate-50 transition-colors"
+                >
+                    <div className="h-9 w-9 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden">
+                        {user?.picture ? (
+                            <img src={user.picture} alt="Profile" className="h-full w-full object-cover" />
+                        ) : (
+                            <User className="text-slate-400" size={20} />
+                        )}
                     </div>
-                    {
-                        showDropDown && (
-                            <div 
-                                className="flex flex-col gap-3 px-4 py-2 rounded-xl bg-white shadow-xl absolute top-10 -left-10 text-center"
-                                ref={dropDownRef}
-                            >
-                                <p 
-                                    className="text-slate-800 cursor-pointer whitespace-nowrap font-medium text-sm"
-                                    onClick={()=>setShowSwitchProfileModal(!showSwitchProfileModal)}
-                                >
-                                    Switch profile
-                                </p>
-                                <p 
-                                    className="text-red-800 cursor-pointer whitespace-nowrap font-medium text-sm"
-                                    onClick={logout}    
-                                >
-                                    Logout
-                                </p>
-                            </div>
-                        )
-                    }
-                </div>
+                    <div className="hidden md:block text-left">
+                        <p className="text-sm font-semibold text-slate-700 leading-tight !mb-0">
+                            {user?.name || "Vendor Account"}
+                        </p>
+                        <p className="text-xs text-slate-500 !mb-0">Manage Account</p>
+                    </div>
+                    <ChevronDown size={16} className={`text-slate-400 transition-transform ${showDropDown ? 'rotate-180' : ''}`} />
+                </button>
+
+                {showDropDown && (
+                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-2 animate-in fade-in zoom-in duration-150">
+                        <div className="px-4 py-2 border-b border-slate-50 mb-1">
+                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Account</p>
+                        </div>
+                        
+                        <button 
+                            onClick={() => {
+                                setShowSwitchProfileModal(true);
+                                setShowDropDown(false);
+                            }}
+                            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 transition-colors"
+                        >
+                            <Repeat size={16} /> Switch Profile
+                        </button>
+
+                        <button 
+                            onClick={logout}
+                            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                        >
+                            <LogOut size={16} /> Logout
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );

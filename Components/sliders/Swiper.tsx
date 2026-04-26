@@ -1,7 +1,8 @@
-import SwiperCore, { Autoplay, Pagination } from "swiper";
+import SwiperCore, { Autoplay, Pagination } from 'swiper';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
-import { processImgUrl } from "../../Utils/helper";
+import 'swiper/css/pagination';
+import { processImgUrl } from '../../Utils/helper';
 
 interface ISwiperProps {
   slides: string[];
@@ -11,31 +12,31 @@ interface ISwiperProps {
 
 SwiperCore.use([Autoplay, Pagination]);
 
-const SwiperSlider = ({slides, slidesToShow=1, imageUrlSrc=true}: ISwiperProps) => {
+const SwiperSlider = ({ slides, slidesToShow = 1, imageUrlSrc = true }: ISwiperProps) => {
   return (
     <Swiper
-      spaceBetween={10}
-      grabCursor={true}
+      spaceBetween={12}
+      grabCursor
       slidesPerView={slidesToShow}
-      autoplay
-      className='h-full w-full'
+      autoplay={{ delay: 3500, disableOnInteraction: false }}
+      pagination={{ clickable: true }}
+      className="h-full w-full rounded-2xl"
     >
-      {
-        slides?.map((slide, index) => (
-          <SwiperSlide
-            key={index}
-            className={`rounded-md bg-gray-400 max-h-full min-h-full`}
-          >
-            <img 
-              src={imageUrlSrc ? processImgUrl(slide) : slide} 
-              alt='image' 
-              className='min-w-full min-h-full max-h-full rounded-md bg-gray-400 !object-center !object-cover'
+      {slides?.map((slide, index) => (
+        <SwiperSlide key={index} className="rounded-2xl overflow-hidden">
+          <div className="relative w-full h-full min-h-[160px]">
+            <img
+              src={imageUrlSrc ? processImgUrl(slide) : slide}
+              alt={`Banner ${index + 1}`}
+              className="w-full h-full object-cover object-center"
             />
-          </SwiperSlide>
-        ))
-      }
+            {/* Subtle gradient overlay for readability */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent rounded-2xl" />
+          </div>
+        </SwiperSlide>
+      ))}
     </Swiper>
   );
 };
 
-export default SwiperSlider
+export default SwiperSlider;

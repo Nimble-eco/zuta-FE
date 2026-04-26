@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { toast} from "react-toastify";
 import Header from "../Components/Header";
@@ -6,12 +6,11 @@ import ProductComponent from "../Components/ProductComponent"
 import ResultsPageSideNavPanel from "../Components/navigation/SideNavPanel";
 import HorizontalSlider from "../Components/lists/HorizontalSlider";
 import FeaturedProductCard from "../Components/cards/FeaturedProductCard";
-import BottomDrawer from "../Components/drawer/BottomDrawer";
 import { MdOutlineFilterList } from "react-icons/md";
 import axiosInstance from "../Utils/axiosConfig";
 import { useRouter } from "next/router";
 import { filterPublicProductsByPriceAction, filterPublicProductsByRatingAction } from "../requests/publicProducts/public-products.request";
-import { Loader2 } from "lucide-react";
+import { Loader2, SearchX, SlidersHorizontal, X } from "lucide-react";
 
 interface IResultsPageProps {
     products: any[];
@@ -21,197 +20,207 @@ interface IResultsPageProps {
 
 function results({products, openOrderProducts, featuredProducts}: IResultsPageProps) {
     const router = useRouter();
-    const [data, setData] = useState(products);
     const [featuredProductsList, setFeaturedProductsList] = useState(featuredProducts);
-    const [page, setPage] = useState(1);
-    const [showMobileFilterDrawer, setShowMobileFilterDrawer] = useState<boolean>(false);
     const { search } = router.query;
-    const [moreProducts, setMoreProducts] = useState(products?.length > 0 ? true : false);
-    const [moreFeatures, setMoreFeatures] = useState(featuredProducts?.length > 0 ? true : false);
-0
-    const loadMoreData = async () => {
-        await axiosInstance.post('/api/public/product/search/index', {
-            search: search,
-            pagination: page + 1
-        })
-        .then((response) => {
-            if(response.data.data) {
-                setData(data.concat(response.data.data));
-                setPage(page + 1);
-            }
-            else setMoreProducts(false);
-        })
 
+    // States
+    const [data, setData] = useState(products || []);
+    const [featuredList, setFeaturedList] = useState(featuredProducts || []);
+    const [productPage, setProductPage] = useState(1);
+    const [featuredPage, setFeaturedPage] = useState(1);
+    const [hasMoreProducts, setHasMoreProducts] = useState(true);
+    const [hasMoreFeatures, setHasMoreFeatures] = useState(true);
+    const [isFiltering, setIsFiltering] = useState(false);
+    const [showMobileFilters, setShowMobileFilters] = useState(false);
+
+    useEffect(() => {
+        setData(products);
+        setFeaturedList(featuredProducts);
+        setProductPage(1);
+        setFeaturedPage(1);
+    }, [products, featuredProducts, search]);
+
+    const loadMoreProducts = async () => {
+        try {
+            const res = await axiosInstance.post('/api/public/product/search/index', {
+                search,
+                pagination: productPage + 1
+            });
+            const newProducts = res?.data?.data;
+            if (newProducts?.length > 0) {
+                setData((prev: any) => [...prev, ...newProducts]);
+                setProductPage(prev => prev + 1);
+            } else {
+                setHasMoreProducts(false);
+            }
+        } catch (err) {
+            setHasMoreProducts(false);
+        }
     };
 
     const loadFeaturedProductsData = async () => {
         await axiosInstance.post('/api/public/product/search/index', {
             search: search,
-            pagination: page + 1
+            pagination: featuredPage + 1
         })
         .then((response) => {
-            if(response.data.data) {
+            if(response?.data?.data) {
                 setFeaturedProductsList(featuredProductsList.concat(response.data.data));
-                setPage(page + 1);
+                setFeaturedPage(prev => prev + 1);
             }
-            else setMoreFeatures(false);
-          
+            else setHasMoreFeatures(false);
         })
     };
 
-    const filterByPrice = async (start_price: number, end_price?: number) => {
-        await filterPublicProductsByPriceAction({start_price, end_price, search: search as string})
-        .then(response => {
-            if(response.status === 200) {
-                setData(response.data?.data?.data);
-                toast.success('Products filtered successfully');
-            }
-            if(response.status === 204) {
+    const handleFilter = async (action: Function, params: any) => {
+        setIsFiltering(true);
+        try {
+            const response = await action({ ...params, search });
+            if (response.status === 200) {
+                setData(response.data?.data?.data || response.data?.data);
+                toast.success('Results updated');
+            } else if (response.status === 204) {
                 setData([]);
-                toast.success('No Products in this range');
             }
-        })
-        .catch(error => {
-            console.log({error});
-            toast.error(error?.data?.response?.message || 'Error try again later');
-        })
-        .finally(() => setShowMobileFilterDrawer(false));
-    }
-
-    const filterByRating = async (rating: number) => {
-        await filterPublicProductsByRatingAction({rating, search: search as string})
-        .then(response => {
-            if(response.status === 200) {
-                setData(response.data?.data.data);
-                toast.success('Products filtered successfully');
-            }
-            if(response.status === 204) {
-                setData([]);
-                toast.success('No Products in this range');
-            }
-        })
-        .catch(error => {
-            console.log({error});
-            toast.error(error?.data?.response?.message || 'Error try again later');
-        })
-        .finally(() => setShowMobileFilterDrawer(false));
-    }
-
-    const sortResultsByPrice = (direction: string) => {
-        let sortedData;
-        if (direction === 'asc') sortedData = [...data].sort((a, b) => a.product_price - b.product_price);
-        if (direction === 'desc') sortedData = [...data].sort((a, b) => b.product_price - a.product_price);
-      
-        if (sortedData) setData(sortedData);
+        } catch (error) {
+            toast.error('Filter failed');
+        } finally {
+            setIsFiltering(false);
+            setShowMobileFilters(false);
+        }
     };
-    console.log({data, products})
+
+    const sortData = (direction: string) => {
+        const sorted = [...data].sort((a, b) => 
+            direction === 'asc' ? a.product_price - b.product_price : b.product_price - a.product_price
+        );
+        setData(sorted);
+    };
+
     return (
-        <div
-            className="flex flex-col w-full bg-white min-h-screen relative"
-        >
+        <div className="bg-slate-50 min-h-screen">
             <Header />
 
-            { showMobileFilterDrawer && <BottomDrawer 
-                filterByPrice={filterByPrice}
-                filterByRating={filterByRating}
-                setShow={()=>setShowMobileFilterDrawer(false)}
-            /> }
+            {/* Sub-Header / Breadcrumbs */}
+            <div className="bg-white border-b border-slate-200 py-4 px-6 sticky top-0 z-10 shadow-sm">
+                <div className="max-w-[1400px] mx-auto flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                        <p className="text-xs text-slate-500 uppercase tracking-wider font-bold">Search Results</p>
+                        <h1 className="text-xl font-semibold text-slate-800 italic">"{search}"</h1>
+                        <p className="text-sm text-slate-400">{data?.length} items found</p>
+                    </div>
 
-            <div className="flex flex-col md:flex-row shadow-md py-5 relative">
-                <div className='flex flex-row relative'>
-                    <p className="text-sm font-thin pl-4 mb-4 md:mb-0">Over {data?.length} results for tag</p>
-                    <MdOutlineFilterList 
-                        className="text-4xl cursor-pointer absolute right-3 md:hidden"
-                        onClick={() => setShowMobileFilterDrawer(!showMobileFilterDrawer)}
-                    />
-                </div>
-                <div
-                    className="flex flex-row justify-center items-center min-w-fit bg-gray-100 rounded-xl px-3 py-2 md:absolute md:top-3 md:right-4 md:mb-10 sm:max-w-fit sm:ml-2 max-w-[80%] md:max-w-none"
-                >
-                    <select 
-                        name="filter" 
-                        onChange={(e) => sortResultsByPrice(e.target.value)}
-                        className="cursor-pointer text-gray-600 min-w-fit outline-none bg-transparent"
-                    >
-                        <option 
-                            value=""
-                            className="py-3 border-b-2 border-solid border-gray-400 cursor-pointer"
+                    <div className="flex items-center gap-3">
+                        <button 
+                            onClick={() => setShowMobileFilters(true)}
+                            className="md:hidden flex items-center gap-2 bg-slate-100 px-4 py-2 rounded-lg text-sm font-medium"
                         >
-                            Sort results
-                        </option>
-                        <option 
-                            value="asc"
-                            className="py-3 border-b-2 border-solid border-gray-400 cursor-pointer"
-                        >
-                            low to high price
-                        </option>
-                        <option 
-                            value="desc"
-                            className="py-3 border-b-2 border-solid border-gray-400 cursor-pointer"
-                        >
-                            high to low price
-                        </option>
-                    </select>
+                            <SlidersHorizontal size={16} /> Filters
+                        </button>
+                        
+                        <div className="relative">
+                            <select 
+                                onChange={(e) => sortData(e.target.value)}
+                                className="appearance-none bg-slate-100 border-none rounded-lg px-4 py-2 pr-10 text-sm font-medium focus:ring-2 focus:ring-orange-500 outline-none cursor-pointer"
+                            >
+                                <option value="">Sort by: Relevance</option>
+                                <option value="asc">Price: Low to High</option>
+                                <option value="desc">Price: High to Low</option>
+                            </select>
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                                <MdOutlineFilterList />
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div className="flex flex-row relative w-full">
-                <div className="hidden md:flex md:flex-col md:w-[25%] px-5">
-                    <ResultsPageSideNavPanel 
-                        filterByPrice={filterByPrice}
-                        filterByRating={filterByRating}
-                    />
-                    <div className="md:w-full lg:w-[95%] mx-auto">
-                        <InfiniteScroll
-                            dataLength={featuredProductsList?.length}
-                            next={loadFeaturedProductsData}
-                            hasMore={moreFeatures}
-                            loader={<Loader2 className="h-7 w-7 mx-auto mt-8 text-orange-600 animate-spin" />}
-                            className='flex flex-col w-full gap-y-48'
-                        >
-                            {
-                                featuredProductsList?.length > 0 && featuredProductsList?.map((product: any, index: number) => (
-                                    <FeaturedProductCard 
-                                        key={`${product.id}-${index}`}
-                                        product={product}
-                                    />
-                                ))
-                            }
-
-                        </InfiniteScroll>
-                    </div>
-                </div>
-
-                <div className="flex flex-col w-full md:w-[75%] mt-4 overflow-x-auto">
-                    { openOrderProducts?.length > 0 && <div className='mt-10 xs:max-w-[18rem] sm:!max-w-[24rem] bmd:!max-w-xl md:!max-w-screen-md lg:!min-w-full'>
-                        <HorizontalSlider 
-                            list={openOrderProducts}
-                            list_name='Open Orders Results'
+            <div className="max-w-[1400px] mx-auto flex flex-col md:flex-row gap-6 p-4 lg:p-6">
+                
+                {/* Desktop Sidebar */}
+                <aside className="hidden md:block w-1/4 space-y-8">
+                    <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                        <ResultsPageSideNavPanel 
+                            filterByPrice={(s:any, e:any) => handleFilter(filterPublicProductsByPriceAction, {start_price: s, end_price: e})}
+                            filterByRating={(r:any) => handleFilter(filterPublicProductsByRatingAction, {rating: r})}
                         />
-                    </div>}
-                    
-                    <h3 className="text-lg font-bold mb-4 pl-12 lg:pl-6">Product Results</h3>
-                    <div className="">
+                    </div>
+
+                    <div className="space-y-4">
+                        <h3 className="font-bold text-slate-800 ml-2">Featured Deals</h3>
                         <InfiniteScroll
-                            dataLength={data?.length}
-                            next={loadMoreData}
-                            hasMore={moreProducts}
-                            loader={<Loader2 className="h-7 w-7 mx-auto mt-8 text-orange-600 animate-spin" />}
-                            className='flex flex-col gap-y-10 md:grid md:grid-cols-2 md:gap-4 lg:grid-cols-3 lg:gap-5 xl:grid-cols-4 w-[90%] mx-auto lg:w-full px-8'
+                            dataLength={featuredList.length}
+                            next={loadFeaturedProductsData}
+                            hasMore={hasMoreFeatures}
+                            loader={<Loader2 className="animate-spin mx-auto text-orange-500" />}
+                            className="space-y-4"
                         >
-                            {data?.length > 0 ? data?.map((product: any, index: number) => (
-                                <ProductComponent 
-                                    key={index} 
-                                    product={product} 
-                                />
-                            )) : <p className="text-center font-medium">No Products found</p>}
+                            {featuredList?.map((p: any, i: number) => (
+                                <FeaturedProductCard key={`${p.id}-${i}`} product={p} />
+                            ))}
                         </InfiniteScroll>
                     </div>
-                </div>
+                </aside>
+
+                {/* Main Content Area */}
+                <section className="flex-1">
+                    {/* Horizontal Slider for related orders */}
+                    {openOrderProducts?.length > 0 && (
+                        <div className="mb-8 bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+                            <HorizontalSlider 
+                                list={openOrderProducts} 
+                                list_name="Ongoing Group Orders" 
+                            />
+                        </div>
+                    )}
+
+                    {isFiltering ? (
+                        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            {[...Array(8)].map((_, i) => (
+                                <div key={i} className="h-64 bg-slate-200 animate-pulse rounded-2xl" />
+                            ))}
+                        </div>
+                    ) : data?.length > 0 ? (
+                        <InfiniteScroll
+                            dataLength={data.length}
+                            next={loadMoreProducts}
+                            hasMore={hasMoreProducts}
+                            loader={<div className="col-span-full py-10 flex justify-center"><Loader2 className="animate-spin text-orange-500" /></div>}
+                            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6"
+                        >
+                            {data?.map((product: any, index: number) => (
+                                <ProductComponent key={index} product={product} />
+                            ))}
+                        </InfiniteScroll>
+                    ) : (
+                        <div className="flex flex-col items-center justify-center py-20 text-slate-400">
+                            <SearchX size={64} strokeWidth={1} className="mb-4" />
+                            <h2 className="text-xl font-semibold text-slate-800">No products found</h2>
+                            <p>Try adjusting your filters or search terms.</p>
+                        </div>
+                    )}
+                </section>
             </div>
+
+            {/* Mobile Filter Drawer (Simplified) */}
+            {showMobileFilters && (
+                <div className="fixed inset-0 z-50 md:hidden">
+                    <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowMobileFilters(false)} />
+                    <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl p-6 animate-in slide-in-from-bottom duration-300">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-lg font-bold">Filters</h2>
+                            <X className="cursor-pointer" onClick={() => setShowMobileFilters(false)} />
+                        </div>
+                        <ResultsPageSideNavPanel 
+                            filterByPrice={(s:any, e:any) => handleFilter(filterPublicProductsByPriceAction, {start_price: s, end_price: e})}
+                            filterByRating={(r:any) => handleFilter(filterPublicProductsByRatingAction, {rating: r})}
+                        />
+                    </div>
+                </div>
+            )}
         </div>
-    )
-}
+    );
+};
 
 export default results
 

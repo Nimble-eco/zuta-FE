@@ -1,21 +1,39 @@
+import { LucideIcon } from "lucide-react";
+
 interface IStatsCardProps {
   title: string;
-  footer?: string;
   value: string | number;
+  icon: LucideIcon;
+  color: "orange" | "blue" | "green" | "slate";
+  trend?: string; // e.g., "+12% this week"
 }
 
-const StatsCard = ({title, value, footer}: IStatsCardProps) => {
+const StatsCard = ({ title, value, icon: Icon, color, trend }: IStatsCardProps) => {
+  const themes = {
+    orange: "bg-orange-50 text-orange-600 border-orange-100",
+    blue: "bg-blue-50 text-blue-600 border-blue-100",
+    green: "bg-green-50 text-green-600 border-green-100",
+    slate: "bg-slate-50 text-slate-600 border-slate-100",
+  };
+
   return (
-    <div className="flex flex-col rounded-md shadow-lg bg-white px-4 py-2 text-left">
-      <p className="font-medium text-slate-600 capitalize text-sm">{title}</p>
-      <p className="font-semibold text-slate-600 text-xl">{value}</p>
-      {
-        footer && <div className="border-t border-gray-200 py-1 font-semibold text-sm text-slate-400">
-          {footer}
+    <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+      <div className="flex items-center justify-between mb-4">
+        <div className={`p-3 rounded-xl border ${themes[color]}`}>
+          <Icon size={24} />
         </div>
-      }
+        {trend && (
+            <span className="text-xs font-medium px-2 py-1 bg-green-50 text-green-600 rounded-full">
+                {trend}
+            </span>
+        )}
+      </div>
+      <div>
+        <p className="text-slate-500 text-sm font-medium mb-1">{title}</p>
+        <h3 className="text-2xl font-bold text-slate-800">{value}</h3>
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default StatsCard
+export default StatsCard;

@@ -5,74 +5,52 @@ interface IResultsPageSideNavPanelProps {
     filterByPrice: (start_price: number, end_price?: number) => void;
 }
 
-const ResultsPageSideNavPanel = ({filterByPrice, filterByRating}: IResultsPageSideNavPanelProps) => {
-  return (
-      <div
-        className="text-base py-10 justify-center w-full"
-      >
-        <div
-            className="flex flex-col w-full mt-4"
-        >
-            <h3 className="font-bold mb-3">Customer Ratings</h3>
-            <div className="flex flex-row text-2xl mb-2 cursor-pointer md:text-sm w-fit" onClick={() => filterByRating(4)}>
-                <MdStar className=' text-orange-300' />
-                <MdStar className='text-orange-300' />
-                <MdStar className='text-orange-300' />
-                <MdStar className='text-orange-300' />
-                <MdOutlineStarOutline className='text-orange-300' />
-                <span className='text-sm font-thin pl-2'> & above</span>
-            </div>
+const ResultsPageSideNavPanel = ({ filterByPrice, filterByRating }: IResultsPageSideNavPanelProps) => {
+    const priceRanges = [
+        { label: "Under ₦5k", start: 0, end: 5000 },
+        { label: "₦5k - ₦10k", start: 5000, end: 10000 },
+        { label: "₦10k - ₦20k", start: 10000, end: 20000 },
+        { label: "₦20k - ₦50k", start: 20000, end: 50000 },
+        { label: "₦50k & Above", start: 50000, end: 10000000 },
+    ];
 
-            <div className="flex flex-row text-2xl mb-2 cursor-pointer md:text-sm w-fit" onClick={() => filterByRating(3)}>
-                <MdStar className=' text-orange-300' />
-                <MdStar className='text-orange-300' />
-                <MdStar className='text-orange-300' />
-                <MdOutlineStarOutline className='text-orange-300' />
-                <MdOutlineStarOutline className='text-orange-300' />
-                <span className='text-sm font-thin pl-2'> & above</span>
-            </div>
+    return (
+        <div className="space-y-8">
+            <section>
+                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">Ratings</h3>
+                <div className="space-y-2">
+                    {[4, 3, 2, 1].map((rating) => (
+                        <div 
+                            key={rating}
+                            onClick={() => filterByRating(rating)}
+                            className="flex items-center gap-1 cursor-pointer group hover:bg-slate-50 p-1 rounded-lg transition-colors"
+                        >
+                            {[...Array(5)].map((_, i) => (
+                                i < rating 
+                                    ? <MdStar key={i} className="text-orange-400 text-lg" />
+                                    : <MdOutlineStarOutline key={i} className="text-slate-300 text-lg" />
+                            ))}
+                            <span className="text-xs text-slate-500 font-medium ml-1">& up</span>
+                        </div>
+                    ))}
+                </div>
+            </section>
 
-            <div className="flex flex-row text-2xl mb-2 cursor-pointer md:text-sm w-fit" onClick={() => filterByRating(2)}>
-                <MdStar className=' text-orange-300' />
-                <MdStar className='text-orange-300' />
-                <MdOutlineStarOutline className='text-orange-300' />
-                <MdOutlineStarOutline className='text-orange-300' />
-                <MdOutlineStarOutline className='text-orange-300' />
-                <span className='text-sm font-thin pl-2'> & above</span>
-            </div>
-
-            <div className="flex flex-row text-2xl mb-2 cursor-pointer md:text-sm w-fit" onClick={() => filterByRating(1)}>
-                <MdStar className=' text-orange-300' />
-                <MdOutlineStarOutline className='text-orange-300' />
-                <MdOutlineStarOutline className='text-orange-300' />
-                <MdOutlineStarOutline className='text-orange-300' />
-                <MdOutlineStarOutline className='text-orange-300' />
-                <span className='text-sm font-thin pl-2'> & above</span>
-            </div>
+            <section>
+                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">Price Range</h3>
+                <div className="grid grid-cols-1 gap-2">
+                    {priceRanges.map((range) => (
+                        <button 
+                            key={range.label}
+                            onClick={() => filterByPrice(range.start, range.end)}
+                            className="text-left text-sm text-slate-600 hover:text-orange-600 hover:bg-orange-50 px-3 py-2 rounded-lg transition-all"
+                        >
+                            {range.label}
+                        </button>
+                    ))}
+                </div>
+            </section>
         </div>
-
-        <div className='flex flex-col text-sm mt-8'>
-            <h3 className="font-bold text-base mb-3">Price</h3>
-            <div className='cursor-pointer mb-3' onClick={() => filterByPrice(0, 5000)}>
-                <p>Under N5,000</p>
-            </div>
-            <div className='cursor-pointer mb-3' onClick={() => filterByPrice(5000, 10000)}>
-                <p>N5,000 to N10,000</p>
-            </div>
-            <div className='cursor-pointer mb-3' onClick={() => filterByPrice(10000, 20000)}>
-                <p>N10,000 to N20,000</p>
-            </div>
-            <div className='cursor-pointer mb-3' onClick={() => filterByPrice(20000, 50000)}>
-                <p>N20,000 to N50,000</p>
-            </div>
-            <div className='cursor-pointer mb-3' onClick={() => filterByPrice(50000, 100000)}>
-                <p>N50,000 to N100,000</p>
-            </div>
-            <div className='cursor-pointer mb-3' onClick={() => filterByPrice(100000, 1000000000000)}>
-                <p>N100,000 & above</p>
-            </div>
-        </div>
-      </div>
     );
 };
 

@@ -12,7 +12,7 @@ interface IMyTableProps {
 
 const MyTable = ({headings, content, onRowButtonClick, isLoading}: IMyTableProps) => {
   return (
-    <div className="p-4 min-w-[950px] overflow-scroll">
+    <div className="p-4 overflow-scroll">
         {
             isLoading && <div className="flex justify-center items-center pt-10 h-72">
                 <Loader2 className='w-20 h-20 text-orange-500 animate-spin' />
@@ -28,7 +28,7 @@ const MyTable = ({headings, content, onRowButtonClick, isLoading}: IMyTableProps
         
         {
             !isLoading && content?.length ?
-            <table className="w-full min-w-fit overflow-x-auto text-base">
+            <table className="w-full min-w-[950px] overflow-x-auto text-base">
                 <thead>
                     <tr className="justify-evenly text-sm text-left whitespace-nowrap">
                         {
