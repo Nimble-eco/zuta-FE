@@ -32,12 +32,13 @@ import {
   CheckCircle, Clock, Truck, XCircle, AlertCircle,
   Edit3, Trash2,
 } from 'lucide-react';
+import { processImgUrl } from '../Utils/helper';
 
 /* ─── Types ──────────────────────────────────────────────────────────────── */
 interface IProfilePageProps {
   profile: any;
   orders: any;
-  orderTrains: any[];
+  orderTrains: any;
   addresses: any[];
   reviews: any;
 }
@@ -54,7 +55,7 @@ type NavKey = typeof NAV_TABS[number]['key'];
 /* ─── Order status badge ─────────────────────────────────────────────────── */
 const STATUS_STYLES: Record<string, { bg: string; text: string; icon: any }> = {
   completed:  { bg: 'bg-green-50',  text: 'text-green-700',  icon: CheckCircle  },
-  delivered:  { bg: 'bg-blue-50',   text: 'text-blue-700',   icon: Truck        },
+  delivered:  { bg: 'bg-green-50',   text: 'text-green-700',   icon: Truck        },
   shipped:    { bg: 'bg-sky-50',    text: 'text-sky-700',    icon: Truck        },
   pending:    { bg: 'bg-amber-50',  text: 'text-amber-700',  icon: Clock        },
   unshipped:  { bg: 'bg-slate-50',  text: 'text-slate-600',  icon: AlertCircle  },
@@ -153,7 +154,7 @@ function ProfilePage({ profile, orders, orderTrains, addresses, reviews }: IProf
       : filterMyOrderTrainStatusAction({ status: status as statusType });
     action
       .then((res) => {
-        setOrderTrainsData(res.data?.data);
+        setOrderTrainsData(res.data);
         if (res.status === 204) toast.info('No trains with this status');
       })
       .catch(() => toast.error('Error filtering trains'))
@@ -176,7 +177,7 @@ function ProfilePage({ profile, orders, orderTrains, addresses, reviews }: IProf
   }, []);
 
   const simpleOrders = simpleOrdersData?.data ?? [];
-  const trainOrders = orderTrainsData ?? [];
+  const trainOrders = orderTrainsData?.data ?? [];
   const currentOrders = orderType === 'simple' ? simpleOrders : trainOrders;
 
   return (
@@ -193,6 +194,7 @@ function ProfilePage({ profile, orders, orderTrains, addresses, reviews }: IProf
         <UpdateAddressModal
           setShow={() => setShowEditAddressModal(false)}
           address={selectedAddress}
+          redirect={() => router.push('/profile')}
         />
       )}
       {showDeleteAddressModal && (
@@ -203,7 +205,10 @@ function ProfilePage({ profile, orders, orderTrains, addresses, reviews }: IProf
         />
       )}
       {showNewAddressModal && (
-        <NewAddressModal setShow={() => setShowNewAddressModal(false)} />
+        <NewAddressModal 
+          setShow={() => setShowNewAddressModal(false)} 
+          redirect={() => router.push('/profile')}  
+        />
       )}
       {showViewOrderModal && (
         <ShowOrderModal setShow={() => setShowViewOrderModal(false)} order={selectedOrder} />
@@ -225,44 +230,46 @@ function ProfilePage({ profile, orders, orderTrains, addresses, reviews }: IProf
       <main className="max-w-5xl mx-auto px-4 md:px-6 py-6 pb-24">
 
         {/* ── PROFILE HEADER CARD ──────────────────────────────────────────── */}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 mb-5 flex flex-col sm:flex-row items-center sm:items-start gap-4">
-          {/* Avatar */}
-          <div className="relative shrink-0">
-            <div className="w-20 h-20 rounded-2xl overflow-hidden bg-orange-50 border-2 border-orange-100">
-              <img
-                src={previewImage ?? user?.picture ?? 'https://via.placeholder.com/100'}
-                alt="profile"
-                className="w-full h-full object-cover"
-              />
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 mb-5 flex flex-col md:flex-row md:justify-between items-center sm:items-start gap-4">
+          <div className='flex flex-row items-center gap-4'>
+            {/* Avatar */}
+            <div className="relative shrink-0">
+              <div className="w-20 h-20 rounded-2xl overflow-hidden bg-orange-50 border-2 border-orange-100">
+                <img
+                  src={previewImage ?? user?.picture ?? 'https://via.placeholder.com/100'}
+                  alt="profile"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <label className="absolute -bottom-1.5 -right-1.5 w-7 h-7 bg-orange-500 hover:bg-orange-600 rounded-full flex items-center justify-center cursor-pointer shadow-sm transition-colors">
+                <Camera className="w-3.5 h-3.5 text-white" />
+                <input
+                  type="file"
+                  accept=".jpg,.jpeg,.png"
+                  className="hidden"
+                  onChange={selectImage}
+                />
+              </label>
             </div>
-            <label className="absolute -bottom-1.5 -right-1.5 w-7 h-7 bg-orange-500 hover:bg-orange-600 rounded-full flex items-center justify-center cursor-pointer shadow-sm transition-colors">
-              <Camera className="w-3.5 h-3.5 text-white" />
-              <input
-                type="file"
-                accept=".jpg,.jpeg,.png"
-                className="hidden"
-                onChange={selectImage}
-              />
-            </label>
-          </div>
 
-          {/* Info */}
-          <div className="flex-1 sm:text-left">
-            <p className="text-lg font-bold text-slate-800 capitalize leading-none mb-2">
-              {user?.name}
-            </p>
-            <div className="flex flex-col sm:flex-row gap-1 sm:gap-4 text-sm text-slate-400">
-              <span className="flex items-center justify-center sm:justify-start gap-1.5">
-                <Mail className="w-3.5 h-3.5" /> {user?.email}
-              </span>
-              {user?.phone && (
+            {/* Info */}
+            <div className="flex-1 sm:text-left">
+              <p className="text-lg font-bold text-slate-800 capitalize leading-none mb-2">
+                {user?.name}
+              </p>
+              <div className="flex flex-col gap-1 sm:gap-4 text-sm text-slate-400">
                 <span className="flex items-center justify-center sm:justify-start gap-1.5">
-                  <Phone className="w-3.5 h-3.5" /> {user.phone}
+                  <Mail className="w-3.5 h-3.5" /> {user?.email}
                 </span>
-              )}
+                {user?.phone && (
+                  <span className="flex items-center justify-center sm:justify-start gap-1.5">
+                    <Phone className="w-3.5 h-3.5" /> {user.phone}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
-
+          
           {/* Vendor badge */}
           {isVendor && (
             <button
@@ -403,7 +410,7 @@ function ProfilePage({ profile, orders, orderTrains, addresses, reviews }: IProf
                     ? (order?.pivot_open_order_price_paid ?? order?.open_order_price_paid)
                     : order?.product_price_paid;
                   const total = isTrain
-                    ? (order?.pivot_order_amount ?? order?.order_amount)
+                    ? (order?.pivot_order_amount ?? order?.order_amount ?? (Number(order?.pivot_open_order_price_paid) * Number(order?.pivot_quantity)))
                     : order?.order_amount;
                   const status = isTrain
                     ? (order?.pivot_status ?? order?.status)
@@ -424,7 +431,7 @@ function ProfilePage({ profile, orders, orderTrains, addresses, reviews }: IProf
                         <div className="w-16 h-16 rounded-xl overflow-hidden bg-slate-100 shrink-0">
                           {image ? (
                             <img
-                              src={image}
+                              src={processImgUrl(image)}
                               alt={productName}
                               className="w-full h-full object-cover"
                             />
@@ -456,6 +463,10 @@ function ProfilePage({ profile, orders, orderTrains, addresses, reviews }: IProf
                               Order #{order.id}
                             </p>
                           )}
+                          <span>
+                            Date:{" "} 
+                            <span className="text-slate-600">{new Date(order?.created_at || order?.createdAt).toDateString()}</span>
+                          </span>
                         </div>
 
                         {/* Arrow */}
@@ -504,7 +515,7 @@ function ProfilePage({ profile, orders, orderTrains, addresses, reviews }: IProf
                 {addresses.map((address: any, index: number) => (
                   <div
                     key={address.id ?? index}
-                    className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 relative"
+                    className={`bg-white rounded-2xl border ${address?.address_selected ? 'border-orange-600' : 'border-slate-100'} shadow-sm p-4 relative`}
                   >
                     {/* Header */}
                     <div className="flex items-center justify-between mb-2">
@@ -512,9 +523,16 @@ function ProfilePage({ profile, orders, orderTrains, addresses, reviews }: IProf
                         <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center">
                           <MapPin className="w-4 h-4 text-orange-500" />
                         </div>
-                        <p className="font-semibold text-sm text-slate-800 capitalize">
+                        <p className="font-semibold text-xl text-slate-800 capitalize !mb-0">
                           {address?.title ?? 'Address'}
                         </p>
+                        {
+                          address?.address_selected ? (
+                            <span className="text-orange-600 text-xs font-semibold italic">
+                              (Default)
+                            </span>
+                          ) : null
+                        }
                       </div>
 
                       {/* Context menu */}
@@ -557,7 +575,7 @@ function ProfilePage({ profile, orders, orderTrains, addresses, reviews }: IProf
                     </div>
 
                     <p className="text-sm text-slate-500 capitalize leading-relaxed">
-                      {address?.name && <span className="block font-medium text-slate-700">{address.name}</span>}
+                      {address?.name && <span className="block font-medium text-slate-700 capitalize">{address.name}</span>}
                       {address?.address}
                     </p>
                   </div>
@@ -597,7 +615,8 @@ function ProfilePage({ profile, orders, orderTrains, addresses, reviews }: IProf
                   <div className="w-16 h-16 rounded-xl overflow-hidden bg-slate-100 shrink-0">
                     <img
                       src={
-                        review?.product?.product_images?.[0] ??
+                        review?.product?.product_images?.[0] ?
+                        processImgUrl(review?.product?.product_images?.[0]) :
                         'https://via.placeholder.com/100'
                       }
                       alt={review?.product?.product_name}

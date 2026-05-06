@@ -158,6 +158,8 @@ const index = ({orders}: IOrdersIndexPageProps) => {
         }
     }
 
+    console.log({orders})
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-row">
         {
@@ -296,7 +298,8 @@ const index = ({orders}: IOrdersIndexPageProps) => {
               content={ordersData?.data?.map((order: any) => ({
                 ...order,
                 order_amount: formatAmount(order.order_amount),
-                order_paid: order.order_paid ? 'Paid' : 'not paid'
+                order_paid: order.order_paid ? 'Paid' : 'not paid',
+                order_status: order?.status
               }))} 
               onRowButtonClick={(order: any) => router.push('orders/show?id='+ order.id)}
             />

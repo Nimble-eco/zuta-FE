@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
-import { HiSearch, HiUser, HiUserAdd, HiMenu } from 'react-icons/hi';
+import { HiSearch, HiUser, HiUserAdd, HiMenu, HiOutlineUserCircle, HiOutlineLogout } from 'react-icons/hi';
 import { BsShop } from 'react-icons/bs';
 import { MdOutlineShoppingCart } from 'react-icons/md';
 import { AiFillCloseCircle } from 'react-icons/ai';
@@ -14,34 +14,67 @@ interface INavBarProps {
 const Header = ({ search = true, onSearch }: INavBarProps) => {
   const router = useRouter();
   const [mobileMenu, showMobileMenu] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
   const [searchStr, setSearchStr] = useState('');
   const [user, setUser] = useState<any>({});
   const [cartCount, setCartCount] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const goToCartPage = () => router.push('/cart');
   const searchProducts = (s: string) => router.push(`/results?search=${s}`);
 
+  // Logic to calculate cart count pulled into a reusable function
+  const updateCartCount = () => {
+    try {
+      const cartData = localStorage.getItem('cart');
+      if (cartData) {
+        const cart = JSON.parse(cartData);
+        const count = (cart?.products?.length || 0) + (cart?.subscriptions?.length || 0);
+        setCartCount(count);
+      } else {
+        setCartCount(0);
+      }
+    } catch (error) {
+      console.error("Error parsing cart storage", error);
+      setCartCount(0);
+    }
+  };
+
   useEffect(() => {
     const userCookie = Cookies.get('user') ? JSON.parse(Cookies.get('user')!) : null;
     setUser(userCookie);
-    const cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')!) : [];
-    setCartCount((cart?.products?.length + cart?.subscriptions?.length) || 0);
+    updateCartCount();
+
+    window.addEventListener('storage', updateCartCount);
+
+    window.addEventListener('cartUpdated', updateCartCount);
+
+    return () => {
+      window.removeEventListener('storage', updateCartCount);
+      window.removeEventListener('cartUpdated', updateCartCount);
+    };
   }, []);
 
   useEffect(() => {
-    let isMounted = true;
-    const handleClickOutside = (event: any) => {
-      if (isMounted && ref.current && !ref.current.contains(event.target)) {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (ref.current && !ref.current.contains(event.target as Node)) {
         showMobileMenu(false);
+      }
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      isMounted = false;
-    };
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const handleLogout = () => {
+    Cookies.remove('user');
+    // Add any other cookie removals if necessary (e.g., token)
+    setUser(null);
+    router.push('/');
+  };
 
   return (
     <header className="w-full shadow-md z-50 sticky top-0">
@@ -111,9 +144,39 @@ const Header = ({ search = true, onSearch }: INavBarProps) => {
             </a>
           )}
           {user?.access_token ? (
-            <button onClick={() => router.push('/profile')} aria-label="Profile">
-              <HiUser className="text-2xl text-white" />
-            </button>
+            <div className="relative" ref={dropdownRef}>
+              <button 
+                onClick={() => setShowDropdown(!showDropdown)} 
+                className="flex items-center focus:outline-none"
+                aria-label="Profile dropdown"
+              >
+                <HiUser className={`text-2xl transition-colors ${showDropdown ? 'text-orange-400' : 'text-white'}`} />
+              </button>
+
+              {/* PROFILE DROPDOWN */}
+              {showDropdown && (
+                <div className="absolute right-0 mt-3 w-48 bg-white rounded-xl shadow-xl border border-slate-100 py-2 animate-in fade-in zoom-in-95 duration-100 origin-top-right">
+                  <div className="px-4 py-2 border-b border-slate-50 mb-1">
+                    <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Account</p>
+                    <p className="text-sm font-medium text-slate-700 truncate">{user.name || 'User'}</p>
+                  </div>
+                  <button
+                    onClick={() => { router.push('/profile'); setShowDropdown(false); }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-orange-500 transition-colors"
+                  >
+                    <HiOutlineUserCircle className="text-lg" />
+                    My Profile
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"
+                  >
+                    <HiOutlineLogout className="text-lg" />
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
           ) : (
             <button onClick={() => router.push('/auth/signIn')} aria-label="Sign in">
               <HiUserAdd className="text-2xl text-white" />

@@ -2,26 +2,37 @@ import { useRouter } from 'next/router';
 import { ArrowRight } from 'lucide-react';
 import { formatAmount } from '../../Utils/formatAmount';
 import { processImgUrl } from '../../Utils/helper';
+import Link from 'next/link';
 
 interface IHorizontalSliderProps {
   list_name: string;
   list: any[];
   page?: string;
+  index_page?: string;
+  type?: 'FEATURED' | 'ORDER TRAIN' | 'PRODUCT'
 }
 
-const HorizontalSlider = ({ list, list_name, page = '/openOrder?id=' }: IHorizontalSliderProps) => {
+const HorizontalSlider = ({ list, list_name, page = '/openOrder?id=', index_page, type='FEATURED' }: IHorizontalSliderProps) => {
   const router = useRouter();
 
   if (!list?.length) return null;
-
+  console.log({list})
   return (
     <section className="flex flex-col w-full py-4">
       {/* Section header */}
       <div className="flex items-center justify-between mb-3 px-0">
         <h3 className="font-semibold text-slate-800 text-base">{list_name}</h3>
-        <button className="flex items-center gap-1 text-orange-500 text-sm font-medium hover:text-orange-600 transition-colors">
-          View all <ArrowRight className="w-4 h-4" />
-        </button>
+        {
+          index_page && (
+            <Link 
+              href={index_page}
+            >
+              <div className="flex items-center gap-1 text-orange-500 text-sm font-medium hover:text-orange-600 transition-colors">
+                View all <ArrowRight className="w-4 h-4" />
+              </div>
+            </Link>
+          )
+        }
       </div>
 
       {/* Scrollable row */}
@@ -29,13 +40,20 @@ const HorizontalSlider = ({ list, list_name, page = '/openOrder?id=' }: IHorizon
         {list.map((item, index) => (
           <article
             key={index}
-            onClick={() => router.push(`${page}${item?.id}`)}
+            onClick={()=>{
+              if(type === 'FEATURED') return router.push(`${page}${item?.product_id}`)
+              router.push(`${page}${item?.id}`)
+            }}
             className="flex flex-col bg-white rounded-xl border border-slate-100 shadow-sm hover:shadow-md hover:border-orange-200 transition-all duration-200 cursor-pointer shrink-0 w-[140px] overflow-hidden"
           >
             {/* Image */}
             <div className="h-[110px] w-full bg-slate-100 overflow-hidden">
               <img
-                src={processImgUrl(item?.product_images?.[0])}
+                src={processImgUrl(
+                  item?.product_images?.length ? 
+                  item?.product_images[0] :
+                  item?.product?.product_images[0]
+                )}
                 alt={item?.product_name}
                 className="w-full h-full object-cover object-center hover:scale-105 transition-transform duration-300"
               />
@@ -47,7 +65,7 @@ const HorizontalSlider = ({ list, list_name, page = '/openOrder?id=' }: IHorizon
                 {item?.product_name}
               </p>
               <p className="text-[13px] font-semibold text-green-600 mt-0.5">
-                {formatAmount(item?.open_order_price ?? item?.product_price)}
+                {formatAmount(item?.open_order_price ?? item?.product_price ?? item?.product?.product_price)}
               </p>
             </div>
           </article>

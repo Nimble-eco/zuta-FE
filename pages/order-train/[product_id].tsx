@@ -1,7 +1,6 @@
 import { useState, useMemo } from "react";
 import Cookies from 'js-cookie';
-import { toast, ToastContainer } from 'react-toastify';
-import { injectStyle } from "react-toastify/dist/inject-style";
+import { toast } from 'react-toastify';
 import { usePaystackPayment } from 'react-paystack';
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -95,7 +94,6 @@ const CreateOpenOrder = ({ product, similar_products }: any) => {
     
     let user: any = {};
     if (typeof window !== 'undefined') {
-        injectStyle();
         user = Cookies.get('user') ? JSON.parse(Cookies.get('user')!) : null;
     }
     // Calculate the actual Next Price drop
@@ -107,11 +105,6 @@ const CreateOpenOrder = ({ product, similar_products }: any) => {
     const totalAmount = useMemo(() => {
         return (quantity * product?.product_price) + deliveryFee - couponDiscount;
     }, [quantity, product?.product_price, deliveryFee, couponDiscount]);
-    
-    if(typeof window !== 'undefined') {
-        injectStyle();
-        user = Cookies.get('user') ? JSON.parse(Cookies.get('user')!) : null;
-    }
 
     for (let i = 0; i < product?.reviews?.length; i += itemsPerPage) {
         reviewPages.push(product?.reviews?.slice(i, i + itemsPerPage));
@@ -137,15 +130,19 @@ const CreateOpenOrder = ({ product, similar_products }: any) => {
     const handlePaymentSuccess = async () => {
         setIsLoading(true);
         try {
-            await axiosInstance.post('/api/open-order/store', {
+            const response = await axiosInstance.post('/api/open-order/store', {
                 product_id: product?.id,
                 quantity,
                 address_id: selectedAddress.id,
                 order_delivery_fee: deliveryFee,
                 reference: paymentReference
             }, { headers: { Authorization: user.access_token } });
-            toast.success('Train started successfully!');
-            router.push(`/profile?path=orders`);
+            
+            if(response?.status === 201) {
+                toast.success('Train started successfully!');
+                sessionStorage.setItem('new_order_train', JSON.stringify(response?.data?.data));
+                router.push(`/order-train/success`);
+            }
         } catch (error: any) {
             toast.error(error?.response?.data?.message || 'Error starting train');
         } finally {
@@ -177,7 +174,6 @@ const CreateOpenOrder = ({ product, similar_products }: any) => {
         </Head>
 
         <Header search={false} />
-        <ToastContainer />
 
         <MyGallery 
             show={showImageGallery} 
@@ -334,7 +330,7 @@ const CreateOpenOrder = ({ product, similar_products }: any) => {
                                     ) : (
                                         <button 
                                             onClick={() => setShowSelectAddressModal(true)}
-                                            className="w-full p-3 border-2 border-dashed border-slate-200 rounded-xl text-slate-400 text-sm hover:border-orange-300 hover:text-orange-500 transition-all flex items-center justify-center gap-2"
+                                            className="w-full p-3 border-2 border-dashed border-orange-600 rounded-xl text-orange-600 text-sm hover:border-orange-300 hover:text-orange-500 transition-all flex items-center justify-center gap-2"
                                         >
                                             <RiTruckLine /> Select Delivery Address
                                         </button>

@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { toast, ToastContainer } from 'react-toastify';
-import { injectStyle } from "react-toastify/dist/inject-style";
+import { toast } from 'react-toastify';
 import ButtonFull from "../../Components/buttons/ButtonFull"
 import Password from "../../Components/inputs/Password"
 import TextInput from "../../Components/inputs/MyTextInput"
@@ -23,8 +22,6 @@ const Register = () => {
     const handleDataChange = (e: any) => {
         setData({ ...data, [e.target.name]: e.target.value });
     }
-
-    if (typeof window !== 'undefined') injectStyle();
 
     const socialSignUp = async (platform: string) => {
         try {
@@ -59,8 +56,7 @@ const Register = () => {
 
     return (
         <div className="min-h-screen flex bg-gray-50">
-            <ToastContainer />
-
+            
             {/* Left Side: Brand Experience */}
             <div className="hidden lg:flex lg:w-1/2 bg-orange-600 relative overflow-hidden items-center justify-center p-12">
                 <div className="relative z-10 text-white max-w-md">

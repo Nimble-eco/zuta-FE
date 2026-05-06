@@ -36,9 +36,6 @@ const Checkout: FC<ICheckoutProps> = ({ user, addresses }) => {
     let userCookie: any = {};
 
     useEffect(() => {
-        const savedCart = JSON.parse(localStorage.getItem('cart') || '{"products":[], "subscriptions":[], "bundles":[]}');
-        setCart(savedCart);
-        
         if (addresses.length > 0) {
             const def = addresses.find(a => a.address_selected) || addresses[0];
             setSelectedAddress(def);
@@ -46,6 +43,24 @@ const Checkout: FC<ICheckoutProps> = ({ user, addresses }) => {
 
         if(typeof window !== 'undefined'){
             userCookie = Cookies.get('user') ? JSON.parse(Cookies.get('user')!) : null; 
+        }
+
+        const savedCart = JSON.parse(localStorage.getItem('cart')!);
+        if(savedCart){
+            setCart(savedCart);
+
+            axiosInstance.post('/api/cart/update', {
+                ...savedCart,
+                user_id: userCookie?.id,
+                open_order_products: savedCart?.subscriptions
+            }, {
+                headers: {
+                    Authorization: userCookie?.access_token
+                }
+            })
+            .catch(error => {
+                toast.error(error.response?.message || "Error try again later")
+            });
         }
     }, []);
 
@@ -123,21 +138,6 @@ const Checkout: FC<ICheckoutProps> = ({ user, addresses }) => {
             setIsLoading(false);
         }
     };
-
-    useEffect(() => {
-        axiosInstance.post('/api/cart/update', {
-            ...cart,
-            user_id: userCookie?.id,
-            open_order_products: cart.subscriptions
-        }, {
-            headers: {
-                Authorization: userCookie?.access_token
-            }
-        })
-        .catch(error => {
-            toast.error(error.response?.message || "Error try again later")
-        })
-    }, []);
 
     return (
         <div className="bg-gray-50 min-h-screen pb-24 lg:pb-12">

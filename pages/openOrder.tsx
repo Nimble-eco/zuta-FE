@@ -15,9 +15,11 @@ import SimilarProductsHorizontalSlider from '../Components/lists/SimilarProducts
 import ProductDetailsSideDrawer from '../Components/drawer/ProductDetailsSideDrawer';
 import RatingsCard from '../Components/cards/RatingsCard';
 import { formatAmount } from '../Utils/formatAmount';
-import { processImgUrl } from '../Utils/helper';
+import { capitalizeFirstLetter, processImgUrl } from '../Utils/helper';
 import en from 'javascript-time-ago/locale/en'
 import TimeAgo from 'javascript-time-ago';
+import { X, XCircle } from 'lucide-react';
+import { Button } from '../Components/buttons/button';
 
 interface IOpenOrderProductPageProps {
     product: any;
@@ -70,6 +72,7 @@ const openOrder = ({ product, similar_products }: IOpenOrderProductPageProps) =>
             localStorage.setItem("cart", JSON.stringify(cart));
         }
 
+        window.dispatchEvent(new Event('cartUpdated'));
         toast.success('cart updated');
 
         if(user?.access_token) {
@@ -84,9 +87,10 @@ const openOrder = ({ product, similar_products }: IOpenOrderProductPageProps) =>
             })
         }
     };
+    console.log({product})
 
     return (
-        <div className='w-full bg-slate-50 min-h-screen pb-20 lg:pb-10'>
+        <div className='!w-full bg-slate-50 min-h-screen pb-20 lg:pb-10 relative overflow-scroll'>
             <Head>
                 <title>{product?.product_name || 'Product Details'}</title>
             </Head>
@@ -106,7 +110,7 @@ const openOrder = ({ product, similar_products }: IOpenOrderProductPageProps) =>
                 slides={product?.product?.product_images}
             />
 
-            <main className='max-w-7xl mx-auto px-4 pt-8 lg:pt-12'>
+            <main className='w-full px-4 pt-8 lg:pt-12'>
                 <div className='grid grid-cols-1 lg:grid-cols-12 gap-12'>
                     
                     {/* LEFT: Visuals & Content */}
@@ -154,7 +158,7 @@ const openOrder = ({ product, similar_products }: IOpenOrderProductPageProps) =>
                         <div className='sticky top-24 space-y-6'>
                             <div className='bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-6'>
                                 {/* Price Card */}
-                                <div className='flex items-end justify-between'>
+                                <div className='flex flex-col md:flex-row md:items-end justify-between'>
                                     <div>
                                         <p className='text-sm text-slate-500 font-medium'>Current Train Price</p>
                                         <div className='flex items-center gap-2'>
@@ -162,9 +166,13 @@ const openOrder = ({ product, similar_products }: IOpenOrderProductPageProps) =>
                                             <span className='text-lg text-slate-400 line-through'>{formatAmount(product.open_order_discount)}</span>
                                         </div>
                                     </div>
-                                    <div className='bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider'>
-                                        Live Deal
-                                    </div>
+                                    {
+                                        product?.status === 'open' && (
+                                            <div className='bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider w-fit'>
+                                                Live Deal
+                                            </div>
+                                        )
+                                    }
                                 </div>
 
                                 {/* Order Train Progress Visualizer */}
@@ -188,25 +196,30 @@ const openOrder = ({ product, similar_products }: IOpenOrderProductPageProps) =>
                                 </div>
 
                                 {/* CTA */}
-                                <button
+                                <Button
                                     onClick={() => addToCart(product)}
-                                    className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-orange-200 flex justify-center items-center gap-2 group"
+                                    disabled={product?.status !== 'open'}
+                                    className="w-full bg-orange-600 hover:bg-orange-700 h-14 font-bold py-4 rounded-xl transition-all shadow-lg shadow-orange-200 flex justify-center items-center gap-2 group"
                                 >
-                                    Join the Order Train
-                                    <BsArrowRight className='group-hover:translate-x-1 transition-transform'/>
-                                </button>
+                                    { product?.status === 'open' ? 'Join the Order Train' : 'Closed' }
+                                    {
+                                        product?.status === 'open' ?
+                                        <BsArrowRight className='group-hover:translate-x-1 transition-transform'/> :
+                                        <XCircle className='group-hover:translate-x-1 transition-transform text-red-800'/>
+                                    }
+                                </Button>
                             </div>
 
                             {/* Recent Activity */}
                             {product?.subscribersList?.length > 0 && (
-                                <div className='bg-slate-900 rounded-2xl p-4 text-white overflow-hidden relative'>
-                                    <div className='relative z-10'>
+                                <div className='bg-slate-900 rounded-2xl p-4 overflow-hidden relative'>
+                                    <div className='relative z-10 text-white'>
                                         <VerticalTextSlider 
-                                            list={product?.subscribersList.map((o: any) => `${o.name} joined the train about ${timeAgo.format(new Date(o?.created_at))}`)} 
+                                            list={product?.subscribersList.map((o: any) => `${capitalizeFirstLetter(o.name)} joined the train about ${timeAgo.format(new Date(o?.created_at))}`)} 
                                             list_name='Live Activity'
                                         />
                                     </div>
-                                    <div className='absolute top-0 right-0 p-4 opacity-10 font-black text-4xl italic leading-none'>LIVE</div>
+                                    <div className='absolute top-0 right-0 p-4 opacity-10 font-black text-3xl italic leading-none text-white'>LIVE</div>
                                 </div>
                             )}
                         </div>

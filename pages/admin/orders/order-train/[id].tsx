@@ -81,6 +81,7 @@ const ShowOrder = ({order, subscribers}: IShowOrderPageProps) => {
                             className="bg-gray-100 px-4 py-2 rounded-xl"
                             onChange={(e)=>setStatus(e.target?.value)}
                         >
+                            <option value={'queued'}>Queued</option>
                             <option value={'ready'}>Ready</option>
                             <option value={'closed'}>Closed</option>
                             <option value={'completed'}>Completed</option>

@@ -1,6 +1,6 @@
 import { Modal } from "react-bootstrap";
 import { MdOutlineClose } from "react-icons/md";
-import TextAreaInput from "../../inputs/TextAreaInput";
+import { HiOutlineChatAlt2, HiOutlineStar } from "react-icons/hi";
 import { useState } from "react";
 import ButtonFull from "../../buttons/ButtonFull";
 import RatingsCard from "../../cards/RatingsCard";
@@ -13,68 +13,108 @@ interface IRateProductModalProps {
     setShow: () => void;
 }
 
-const RateProductModal = ({order, orderTrain, setShow}: IRateProductModalProps) => {
+const RateProductModal = ({ order, orderTrain, setShow }: IRateProductModalProps) => {
     const [loading, setLoading] = useState(false);
     const [comment, setComment] = useState('');
     const [score, setScore] = useState<number | undefined>(undefined);
 
-    const submit = async () => {
-        setLoading(true);
+    // Dynamic data based on source
+    const product = order?.product ?? orderTrain?.product;
+    const productName = order?.product_name ?? product?.product_name;
 
+    const submit = async () => {
+        if (!score) {
+            return toast.error("Please select a star rating");
+        }
+
+        setLoading(true);
         storeProductRatingAction({
             product_id: order?.product_id ?? orderTrain?.product_id,
-            score: score!,
+            score: score,
             comment
         })
         .then(() => {
-            toast.success('Review submitted');
+            toast.success('Thank you for your feedback!');
             setShow();
-            setTimeout(()=>window.location.reload(), 3000);
+            // Using a softer approach than reload if possible, but keeping your logic
+            setTimeout(() => window.location.reload(), 2000);
         })
         .catch((error: any) => {
-            console.log({error});
             toast.error(error?.response?.data?.message || 'Error! Try again later');
         })
-        .finally(()=>setLoading(false));
+        .finally(() => setLoading(false));
     }
 
-  return (
-    <div className="!rounded-md ">
-        <Modal show={true} onHide={setShow} backdrop="static" dialogClassName='md:modal-90w'>
-            <Modal.Body className='md:!min-w-[40vw] md:!w-[40vw] relative'>
-                <MdOutlineClose className='text-3xl cursor-pointer absolute top-3 right-3' onClick={setShow} />
-                <div className="flex flex-col gap-4 justify-center py-6 px-4">
-                    <h3 className="text-lg font-semibold text-slate-700 text-center">Rate Product</h3>
-                    <div className="flex flex-row gap-4 items-center">
-                        <label htmlFor="score" className="font-semibold">Score:</label>
-                        <RatingsCard 
-                            rating={score!} 
-                            setRatings={setScore}
-                            hight={8}
-                            width={8}
-                        />
+    return (
+        <Modal 
+            show={true} 
+            onHide={setShow} 
+            centered 
+            backdrop="static" 
+            dialogClassName='max-w-[450px] mx-auto px-4'
+        >
+            <Modal.Body className='p-0 overflow-hidden rounded-[2rem] bg-white shadow-xl relative'>
+                {/* Close Button */}
+                <button 
+                    onClick={setShow}
+                    className="absolute top-4 right-4 z-50 p-2 text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                    <MdOutlineClose className='text-2xl' />
+                </button>
+
+                <div className="flex flex-col">
+                    {/* Header Section with Product Preview */}
+                    <div className="bg-slate-50 p-8 flex flex-col items-center text-center border-b border-slate-100">
+                        <h3 className="text-xl font-black text-slate-800 leading-tight">
+                            How was your {productName}?
+                        </h3>
+                        <p className="text-slate-500 text-xs mt-2 font-medium">
+                            Your review helps others make better choices!
+                        </p>
                     </div>
 
-                    <TextAreaInput
-                        label="Comment"
-                        name="comment"
-                        value={comment}
-                        placeHolder="Enter your message here"
-                        onInputChange={(e: any)=>setComment(e.target.value)}
-                    />
+                    {/* Rating Section */}
+                    <div className="p-8 flex flex-col gap-6">
+                        <div className="flex flex-col items-center gap-3">
+                            <label className="text-[10px] uppercase tracking-[0.2em] font-black text-slate-400 flex items-center gap-2">
+                                <HiOutlineStar className="text-sm" /> Select Rating
+                            </label>
+                            <RatingsCard 
+                                rating={score || 0} 
+                                setRatings={setScore}
+                                hight={10} 
+                                width={10}
+                            />
+                        </div>
 
-                    <div className="h-10 w-[80%] mx-auto">
-                        <ButtonFull
-                            action="Submit"
-                            loading={loading}
-                            onClick={submit}
-                        />
+                        <div className="flex flex-col gap-2">
+                            <label className="text-[10px] uppercase tracking-[0.2em] font-black text-slate-400 flex items-center gap-2">
+                                <HiOutlineChatAlt2 className="text-sm" /> Your Experience
+                            </label>
+                            <textarea
+                                className="w-full h-32 rounded-2xl bg-slate-50 border border-slate-100 outline-none px-4 py-3 text-sm focus:ring-2 focus:ring-orange-100 transition-all"
+                                placeholder="What did you like or dislike?"
+                                value={comment}
+                                onChange={(e) => setComment(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="pt-2">
+                            <ButtonFull
+                                action="Submit Review"
+                                loading={loading}
+                                onClick={submit}
+                            />
+                        </div>
+                        
+                        <p className="text-[10px] text-center text-slate-400 italic">
+                            By submitting, you agree to our community guidelines.
+                        </p>
                     </div>
                 </div>
             </Modal.Body>
         </Modal>
-    </div>
-  )
+    );
 }
 
-export default RateProductModal
+export default RateProductModal;

@@ -6,11 +6,10 @@ import axiosInstance from "../../../Utils/axiosConfig";
 import { useRouter } from "next/router";
 import { CheckCircle, Loader2, Package, ShoppingBag, MessageSquareHeart } from "lucide-react";
 import RatingsCard from "../../../Components/cards/RatingsCard";
-import { updateOrderRequest } from "../../../requests/order/order.request";
-import { updateOrderTrainStatusAction } from "../../../requests/orderTrain/orderTrain.request";
 import { storeFeedbackAction } from "../../../requests/feedback/feedback.request";
 import { feedbackTypes } from "../../../Utils/data";
-import { capitalizeFirstLetter } from "../../../Utils/helper";
+import { capitalizeFirstLetter, processImgUrl } from "../../../Utils/helper";
+import ProductComponent from "../../../Components/ProductComponent";
 
 const PaystackCallback = () => {
     const router = useRouter();
@@ -36,15 +35,6 @@ const PaystackCallback = () => {
         .then(async (response) => {
             if (response.data?.message?.toLowerCase() === 'payment successful') {
                 setPaymentStatus('success');
-                const metadata = response.data.data.metadata;
-
-                // Fire and forget updates
-                metadata?.orders?.forEach((id: any) => 
-                    updateOrderRequest({ id, order_paid: true })
-                );
-                metadata?.order_train?.forEach((id: string) => 
-                    updateOrderTrainStatusAction({ id, order_paid: true, status: 'unshipped' })
-                );
                 
                 localStorage.removeItem('cart');
             } else {
@@ -58,7 +48,9 @@ const PaystackCallback = () => {
     // Load Featured Products
     useEffect(() => {
         axiosInstance.get('/api/featured/product/index?properties=1')
-            .then(res => setFeaturedProducts(res?.data?.data?.slice(0, 5)));
+            .then(res => {
+                if(res?.data)setFeaturedProducts(res?.data?.data?.data?.slice(0, 5))
+            });
     }, []);
 
     const submitFeedback = async () => {
@@ -170,33 +162,10 @@ const PaystackCallback = () => {
                         <h3 className="font-bold text-slate-800 px-2">You might also like</h3>
                         <div className="space-y-4">
                             {featuredProducts?.map((product) => (
-                                <a 
-                                    key={product.id}
-                                    href={`/product?id=${product?.id}`}
-                                    className="flex gap-4 bg-white p-3 rounded-xl border border-slate-100 hover:shadow-md transition-shadow group"
-                                >
-                                    <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-slate-100">
-                                        <img 
-                                            src={product?.product?.product_images[0]} 
-                                            className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-300"
-                                            alt={product.product_name}
-                                        />
-                                    </div>
-                                    <div className="flex flex-col justify-center">
-                                        <h4 className="text-sm font-bold text-slate-800 line-clamp-1">{product.product_name}</h4>
-                                        <div className="mt-1">
-                                            {product?.product?.reviews && <RatingsCard rating={product?.product?.reviews} />}
-                                        </div>
-                                        <div className="flex items-center gap-2 mt-1">
-                                            <span className="text-orange-600 font-bold text-sm">₦{product?.product?.product_price}</span>
-                                            {product?.product?.product_discount > 0 && (
-                                                <span className="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-bold">
-                                                    -{product?.product?.product_discount}%
-                                                </span>
-                                            )}
-                                        </div>
-                                    </div>
-                                </a>
+                                <ProductComponent
+                                    key={product?.id}
+                                    product={product?.product}
+                                />
                             ))}
                         </div>
                     </aside>

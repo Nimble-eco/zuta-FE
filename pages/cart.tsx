@@ -321,37 +321,53 @@ const CartPage = () => {
   };
 
   const getRecommendations = async (cartItems: any) => {
+    // 1. Check if the cart is actually empty to avoid useless API calls
+    const cartValues = Object.values(cartItems).flat();
+    if (cartValues.length === 0) {
+        setFeaturedProducts([]);
+        setSimilarProducts([]);
+        setOpenOrderProducts([]);
+        return;
+    }
+
     setLoadingRecommendations(true);
     try {
-      const categoryList: string[] = [];
-      const tagsList: string[] = [];
+      const categorySet = new Set<string>();
+      const tagsSet = new Set<string>();
 
-      for (const arr of Object.values(cartItems)) {
-        if (!Array.isArray(arr)) continue;
-        for (const item of arr as any[]) {
+      // 2. Efficient extraction using Sets to remove duplicates
+      for (const item of cartValues as any[]) {
           const cats = item?.product_categories ?? item?.product?.product_categories ?? [];
           const tags = item?.product_tags ?? item?.product?.product_tags ?? [];
-          categoryList.push(...(Array.isArray(cats) ? cats : []));
-          tagsList.push(...(Array.isArray(tags) ? tags : []));
-        }
+          
+          if (Array.isArray(cats)) cats.forEach(c => categorySet.add(c));
+          if (Array.isArray(tags)) tags.forEach(t => tagsSet.add(t));
       }
 
-      const payload = { product_categories: categoryList, product_tags: tagsList };
+      const payload = { 
+          product_categories: Array.from(categorySet), 
+          product_tags: Array.from(tagsSet) 
+      };
 
       const [showcaseRes, productsRes, openOrdersRes] = await Promise.allSettled([
-        axiosInstance.post('/api/featured/product/filter/index', payload),
-        axiosInstance.post('/api/public/product/filter/index', payload),
-        axiosInstance.post('/api/open-order/filter/index', payload),
+          axiosInstance.post('/api/featured/product/filter/index', payload),
+          axiosInstance.post('/api/public/product/filter/index', payload),
+          axiosInstance.post('/api/open-order/filter/index', {...payload, status: 'open'}),
       ]);
 
-      if (showcaseRes.status === 'fulfilled' && showcaseRes.value.status === 200)
-        setFeaturedProducts(showcaseRes.value.data?.data?.slice(0, 6) ?? []);
+      // Helper to extract data from AdonisJS paginated response
+      // Path: res.value (Promise) -> .data (Axios) -> .data (Adonis JSON) -> .data (Lucid Paginate Array)
+      const extractData = (res: any) => {
+          if (res.status === 'fulfilled' && res.value.status === 200) {
+              return res.value.data?.data?.data || res.value.data?.data || [];
+          }
+          return []; // Return empty array for 204 or failed requests
+      };
 
-      if (productsRes.status === 'fulfilled' && productsRes.value.status === 200)
-        setSimilarProducts(productsRes.value.data?.data?.data?.slice(0, 6) ?? []);
+      setFeaturedProducts(extractData(showcaseRes).slice(0, 6));
+      setSimilarProducts(extractData(productsRes).slice(0, 6));
+      setOpenOrderProducts(extractData(openOrdersRes));
 
-      if (openOrdersRes.status === 'fulfilled' && openOrdersRes.value.status === 200)
-        setOpenOrderProducts(openOrdersRes.value.data?.data?.data ?? []);
     } catch (err) {
       console.error('Failed to load recommendations', err);
     } finally {
@@ -418,6 +434,8 @@ const CartPage = () => {
     </div>
   );
 
+  console.log({openOrderProducts, featuredProducts, similarProducts})
+
   return (
     <div className="w-full bg-slate-50 min-h-screen pb-32 md:pb-10">
       <Header />
@@ -467,6 +485,16 @@ const CartPage = () => {
                   />
                 </div>
               </div>
+            )}
+
+            {featuredProducts.length > 0 && (
+              <section className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
+                <HorizontalSlider
+                  list={featuredProducts}
+                  list_name="✨ Recommended for you"
+                  page="/product?id="
+                />
+              </section>
             )}
           </div>
 
@@ -522,16 +550,6 @@ const CartPage = () => {
         {/* ── Recommendations ─────────────────────────────────────────────── */}
         {!loadingRecommendations && (
           <>
-            {featuredProducts.length > 0 && (
-              <section className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
-                <HorizontalSlider
-                  list={featuredProducts}
-                  list_name="✨ Recommended for you"
-                  page="/product?id="
-                />
-              </section>
-            )}
-
             {similarProducts.length > 0 && (
               <section className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
                 <HorizontalSlider

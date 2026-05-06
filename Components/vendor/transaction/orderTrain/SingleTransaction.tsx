@@ -70,9 +70,9 @@ const SingleOpenOrderTransaction = ({transaction, reviews}: ISingleTransactionPr
     setIsLoading(true)
 
     await markOpenOrderAsReadyByVendorAction(transaction.id, transaction.vendor_id)
-    .then((response) => {
-      if(response.status === 202) {
-        toast.success('Order status updated');
+    .then((response: any) => {
+      if(response?.data) {
+        toast.success(response?.message || 'Order status updated');
         router.push(`/vendor/transactions/order-train/show?id=${transaction.id}`);
       }
     })
@@ -95,7 +95,7 @@ const SingleOpenOrderTransaction = ({transaction, reviews}: ISingleTransactionPr
                 transaction.status === 'open' &&
                 <div className="h-10">
                   <ButtonGhost
-                    action="Cancel Order"
+                    action="Close Order"
                     loading={isLoading}
                     onClick={closeOrderByVendor}
                   />
@@ -186,7 +186,7 @@ const SingleOpenOrderTransaction = ({transaction, reviews}: ISingleTransactionPr
           <h2 className="text-gray-700 !text-base my-4 font-bold">Subscribers</h2>
           { transaction && transaction.subscribersList?.map((subscriber, index) => (
             <div className="flex flex-col pb-3 border-b border-gray-100 mb-3" key={index}>
-              <div className="flex flex-row">
+              <div className="flex flex-row justify-between items-center">
                 <h3 className="mr-4 capitalize">{capitalizeFirstLetter(subscriber.name)}</h3>
                 <p className="">
                   <span className='opacity-40 mr-1 font-semibold'>Qty: </span>
@@ -202,7 +202,7 @@ const SingleOpenOrderTransaction = ({transaction, reviews}: ISingleTransactionPr
           <h2 className="text-gray-700 !text-base my-4 font-semibold">Reviews</h2>
           { reviews && reviews?.map((review, index) => (
             <div className="flex flex-col pb-3 border-b border-gray-100 mb-3" key={index}>
-              <div className="flex flex-row">
+              <div className="flex flex-row justify-between items-center">
                 <h3 className="font-semibold mr-4 capitalize">{review.user?.name}</h3>
                 <RatingsCard rating={review.score} />
               </div>

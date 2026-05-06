@@ -65,16 +65,19 @@ const index = () => {
                     id={'1'}
                     name="jemiseu"
                     image="https://via.placeholder.com/100"
+                    is_following={false}
                 />  
                 <ExploreUserCard
                     id={'1'}
                     name="jemiseu"
                     image="https://via.placeholder.com/100"
+                    is_following={false}
                 />  
                 <ExploreUserCard
                     id={'1'}
                     name="jemiseu"
                     image="https://via.placeholder.com/100"
+                    is_following={false}
                 />  
             </div>
         </div>

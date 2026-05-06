@@ -27,7 +27,7 @@ const showVendor = ({vendor}: IShowVendorPageProps) => {
         .then((response) => {
             if(response.status === 200) {
                 toast.success('Vendor status updated');
-                setTimeout(()=>window.location.reload(), 3000);
+                setTimeout(()=>router.reload(), 3000);
             }
         })
         .catch(error => {
@@ -44,7 +44,7 @@ const showVendor = ({vendor}: IShowVendorPageProps) => {
         .then((response) => {
             if(response.status === 200) {
                 toast.success('Vendor status updated');
-                setTimeout(()=>window.location.reload(), 3000);
+                setTimeout(()=>router.reload(), 3000);
             }
         })
         .catch(error => {

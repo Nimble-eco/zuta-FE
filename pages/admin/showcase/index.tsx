@@ -12,6 +12,8 @@ import FilterContainer from "../../../Components/modals/containers/FilterContain
 import TextInput from "../../../Components/inputs/MyTextInput";
 import MyDropDownInput from "../../../Components/inputs/MyDropDownInput";
 import AdminNavBar from "../../../Components/admin/layout/AdminNavBar";
+import { formatCurrency } from "../../../Utils/helper";
+import { formatAmount } from "../../../Utils/formatAmount";
 
 interface IShowcaseIndexPageProps {
     items: any;
@@ -237,7 +239,12 @@ const ShowcaseIndexPage = ({items}: IShowcaseIndexPageProps) => {
                         headings={['product_name', 'featured_amount', 'duration', 'position', 'product_categories', 'status', 'activation_date', 'deactivation_date', 'featured_paid', 'featured_payment_confirmed',]}
                         content={featuredItemsData?.data?.data?.map((item: any) => ({
                             ...item,
-                            duration: item.featured_duration_in_hours
+                            featured_amount: formatAmount(item?.featured_amount),
+                            duration: item.featured_duration_in_hours?.toFixed(0),
+                            activation_date: item?.activation_date ? new Date(item?.activation_date).toDateString() : new Date(item?.featured_start_date).toDateString(),
+                            deactivation_date: item?.deactivation_date ? new Date(item?.deactivation_date).toDateString() : new Date(item?.featured_end_date).toDateString(),
+                            featured_paid: item?.featured_paid ? 'True' : 'False',
+                            featured_payment_confirmed: item?.featured_paid ? 'True' : 'False',
                         }))} 
                         onRowButtonClick={(item: any) => router.push(`showcase/show?id=${item.id}`)}
                     />

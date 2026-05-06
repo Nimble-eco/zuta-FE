@@ -3,6 +3,7 @@ import axiosInstance from "../../../Utils/axiosConfig";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { Loader2, Search } from "lucide-react";
 import ExploreUserCard from "../../../Components/cards/ExploreUserCard";
+import Cookies from "js-cookie";
 
 interface IUsersResultTabProps {
     search_string: string;
@@ -12,16 +13,22 @@ interface IUsersResultTabProps {
 const UsersResultTab = ({search_string, users}: IUsersResultTabProps) => {
     const [usersData, setUsersData] = useState(users);
     const [page, setPage] = useState(1);
-    const [moreUsers, setMoreUsers] = useState(users?.length > 0 ? true : false);
+    const [moreUsers, setMoreUsers] = useState(users?.length > 24 ? true : false);
+    let userCookie: any = {};
+
+    if(typeof window !== 'undefined'){
+        userCookie = Cookies.get('user') ? JSON.parse(Cookies.get('user')!) : null; 
+    }
 
     const loadMoreData = async () => {
-        await axiosInstance.post('/api/public/users/search/index', {
+        await axiosInstance.post('/api/public/user/search/index', {
             search: search_string,
-            pagination: page + 1
-        })
+            page: page + 1
+        },{ headers: { Authorization: userCookie?.access_token } })
         .then((response) => {
-            if(response.data.data) {
-                setUsersData(usersData.concat(response.data.data));
+            console.log({response})
+            if(response.data.data?.data) {
+                setUsersData(usersData.concat(response.data.data?.data));
                 setPage(page + 1);
             }
             else setMoreUsers(false);
@@ -42,8 +49,9 @@ const UsersResultTab = ({search_string, users}: IUsersResultTabProps) => {
                     <ExploreUserCard
                         key={user?.id}
                         id={user.id}
-                        name={user.name}
+                        name={`${user.first_name} ${user?.last_name}`}
                         image={user?.picture}
+                        is_following={user?.is_following}
                     />
                 )) : 
                 <div className="flex flex-col items-center justify-center py-24 gap-4">

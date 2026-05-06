@@ -69,6 +69,7 @@ const ShowOrder = ({order}: IShowOrderPageProps) => {
             setTimeout(()=>window.location.reload(), 3000);
         }
     }
+    console.log({order})
     
   return (
     <div className="min-h-screen bg-gray-100 overflow-scroll flex flex-row relative">
@@ -85,6 +86,7 @@ const ShowOrder = ({order}: IShowOrderPageProps) => {
                             onChange={(e)=>setStatus(e.target?.value)}
                             value={status}
                         >
+                            <option value={'queued'}>Queued</option>
                             <option value={'shipped'}>Shipped</option>
                             <option value={'unshipped'}>Unshipped</option>
                             <option value={'delivered'}>Delivered</option>

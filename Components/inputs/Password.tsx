@@ -36,13 +36,13 @@ const Password = ({ label, name, value, border=1, page, handleChange, handleFocu
             {
                 showPassword ?
                 <span 
-                    className='w-10 absolute right-5 top-[30%] cursor-pointer text-[#1E1E1E] font-semibold'
+                    className='w-10 absolute right-5 top-[40%] cursor-pointer text-gray-500 font-medium text-xs'
                     onClick={() => setShowPassword(false)}
                 >
                     Hide
                 </span> : 
                 <span
-                    className='w-10 absolute right-5 top-[30%] cursor-pointer text-[#1E1E1E] font-semibold'
+                    className='w-10 absolute right-5 top-[40%] cursor-pointer text-gray-500 font-medium text-xs'
                     onClick={() => setShowPassword(true)}
                 >
                     Show

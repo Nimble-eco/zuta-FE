@@ -1,7 +1,6 @@
 import { parse } from "cookie";
 import axiosInstance from "../../../Utils/axiosConfig";
 import VendorSideNavPanel from "../../../Components/vendor/layout/VendorSideNavPanel";
-import { getDateAndTimeFromISODate } from "../../../Utils/convertIsoDateToDateString";
 import { calculateTotalHours } from "../../../Utils/getHoursDifferenceFromDateTime";
 import ButtonFull from "../../../Components/buttons/ButtonFull";
 import { activateProductShowcaseAction, deactivateProductShowcaseAction, reactivateProductShowcaseAction, resumeProductShowcaseAction } from "../../../requests/showcase/showcase.request";
@@ -34,9 +33,10 @@ const show = ({featuredProduct, mostViewedInCategories}: IShowFeaturedProductPag
   const activateProductFeature = async () => {
     setIsLoading(true);
     await activateProductShowcaseAction(featuredProduct?.id, vendorId)
-    .then((response) => {
+    .then((response: any) => {
         if(response.status === 202) {
-            router.push(response.data.data.pay_stack_checkout_url);
+          toast.success(response?.message || 'Feature activated successfully');
+          setTimeout(()=>router.reload(), 1200);
         }
     })
     .catch(error => {
@@ -62,9 +62,10 @@ const show = ({featuredProduct, mostViewedInCategories}: IShowFeaturedProductPag
   const deactivateProductFeature = async () => {
     setIsLoading(true);
     await deactivateProductShowcaseAction(featuredProduct?.id, vendorId)
-    .then((response) => {
+    .then((response: any) => {
       if(response.status === 202) {
-        router.push(response.data.data.pay_stack_checkout_url);
+        toast.success(response?.message || 'Feature deactivated successfully');
+        setTimeout(()=>router.reload(), 1200);
       }
     })
     .catch(error => {
@@ -78,7 +79,8 @@ const show = ({featuredProduct, mostViewedInCategories}: IShowFeaturedProductPag
     await resumeProductShowcaseAction(featuredProduct?.id, vendorId)
     .then((response) => {
       if(response.status === 202) {
-        return toast.success('Showcase resumed');
+        toast.success('Showcase resumed');
+        setTimeout(()=>router.reload(), 1200);
       }
     })
     .catch(error => {
@@ -87,24 +89,15 @@ const show = ({featuredProduct, mostViewedInCategories}: IShowFeaturedProductPag
     .finally(() => setIsLoading(false));
   }
 
+  console.log({mostViewedInCategories})
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col overflow-auto">
       <div className="flex flex-row w-full mx-auto relative">
         <VendorSideNavPanel />
         <div className="min-h-screen bg-gray-100 flex flex-col w-full lg:w-[80%] lg:absolute right-0 lg:left-[20%] rounded-md !px-2 lg:!px-4">
           <VendorNavBar />
-          <div className="flex flex-row gap-4 flex-wrap">
-            <div className="bg-white rounded-md shadow-md flex flex-col gap-1 px-4 py-2">
-              <p className="text-lg font-semibold text-orange-600">Total Views before</p>
-              <p className="text-slate font-medium">4</p>
-            </div>
-
-            <div className="bg-white rounded-md shadow-md flex flex-col gap-1 px-4 py-2">
-              <p className="text-lg font-semibold text-orange-600">Total Views After</p>
-              <p className="text-slate font-medium">9</p>
-            </div>
-          </div>
-
+          
           <div className='flex flex-col'>
             <div className="flex flex-row justify-between my-4">
               <h2 className="!text-lg !font-medium text-slate my-auto">Showcase</h2>
@@ -114,6 +107,7 @@ const show = ({featuredProduct, mostViewedInCategories}: IShowFeaturedProductPag
                     <ButtonFull
                       action="Pause"
                       onClick={deactivateProductFeature}
+                      loading={isLoading}
                     />
                   </div> : 
                 featuredProduct?.status === 'inactive' && !featuredProduct.deactivation_date ?
@@ -121,14 +115,16 @@ const show = ({featuredProduct, mostViewedInCategories}: IShowFeaturedProductPag
                     <ButtonFull
                       action="Activate"
                       onClick={activateProductFeature}
+                      loading={isLoading}
                     />
                   </div> : 
                 featuredProduct?.status === 'inactive' && 
-                new Date(featuredProduct.deactivation_date) > new Date(featuredProduct?.featured_start_date) ?
+                new Date(featuredProduct.deactivation_date) < new Date(featuredProduct?.featured_end_date) ?
                   <div className="h-12 w-[15%]">
                     <ButtonFull
                       action="Resume"
                       onClick={resumeProductFeature}
+                      loading={isLoading}
                     />
                   </div> : 
                 featuredProduct?.status === 'completed' &&
@@ -145,7 +141,7 @@ const show = ({featuredProduct, mostViewedInCategories}: IShowFeaturedProductPag
             <div className="flex flex-col md:grid md:grid-cols-2 gap-4">
               <div className="flex flex-col px-4 py-5 bg-white">
                 <p className="text-lg font-medium">{capitalizeFirstLetter(featuredProduct.product_name)}</p>
-                <p className="text-sm">{featuredProduct.product?.product_description}</p>
+                <p className="text-sm line-clamp-6" dangerouslySetInnerHTML={{__html: featuredProduct.product?.product_description}} />
                 <div className="flex flex-col gap-2 mt-3">
                   <p className="font-medium">Featured In:</p>
                   {
@@ -157,23 +153,23 @@ const show = ({featuredProduct, mostViewedInCategories}: IShowFeaturedProductPag
               </div>
 
               <div className="flex flex-col px-4 py-5 gap-2 bg-white">
-                <div className="flex flex-row gap-3">
+                <div className="flex flex-row gap-3 justify-between items-center">
                   <p className="">Status</p>
                   <p className="font-medium">{featuredProduct.status}</p>
                 </div>
-                <div className="flex flex-row gap-3">
+                <div className="flex flex-row gap-3 justify-between items-center">
                   <p className="">Start Date</p>
                   <p className="font-medium">{new Date(featuredProduct.featured_start_date).toDateString()}</p>
                 </div>
-                <div className="flex flex-row gap-3">
+                <div className="flex flex-row gap-3 justify-between items-center">
                   <p className="">End Date</p>
                   <p className="font-medium">{new Date(featuredProduct.featured_end_date).toDateString()}</p>
                 </div>
-                <div className="flex flex-row gap-3">
+                <div className="flex flex-row gap-3 justify-between items-center">
                   <p className="">Duration</p>
-                  <p className="font-medium">{featuredProduct.featured_duration_in_hours}</p>
+                  <p className="font-medium">{featuredProduct.featured_duration_in_hours?.toFixed(0)}</p>
                 </div>
-                <div className="flex flex-row gap-3">
+                <div className="flex flex-row gap-3 justify-between items-center">
                   <p className="">Time Left</p>
                   <p className="font-medium">
                     {
@@ -183,7 +179,7 @@ const show = ({featuredProduct, mostViewedInCategories}: IShowFeaturedProductPag
                       new Date(featuredProduct.featured_start_date) < new Date(Date.now()) &&
                       new Date(featuredProduct.featured_end_date) < new Date(Date.now()) ?
                         0 :
-                      featuredProduct.featured_duration_in_hours
+                      featuredProduct.featured_duration_in_hours?.toFixed(2)
                     }
                   </p>
                 </div>

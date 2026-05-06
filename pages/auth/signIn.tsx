@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import Cookies from 'js-cookie';
-import { toast, ToastContainer } from 'react-toastify';
-import { injectStyle } from "react-toastify/dist/inject-style";
+import { toast } from 'react-toastify';
 import { FaGoogle } from "react-icons/fa";
 import Password from "../../Components/inputs/Password";
 import ButtonFull from "../../Components/buttons/ButtonFull";
@@ -19,8 +18,6 @@ export default function SignIn() {
     const handleDataChange = (e: any) => {
         setData({ ...data, [e.target.name]: e.target.value });
     }
-
-    if (typeof window !== 'undefined') injectStyle();
 
     const socialSignUp = async (platform: string) => {
         try {
@@ -50,14 +47,17 @@ export default function SignIn() {
                 }
             }
         } catch (error: any) {
+            console.log({error})
             setIsLoading(false);
             toast.error(error.response?.data?.message || 'Login failed');
+            if(error?.response?.status === 413) {
+                router.push('/auth/requestEmailVerification');
+            }
         }
     }
 
     return (
         <div className="min-h-screen flex bg-gray-50">
-            <ToastContainer />
             <LoginSelectWorkSpaceModal show={showSwitchProfileModal} setShow={setShowSwitchProfileModal} />
 
             {/* Left Side: Brand/Marketing (Hidden on Mobile) */}
@@ -119,11 +119,7 @@ export default function SignIn() {
                                 value={data.password}
                                 handleChange={handleDataChange}
                             />
-                            <div className="flex items-center justify-between mt-2">
-                                <label className="flex items-center text-xs text-gray-600 cursor-pointer">
-                                    <input type="checkbox" className="mr-2 rounded border-gray-300 text-orange-600 focus:ring-orange-500" />
-                                    Remember me
-                                </label>
+                            <div className="flex items-center justify-end mt-2">
                                 <span 
                                     className="text-xs font-medium text-orange-600 hover:underline cursor-pointer"
                                     onClick={() => router.push('/auth/forgotPassword')}

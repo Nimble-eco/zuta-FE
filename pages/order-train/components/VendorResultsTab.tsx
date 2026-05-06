@@ -3,6 +3,7 @@ import axiosInstance from "../../../Utils/axiosConfig";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { Loader2, Search } from "lucide-react";
 import ExploreVendorCard from "../../../Components/cards/ExploreVendorCard";
+import Cookies from "js-cookie";
 
 interface IVendorResultsTabProps {
     search_string: string;
@@ -12,16 +13,21 @@ interface IVendorResultsTabProps {
 const VendorResultsTab = ({search_string, vendors}: IVendorResultsTabProps) => {
     const [vendorsData, setVendorsData] = useState(vendors);
     const [page, setPage] = useState(1);
-    const [moreVendors, setMoreVendors] = useState(vendors?.length > 0 ? true : false);
+    const [moreVendors, setMoreVendors] = useState(vendors?.length > 24 ? true : false);
+    let userCookie: any = {};
+
+    if(typeof window !== 'undefined'){
+        userCookie = Cookies.get('user') ? JSON.parse(Cookies.get('user')!) : null; 
+    }
 
     const loadMoreData = async () => {
-        await axiosInstance.post('/api/open-order/search/index', {
+        await axiosInstance.post('/api/public/vendor/search/index', {
             search: search_string,
-            pagination: page + 1
-        })
+            page: page + 1
+        }, { headers: { Authorization: userCookie?.access_token } })
         .then((response) => {
-            if(response.data.data) {
-                setVendorsData(vendorsData.concat(response.data.data));
+            if(response.data.data.data) {
+                setVendorsData(vendorsData.concat(response.data.data?.data));
                 setPage(page + 1);
             }
             else setMoreVendors(false);
@@ -43,8 +49,9 @@ const VendorResultsTab = ({search_string, vendors}: IVendorResultsTabProps) => {
                         key={vendor?.id}
                         id={vendor.id}
                         name={vendor.vendor_name}
-                        username={`${vendor?.vendor_city} - ${vendor?.vendor_state}`}
+                        username={`${vendor.vendor_city ?? ''} ${vendor.vendor_city && vendor.vendor_state ? '·' : ''} ${vendor.vendor_state ?? ''}`}
                         image={vendor?.user?.picture}
+                        is_subscribed={vendor?.is_subscribed}
                     />
                 )) : 
                 <div className="flex flex-col items-center justify-center py-24 gap-4">

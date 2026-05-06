@@ -170,6 +170,7 @@ function results({products, openOrderProducts, featuredProducts}: IResultsPagePr
                             <HorizontalSlider 
                                 list={openOrderProducts} 
                                 list_name="Ongoing Group Orders" 
+                                type="ORDER TRAIN"
                             />
                         </div>
                     )}
@@ -240,7 +241,7 @@ export async function getServerSideProps(context: any) {
 
         const getFeaturedProducts = await axiosInstance.post(
             '/api/featured/product/search/index',
-            {search}
+            {search, status: 'active'}
         );
 
         const [productsResult, openOrderProductsResult, featuredProductsResult] = await Promise.allSettled([
@@ -252,7 +253,6 @@ export async function getServerSideProps(context: any) {
         const products = productsResult.status === 'fulfilled' && productsResult.value.data ? productsResult.value.data?.data : [];
         const openOrderProducts = openOrderProductsResult.status === 'fulfilled' && openOrderProductsResult.value.data ? openOrderProductsResult.value.data?.data : [];
         const featuredProducts = featuredProductsResult.status === 'fulfilled' && featuredProductsResult.value.data ? featuredProductsResult.value.data?.data : [];
-        console.log({products, openOrderProducts, featuredProducts})
 
         return {
             props: {

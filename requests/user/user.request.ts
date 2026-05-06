@@ -39,6 +39,13 @@ export const blockUserAction = async (id: string) => {
     });
 }
 
+export const unblockUserAction = async (id: string) => {
+    const user = JSON.parse(Cookies.get('user')!);
+    return axiosInstance.post('/api/user/unblock', {id}, {
+        headers: {Authorization: user.access_token}
+    });
+}
+
 export const followUserAction = async (userId: string) => {
     const user = JSON.parse(Cookies.get('user')!);
     return axiosInstance.post('/api/user/follow', {userId}, {

@@ -12,7 +12,7 @@ const TextImageCard = ({title, image, link, onClick}: ITextImageCardProps) => {
         className="flex flex-col justify-center items-center rounded-full relative h-fit w-fit"
         onClick={onClick ?? null}
     >
-        <div className='absolute top-0 left-0 right-0 bottom-0 rounded-full bg-black bg-opacity-40 ' />
+        <div className='absolute top-0 left-0 right-0 bottom-0 rounded-full bg-black !opacity-30 ' />
         <img
             src={image} 
             alt={title}

@@ -274,6 +274,7 @@ function ProductPage({
       });
     }
     localStorage.setItem('cart', JSON.stringify(cart));
+    window.dispatchEvent(new Event('cartUpdated'));
     toast.success('Added to cart');
     if (user?.access_token) {
       await axiosInstance
@@ -737,6 +738,8 @@ function ProductPage({
             <HorizontalSlider
               list={featured_similar_products.data}
               list_name="Recommended for you"
+              type='FEATURED'
+              page='/product?id='
             />
           </section>
         )}
@@ -811,6 +814,8 @@ function ProductPage({
             <HorizontalSlider
               list={similar_products.data}
               list_name="Customers also viewed"
+              type='PRODUCT'
+              page='/product?id='
             />
           </section>
         )}

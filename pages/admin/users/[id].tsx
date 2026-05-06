@@ -7,7 +7,7 @@ import TextCard from "../../../Components/texts/TextCard";
 import MyTable from "../../../Components/tables/MyTable";
 import { useState } from "react";
 import { toast } from "react-toastify";
-import { blockUserAction } from "../../../requests/user/user.request";
+import { blockUserAction, unblockUserAction } from "../../../requests/user/user.request";
 import AdminSideNavPanel from "../../../Components/admin/layout/AdminSideNav";
 import AdminNavBar from "../../../Components/admin/layout/AdminNavBar";
 
@@ -25,8 +25,26 @@ const show = ({user}: IShowUserProps) => {
 
     await blockUserAction(user.id)
     .then((response) => {
+      if(response.status === 202) {
+        toast.success('User status updated');
+        router.reload();
+      }
+    })
+    .catch(error => {
+      console.log({error});
+      toast.error(error?.response?.data?.message || 'Error try again later');
+    })
+    .finally(() => setIsBlockingUser(false));
+  }
+
+  const unblockUser = async() => {
+    setIsBlockingUser(true)
+
+    await unblockUserAction(user.id)
+    .then((response) => {
         if(response.status === 202) {
-            toast.success('Product status updated');
+          toast.success('User status updated');
+          router.reload();
         }
     })
     .catch(error => {
@@ -45,13 +63,25 @@ const show = ({user}: IShowUserProps) => {
           <div className="flex flex-row justify-between items-center border-b border-gray-200 py-4 px-4">
               <h2 className="text-xl font-semibold align-center align-baseline my-auto capitalize">{user.name}</h2>
               <div className="flex flex-row ">
-                <div className="ml-3">
-                  <ButtonFull
-                    action="Block User"
-                    onClick={blockUser}
-                    loading={isBlockingUser}
-                  />
-                </div>
+                {
+                  user?.blocked ? (
+                    <div className="ml-3">
+                      <ButtonFull
+                        action="Unblock User"
+                        onClick={unblockUser}
+                        loading={isBlockingUser}
+                      />
+                    </div>
+                  ) : (
+                    <div className="ml-3">
+                      <ButtonFull
+                        action="Block User"
+                        onClick={blockUser}
+                        loading={isBlockingUser}
+                      />
+                    </div>
+                  )
+                }
               </div>
           </div>
 

@@ -13,7 +13,7 @@ import axiosInstance from "../../../Utils/axiosConfig";
 import { filterProductShowcaseAction, searchFeaturedProductsByVendorAction } from "../../../requests/showcase/showcase.request";
 import MyDropDownInput from "../../../Components/inputs/MyDropDownInput";
 import VendorNavBar from "../../../Components/vendor/layout/VendorNavBar";
-import { Sparkles, Calendar, ShieldCheck, Clock, Search, ArrowUpRight } from "lucide-react";
+import { Sparkles, Calendar, ShieldCheck } from "lucide-react";
 import { formatAmount } from "../../../Utils/formatAmount";
 
 interface IProductShowcaseIndexPageProps {
@@ -160,13 +160,6 @@ const index = ({featured_products}: IProductShowcaseIndexPageProps) => {
                         </h1>
                         <p className="text-slate-500 text-sm">Manage your premium featured listings and track visibility periods.</p>
                     </div>
-                    <button 
-                        onClick={() => router.push('/vendor/showcase/create')}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-indigo-200 transition-all flex items-center gap-2 text-sm"
-                    >
-                        <span>Feature New Product</span>
-                        <ArrowUpRight size={18} />
-                    </button>
                 </header>
 
                 {/* Quick Stats */}
@@ -213,11 +206,12 @@ const index = ({featured_products}: IProductShowcaseIndexPageProps) => {
                 {/* Table */}
                 <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-scroll">
                     <MyTable
-                        headings={['product_name', 'featured_amount', 'paid', 'featured_payment_confirmed', 'status', 'start_date', 'end_date']}
+                        headings={['product_name', 'featured_amount', 'paid', 'payment_confirmed', 'status', 'start_date', 'end_date']}
                         content={featuredProducts?.data?.map((featuredProduct: any) => ({
                             ...featuredProduct,
+                            featured_amount: formatAmount(featuredProduct?.featured_amount),
                             paid: featuredProduct.featured_paid ? 'Paid' : 'Not Paid',
-                            featured_payment_confirmed: featuredProduct.featured_payment_confirmed ? 'Confirmed' : 'Unconfirmed',
+                            payment_confirmed: featuredProduct.featured_payment_confirmed ? 'Confirmed' : 'Unconfirmed',
                             start_date: getDateAndTimeFromISODate(featuredProduct.featured_start_date),
                             end_date: getDateAndTimeFromISODate(featuredProduct.featured_end_date),
                         }))} 

@@ -35,6 +35,7 @@ const TransactionsIndexPage = ({payments}:ITransactionsIndexPageProps) => {
         start_date: '',
         end_date: '',
     });
+    console.log({payments, transactionsData})
     
     const handleFilterByDetailsChange = (e: any) => {
         setFilterByDetails((prevState) => ({
@@ -246,6 +247,8 @@ const TransactionsIndexPage = ({payments}:ITransactionsIndexPageProps) => {
                         content={transactionsData?.data?.data?.map((transaction: any) => ({
                             ...transaction,
                             id: transaction.id,
+                            paid: transaction.paid ? 'True' : 'False',
+                            payment_confirmed: transaction.payment_confirmed ? 'True' : 'False'
                         }))} 
                         onRowButtonClick={(transaction: any) => router.push(`transactions/${transaction.id}`)}
                     />

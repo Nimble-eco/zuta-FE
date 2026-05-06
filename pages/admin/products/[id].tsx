@@ -9,6 +9,7 @@ import { managementApproveProductAction, managementUnApproveProductAction } from
 import axiosInstance from "../../../Utils/axiosConfig"
 import { parse } from "cookie"
 import AdminNavBar from "../../../Components/admin/layout/AdminNavBar"
+import { formatAmount } from "../../../Utils/formatAmount"
 
 interface IShowProductPageProps {
     product: any;
@@ -26,7 +27,7 @@ const showProduct = ({product}: IShowProductPageProps) => {
         .then((response) => {
             if(response.status === 200) {
                 toast.success('Product status updated');
-                setTimeout(()=>window.location.reload(), 3000);
+                setTimeout(()=>router.reload(), 1500);
             }
         })
         .catch(error => {
@@ -43,7 +44,7 @@ const showProduct = ({product}: IShowProductPageProps) => {
         .then((response) => {
             if(response.status === 200) {
                 toast.success('Product status updated');
-                setTimeout(()=>window.location.reload(), 3000);
+                setTimeout(()=>router.reload(), 1500);
             }
         })
         .catch(error => {
@@ -84,7 +85,7 @@ const showProduct = ({product}: IShowProductPageProps) => {
                     <div className='grid-cols-2 grid md:grid-cols-3 lg:grid-cols-4 gap-4'>
                         <TextCard label='Name' value={product.product_name} />
                         <TextCard label='Quantity' value={product.quantity} />
-                        <TextCard label='Price' value={product.product_price} />
+                        <TextCard label='Price' value={formatAmount(product.product_price)} />
                         <TextCard label='Discount' value={product.product_discount} />
                         <TextCard label='Status' value={product.status} />
                         <TextCard label='Featured' value={product.featured_status ?? '--'} />
@@ -117,6 +118,8 @@ const showProduct = ({product}: IShowProductPageProps) => {
                         <TextCard label="City" value={product?.vendor?.vendor_city} />
                         <TextCard label="State" value={product?.vendor?.vendor_state} />
                         <TextCard label="Country" value={product?.vendor?.vendor_country} />
+                        <TextCard label="Management Approved" value={product?.vendor?.management_approved ? 'True' : 'False'} />
+                        <TextCard label="Vendor Approved" value={product?.vendor?.user_approved ? 'True' : 'False'} />
                         <TextCard label="Flag(s)" value={product?.vendor?.flag} />
                     </div>
                 </div>
@@ -133,12 +136,26 @@ const showProduct = ({product}: IShowProductPageProps) => {
                                 View
                             </p>
                         </div>
-                        <div className="gird grid-cols-2 lg:grid-cols-4 gap-4">
-                            <TextCard label="Amount" value={product?.featured?.featured_amount} />
-                            <TextCard label="Duration" value={product?.featured?.featured_duration_in_hours} />
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            <TextCard label="Amount" value={formatAmount(product?.featured?.featured_amount)} />
+                            <TextCard label="Duration" value={Number(product?.featured?.featured_duration_in_hours).toFixed(2)} />
                             <TextCard label="Status" value={product?.featured?.status} />
-                            <TextCard label="Activation Date" value={product?.featured?.activation_date} />
-                            <TextCard label="Deactivation Date" value={product?.featured?.deactivation_date} />
+                            <TextCard 
+                                label="Activation Date" 
+                                value={
+                                    product?.featured?.activation_date ?
+                                    new Date(product?.featured?.activation_date).toDateString() :
+                                    new Date(product?.featured?.featured_start_date).toDateString()
+                                } 
+                            />
+                            <TextCard 
+                                label="Deactivation Date" 
+                                value={
+                                    product?.featured?.deactivation_date ?
+                                    new Date(product?.featured?.deactivation_date).toDateString() :
+                                    new Date(product?.featured?.featured_end_date).toDateString()
+                                } 
+                            />
                             <TextCard label="Paid" value={product?.featured?.featured_paid ? 'True' : 'False'} />
                         </div>
                     </div> : 
@@ -155,8 +172,8 @@ const showProduct = ({product}: IShowProductPageProps) => {
         
                 <div className="flex flex-col gap-4 bg-white rounded-md">
                     <div className="flex flex-row gap-4 text-gray-600 mt-8 pl-4 items-center">
-                        <h4 className={`font-medium ${orderTab === 'order' && 'text-orange-700 text-lg font-semibold'} cursor-pointer`} onClick={()=>setOrderTab('order')}>Orders</h4>
-                        <h4 className={`font-medium ${orderTab === 'train' && 'text-orange-700 text-lg font-semibold'} cursor-pointer`} onClick={()=>setOrderTab('train')}>Order Train</h4>
+                        <p className={`font-medium ${orderTab === 'order' && 'text-orange-700 text-lg font-semibold'} cursor-pointer`} onClick={()=>setOrderTab('order')}>Orders</p>
+                        <p className={`font-medium ${orderTab === 'train' && 'text-orange-700 text-lg font-semibold'} cursor-pointer`} onClick={()=>setOrderTab('train')}>Order Train</p>
                     </div>
         
                     {
@@ -168,6 +185,7 @@ const showProduct = ({product}: IShowProductPageProps) => {
                                     ...order,
                                     id: order.id,
                                     sn: index + 1,
+                                    product_price_paid: formatAmount(order?.product_price_paid),
                                     order_payment_confirmed: order.order_payment_confirmed ? 'True' : 'False',
                                     created_at: new Date(order.created_at).toDateString(),
                                 }))} 
@@ -185,6 +203,7 @@ const showProduct = ({product}: IShowProductPageProps) => {
                                     ...order,
                                     id: order.id,
                                     sn: index + 1,
+                                    open_order_price: formatAmount(order?.open_order_price),
                                     created_at: new Date(order.created_at).toDateString()
                                 }))} 
                                 onRowButtonClick={(order: any) => router.push(`orders/${order.id}`)}

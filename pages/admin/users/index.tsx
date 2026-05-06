@@ -219,12 +219,12 @@ const index = ({users}: IUsersIndexPageProps) => {
                     <StatsCard
                         title='Users with Orders'
                         value={usersWithOrders}
-                        footer={calculateRatio(usersWithOrders, users.data?.meta?.total)}
+                        trend={calculateRatio(usersWithOrders, users.data?.meta?.total)}
                     />
                     <StatsCard
                         title='Users with Open Orders'
                         value={usersWithOpenOrders}
-                        footer={calculateRatio(usersWithOpenOrders, users.data?.meta?.total)}
+                        trend={calculateRatio(usersWithOpenOrders, users.data?.meta?.total)}
                     />
                 </div>
                 <div className="flex flex-row text-sm font-semibold !text-gray-400 px-4 pt-5 bg-white">

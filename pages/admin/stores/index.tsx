@@ -222,17 +222,17 @@ const StoresIndexPage = ({stores}:IStoresIndexPageProps) => {
                     <StatsCard
                         title='Stores with order(s)'
                         value={storesWithOrders}
-                        footer={calculateRatio(storesWithOrders, stores.data?.meta?.total)}
+                        trend={calculateRatio(storesWithOrders, stores.data?.meta?.total)}
                     />
                     <StatsCard
                         title='Stores with order train(s)'
                         value={storesWithOpenOrders}
-                        footer={calculateRatio(storesWithOpenOrders, stores.data?.meta?.total)}
+                        trend={calculateRatio(storesWithOpenOrders, stores.data?.meta?.total)}
                     />
                     <StatsCard
                         title='Stores with Product(s)'
                         value={storesWithProducts}
-                        footer={calculateRatio(storesWithProducts, stores.data?.meta?.total)}
+                        trend={calculateRatio(storesWithProducts, stores.data?.meta?.total)}
                     />
                 </div>
                 <div className="flex flex-row text-sm font-semibold !text-gray-400 px-4 pt-5 bg-white">

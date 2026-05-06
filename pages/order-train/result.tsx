@@ -5,10 +5,9 @@ import Head from 'next/head';
 import {
   ArrowLeft, Search, Train, Package, Star,
   Store, Users, LayoutGrid, X,
+  PersonStanding,
 } from 'lucide-react';
 import Header from '../../Components/Header';
-import ExploreUserCard from '../../Components/cards/ExploreUserCard';
-import ProductComponent from '../../Components/ProductComponent';
 import ProductResultsTab from './components/ProductResultsTab';
 import ReviewResultsTab from './components/ReviewResultsTab';
 import TrainResultsTab from './components/TrainResultsTab';
@@ -16,7 +15,9 @@ import VendorResultsTab from './components/VendorResultsTab';
 import TopResultsTab from './components/TopResultsTab';
 import UsersResultTab from './components/UsersResultsTab';
 import axiosInstance from '../../Utils/axiosConfig';
-import { productsDummyData } from '../../data/products';
+import FeaturedProductCard from '../../Components/cards/FeaturedProductCard';
+import ExploreUserMiniCard from '../../Components/cards/ExploreUserMiniCard';
+import Link from 'next/link';
 
 /* ─── Types ──────────────────────────────────────────────────────────────── */
 interface IResultsPageProps {
@@ -26,6 +27,7 @@ interface IResultsPageProps {
   reviews: any[];
   vendors: any[];
   users: any[];
+  usersSearchResult: any[];
 }
 
 /* ─── Tab config ─────────────────────────────────────────────────────────── */
@@ -48,6 +50,7 @@ const ResultPage = ({
   reviews,
   vendors,
   users,
+  usersSearchResult
 }: IResultsPageProps) => {
   const router = useRouter();
   const queryTab = (router.query.tab as TabKey) ?? 'top';
@@ -57,9 +60,7 @@ const ResultPage = ({
 
   const doSearch = (str: string) => {
     setSearchString(str);
-    router.push(`/order-train/result?search=${encodeURIComponent(str)}&tab=${filterTab}`, undefined, {
-      shallow: true,
-    });
+    router.push(`/order-train/result?search=${encodeURIComponent(str)}&tab=${filterTab}`);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -76,13 +77,15 @@ const ResultPage = ({
 
   /* Count helpers for badge display */
   const counts: Record<TabKey, number> = {
-    top: products.length + openOrderProducts.length,
+    top: products.length + openOrderProducts.length + usersSearchResult?.length + vendors?.length + reviews?.length,
     train: openOrderProducts.length,
     products: products.length,
     reviews: reviews.length,
     vendor: vendors.length,
-    users: users.length,
+    users: usersSearchResult.length,
   };
+
+  console.log({vendors})
 
   return (
     <div className="w-full bg-slate-50 min-h-screen">
@@ -178,18 +181,19 @@ const ResultPage = ({
 
         {/* Left sidebar — featured products */}
         <aside className="hidden lg:flex flex-col gap-4 w-56 shrink-0">
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-            <div className="px-4 py-3 border-b border-slate-50">
+          <div className="bg-white rounded-2xl border-l border-slate-100 shadow-sm overflow-hidden">
+            <div className="pt-3 pl-1.5 border-b border-slate-50">
               <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                 Featured products
               </h3>
             </div>
-            <div className="p-3 flex flex-col gap-3">
-              {(featuredProducts?.length ? featuredProducts : productsDummyData)
-                ?.slice(0, 4)
+            <div className="flex flex-col gap-3 px-1.5">
+              {
+              featuredProducts?.length ? 
+                featuredProducts?.slice(0, 4)
                 .map((product: any) => (
-                  <ProductComponent key={product.id} product={product} />
-                ))}
+                  <FeaturedProductCard key={product.id} product={product} />
+                )) : null}
             </div>
           </div>
         </aside>
@@ -202,6 +206,7 @@ const ResultPage = ({
               orders={openOrderProducts}
               products={products}
               vendors={vendors}
+              users={usersSearchResult}
               reviews={reviews}
             />
           )}
@@ -218,7 +223,7 @@ const ResultPage = ({
             <VendorResultsTab search_string={searchString} vendors={vendors} />
           )}
           {filterTab === 'users' && (
-            <UsersResultTab search_string={searchString} users={users} />
+            <UsersResultTab search_string={searchString} users={usersSearchResult} />
           )}
         </main>
 
@@ -230,14 +235,30 @@ const ResultPage = ({
                 Who to follow
               </h3>
             </div>
-            <div className="p-3 flex flex-col gap-2">
-              {[
-                { id: '1', name: 'Chukwuma Eze', image: 'https://via.placeholder.com/100' },
-                { id: '2', name: 'Amaka Obi',    image: 'https://via.placeholder.com/100' },
-                { id: '3', name: 'Tunde Alabi',  image: 'https://via.placeholder.com/100' },
-              ].map((u) => (
-                <ExploreUserCard key={u.id} id={u.id} name={u.name} image={u.image} />
-              ))}
+            <div className="p-1 flex flex-col gap-2">
+              {
+                users?.length ?
+                users?.slice(0,5)?.map((u) => (
+                  <ExploreUserMiniCard 
+                    key={u.id} 
+                    id={u.id} 
+                    name={`${u.first_name} ${u?.last_name}`} 
+                    image={u.picture} 
+                    is_following={u?.is_following}
+                  />
+                )) : (
+                  <div className="flex flex-col gap-2 items-center">
+                    <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center">
+                      <PersonStanding className="w-8 h-8 text-slate-300" />
+                    </div>
+                    <Link href={'/auth/signIn'}>
+                      <p className="text-sm text-slate-400 mt-1 cursor-pointer">
+                        Sign in to follow Shoppers
+                      </p>
+                  </Link>
+                  </div>
+                )
+              }
             </div>
           </div>
         </aside>
@@ -264,6 +285,7 @@ export async function getServerSideProps(context: any) {
       reviewResults,
       vendorResults,
       usersResult,
+      usersIndexResult,
     ] = await Promise.allSettled([
       axiosInstance.post('/api/public/product/search/index', { search }),
       axiosInstance.post('/api/open-order/search/index', { search }),
@@ -271,11 +293,12 @@ export async function getServerSideProps(context: any) {
       axiosInstance.post('/api/review/product/search/index', { search }, { headers: { Authorization: token } }),
       axiosInstance.post('/api/public/vendor/search/index', { search }, { headers: { Authorization: token } }),
       axiosInstance.post('/api/public/user/search/index', { search }, { headers: { Authorization: token } }),
+      axiosInstance.get('/api/public/user/index', { headers: { Authorization: token } }),
     ]);
 
     const safeData = (r: PromiseSettledResult<any>) =>
       r.status === 'fulfilled' ? r.value?.data?.data?.data ?? r.value?.data?.data ?? [] : [];
-
+    
     return {
       props: {
         products: safeData(productsResult),
@@ -283,7 +306,8 @@ export async function getServerSideProps(context: any) {
         featuredProducts: safeData(featuredProductsResult),
         reviews: safeData(reviewResults),
         vendors: safeData(vendorResults),
-        users: safeData(usersResult),
+        usersSearchResult: safeData(usersResult),
+        users: safeData(usersIndexResult),
       },
     };
   } catch (error: any) {
@@ -299,6 +323,7 @@ export async function getServerSideProps(context: any) {
         reviews: [],
         vendors: [],
         users: [],
+        usersSearchResult: [],
       },
     };
   }

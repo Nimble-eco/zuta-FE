@@ -3,32 +3,42 @@ import ExploreItemCard from '../../../Components/cards/ExploreItemCard';
 import ExploreTrainCard from '../../../Components/cards/ExploreTrainCard';
 import ExploreVendorCard from '../../../Components/cards/ExploreVendorCard';
 import ExploreReviewCard from '../../../Components/cards/ExploreRevewCard';
+import ExploreUserCard from '../../../Components/cards/ExploreUserCard';
 
 interface ITopResultsTabProps {
   search_string: string;
   vendors: any[];
+  users: any[];
   products: any[];
   orders: any[];
   reviews: any[];
 }
 
 type ResultItem = {
-  type: 'vendor' | 'product' | 'order' | 'review';
+  type: 'vendor' | 'product' | 'order' | 'review' | 'user';
   [key: string]: any;
 };
 
 const TopResultsTab = ({
   search_string,
   vendors,
+  users,
   products,
   orders,
   reviews,
 }: ITopResultsTabProps) => {
+  const safeOrders = Array.isArray(orders) ? orders : [];
+  const safeProducts = Array.isArray(products) ? products : [];
+  const safeVendors = Array.isArray(vendors) ? vendors : [];
+  const safeUsers = Array.isArray(users) ? users : [];
+  const safeReviews = Array.isArray(reviews) ? reviews : [];
+
   const merged: ResultItem[] = [
-    ...orders.map((o) => ({ ...o, type: 'order' as const })),
-    ...products.map((p) => ({ ...p, type: 'product' as const })),
-    ...vendors.map((v) => ({ ...v, type: 'vendor' as const })),
-    ...reviews.map((r) => ({ ...r, type: 'review' as const })),
+    ...safeOrders.map((o) => ({ ...o, type: 'order' as const })),
+    ...safeProducts.map((p) => ({ ...p, type: 'product' as const })),
+    ...safeVendors.map((v) => ({ ...v, type: 'vendor' as const })),
+    ...safeUsers.map((u) => ({ ...u, type: 'user' as const })),
+    ...safeReviews.map((r) => ({ ...r, type: 'review' as const })),
   ].sort(() => Math.random() - 0.5);
 
   if (merged.length === 0) {
@@ -100,6 +110,18 @@ const TopResultsTab = ({
               name={object.vendor_name}
               username={`${object.vendor_city ?? ''} ${object.vendor_city && object.vendor_state ? '·' : ''} ${object.vendor_state ?? ''}`}
               image={object.user?.picture}
+              is_subscribed={object?.is_subscribed}
+            />
+          );
+        }
+        if (object.type === 'user') {
+          return (
+            <ExploreUserCard
+              key={`${object.id}-${index}`}
+              id={object.id}
+              name={object.name}
+              image={object.picture}
+              is_following={object?.is_following}
             />
           );
         }

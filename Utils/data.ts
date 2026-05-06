@@ -31,7 +31,7 @@ export const feedbackStatusTypes = [
 export const appFaqs = [
     {
         question: 'What is an order train?',
-        answer: 'An order train is when many users order the same item within 5 days. We combine these orders to get a big wholesale order. This way, everyone gets the item at a cheaper price.'
+        answer: 'An order train is when many users order the same item within a specific time period usually 5 days. We combine these orders to get a big wholesale order. This way, everyone gets the item at a cheaper price.'
     },
     {
         question: 'How do I track my order?',
@@ -39,11 +39,11 @@ export const appFaqs = [
     },
     {
         question: 'What is the return policy?',
-        answer: 'We offer a 30-day return policy. If you are not satisfied with your purchase, you can return it within 30 days of delivery for a full refund or exchange.'
+        answer: 'We offer a 7-day return policy. If you are not satisfied with your purchase, you can return it within 7 days of delivery for a full refund or exchange.'
     },
     {
         question: 'How do I pay for my order?',
-        answer: 'We accept various payment methods including credit cards, PayPal, and bank transfers. You can select your preferred payment method during checkout.'
+        answer: 'We use payment gateways to accept various payment methods including credit cards and bank transfers. You can select your preferred payment method during checkout.'
     },
     {
         question: 'Is my personal information secure?',

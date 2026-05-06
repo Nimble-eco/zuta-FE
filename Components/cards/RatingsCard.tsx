@@ -11,7 +11,13 @@ const RatingsCard = ({ rating, setRatings, hight=5, width=5 }: IRatingsCardProps
   let stars = [];
   for (let i = 0; i < 5; i++) {
     if (i < rating) {
-      stars.push(<MdStar key={i} className={`text-orange-300 h-${hight} w-${width}`}/>);
+      stars.push(<MdStar 
+        key={i} 
+        className={`text-orange-300 h-${hight} w-${width}`}
+        onClick={() => {
+          if(setRatings) setRatings(i + 1);
+        }}  
+      />);
     } else {
       stars.push(
       <MdOutlineStarOutline 

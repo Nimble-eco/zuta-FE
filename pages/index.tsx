@@ -150,7 +150,11 @@ const Home = ({ products, openOrders, categories, tags, featured, catalogues }: 
 
       {/* ── FEATURED / SHOWCASE ───────────────────────────────────────────── */}
       <section className="bg-white px-4 py-5 mt-2 border-b border-slate-100">
-        <HorizontalSlider list_name="✨ Featured picks" list={featured} />
+        <HorizontalSlider 
+          list_name="✨ Featured picks" 
+          list={featured} 
+          page='/product?id='  
+        />
       </section>
 
       {/* ── TAGS ──────────────────────────────────────────────────────────── */}
@@ -213,7 +217,7 @@ export async function getServerSideProps() {
       bannersResult,
     ] = await Promise.allSettled([
       sendAxiosRequest('/api/public/product/index?properties=1', 'get', {}, '', ''),
-      sendAxiosRequest('/api/open-order/index?properties=1', 'get', {}, '', ''),
+      sendAxiosRequest('/api/open-order/filter/index', 'post', { status: 'open' }, '', ''),
       sendAxiosRequest('/api/product/category/index', 'get', {}, '', ''),
       sendAxiosRequest('/api/product/tag/index', 'get', {}, '', ''),
       sendAxiosRequest('/api/featured/product/filter/index', 'post', { status: 'active' }, '', ''),

@@ -90,6 +90,8 @@ const index = ({orders}: IStandardOrdersIndexPageProps) => {
         }
     }
 
+    console.log({orders})
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col overflow-scroll">
         {
@@ -183,11 +185,12 @@ const index = ({orders}: IStandardOrdersIndexPageProps) => {
                 {/* OORDERS TABLE */}
                 <div className="flex flex-col pb-8 bg-white overflow-y-auto">
                     <MyTable
-                        headings={['product_name', 'quantity', 'price', 'next_price', 'next_discount', 'status', 'stock',]}
+                        headings={['product_name', 'quantity', 'subscribers', 'price', 'next_price', 'next_discount', 'status', 'stock',]}
                         content={ordersData?.data?.data?.map((order: any) => ({
                             ...order,
                             product_name: order.product_name,
-                            quantity: order.orderCount,
+                            quantity: order.order_count,
+                            subscribers: order.subscribers_count,
                             price: formatAmount(order.open_order_price),
                             next_price: formatAmount(order.next_price),
                             next_discount: formatAmount(order.next_discount),

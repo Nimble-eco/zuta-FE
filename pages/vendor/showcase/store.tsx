@@ -12,6 +12,7 @@ import Cookies from "js-cookie";
 import { storeProductShowcaseAction } from "../../../requests/showcase/showcase.request";
 import { useRouter } from "next/router";
 import VendorNavBar from "../../../Components/vendor/layout/VendorNavBar";
+import { Button } from "../../../Components/buttons/button";
 
 interface IStoreProductFeaturePageProps {
     product: any;
@@ -61,7 +62,7 @@ const store = ({product, rate}: IStoreProductFeaturePageProps) => {
             ...featuredDetails,
             product_id: product.id,
             vendor_id: vendorId,
-            featured_duration_in_hours: totalHours,
+            featured_duration_in_hours: Number(totalHours.toFixed(0)),
         })
         .then((response) => {
             if(response.status === 201) {
@@ -84,12 +85,15 @@ const store = ({product, rate}: IStoreProductFeaturePageProps) => {
                     <h2 className="text-xl font-semibold text-gray-700">Showcase: 
                         <span className="font-bold text-slate-700 ml-2">{capitalizeFirstLetter(product.product_name)}</span>
                     </h2>
-                    <div className="w-[20%] h-10 hidden lg:flex">
-                        <ButtonFull
-                            action="Advertise"
-                            loading={isLoading}                        
+                    <div className="hidden lg:flex">
+                        <Button
+                            disabled={isLoading || !rate.featuredRatePerHour || !totalHours || !product?.product_price}
+                            className="h-12 w-40 bg-orange-600"
+                            isLoading={isLoading}                        
                             onClick={storeProductFeature}
-                        />
+                        >
+                            Advertise
+                        </Button>
                     </div>
                 </div>
 
@@ -97,7 +101,7 @@ const store = ({product, rate}: IStoreProductFeaturePageProps) => {
                     <div className="flex flex-col text-gray-700">
 
                         <div className='flex flex-row bg-white px-4 py-6 rounded-md w-full'>
-                            <div className='flex flex-row justify-between gap-4 items-center bg-gray-100 rounded-md px-4 py-3 w-full'>
+                            <div className='flex flex-col md:flex-row justify-between gap-4 md:items-center bg-gray-100 rounded-md px-4 py-3 w-full'>
                                 <label className="text-sm font-semibold">Start Date And Time:</label>
                                 <input 
                                     type="datetime-local"
@@ -111,7 +115,7 @@ const store = ({product, rate}: IStoreProductFeaturePageProps) => {
                         </div>
 
                         <div className='flex flex-col gap-4 bg-white px-4 py-6 mt-4 relative rounded-md'>
-                            <div className='flex flex-row justify-between gap-4 items-center bg-gray-100 rounded-md px-4 py-3'>
+                            <div className='flex flex-col md:flex-row justify-between gap-4 md:items-center bg-gray-100 rounded-md px-4 py-3'>
                                 <label className="text-sm font-semibold">End Date And Time:</label>
                                 <input 
                                     type="datetime-local"
@@ -159,12 +163,15 @@ const store = ({product, rate}: IStoreProductFeaturePageProps) => {
                     <p className="text-orange-500">{formatAmount(rate.featuredRatePerHour * product?.product_price * totalHours)}</p>
                 </div>
 
-                <div className="w-[40%] lg:w-[30%] mx-auto my-6 h-14 lg:hidden">
-                    <ButtonFull
-                        action="Showcase"
-                        loading={isLoading}                        
+                <div className="w-[40%] mx-auto my-6 h-14 lg:hidden">
+                    <Button
+                        disabled={isLoading || !rate.featuredRatePerHour || !totalHours || !product?.product_price}
+                        className="h-14 bg-orange-600 w-full"
+                        isLoading={isLoading}                        
                         onClick={storeProductFeature}
-                    />
+                    >
+                        Showcase
+                    </Button>
                 </div>
             </div>
         </div>

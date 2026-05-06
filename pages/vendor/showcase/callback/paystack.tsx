@@ -1,148 +1,106 @@
 import { useRouter } from "next/router";
-import {useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { toast } from 'react-toastify';
 import axiosInstance from "../../../../Utils/axiosConfig";
 import ButtonFull from "../../../../Components/buttons/ButtonFull";
 import { PulseLoader } from "react-spinners";
 import Header from "../../../../Components/Header";
-import ButtonGhost from "../../../../Components/buttons/ButtonGhost";
-import RatingsCard from "../../../../Components/cards/RatingsCard";
+import { CheckCircle2, XCircle } from "lucide-react";
 
-const paystack = () => {
+const PaystackCallback = () => {
     const router = useRouter();
-    let userCookie: any = {};
-    const [isLoading, setIsLoading]= useState(false);
-    const [paymentStatus, setPaymentStatus] = useState<string>('');
-    const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
-
-    if(typeof window !== 'undefined'){
-        userCookie = Cookies.get('user') ? JSON.parse(Cookies.get('user')!) : null; 
-    }
+    const [isLoading, setIsLoading] = useState(true);
+    const [paymentStatus, setPaymentStatus] = useState<'verifying' | 'success' | 'error'>('verifying');
 
     useEffect(() => {
-        const queryParams = new URLSearchParams(router.asPath.split('?')[1]);
-        const trxref = queryParams.get('trxref');
-        const reference = queryParams.get('reference');
-      
-        setIsLoading(true)
+        if (!router.isReady) return;
 
-        axiosInstance.post('/api/payment/verify/paystack', {
-            reference,
-            trxref
-        }, {
-            headers: {Authorization: userCookie.access_token}
-        })
-        .then((response) => {
-            setIsLoading(false)
-            if(response.data?.message?.toLowerCase() === 'payment successful') {
-                const status = response.data.message.toLowerCase() === 'payment successful' ? 'success' : 'unsuccessful';
-                setPaymentStatus(status);
-                toast.success('Payment verified successfully')
+        const verifyPayment = async () => {
+            const { reference, trxref } = router.query;
+            const userCookie = Cookies.get('user') ? JSON.parse(Cookies.get('user')!) : null;
+
+            if (!reference || !userCookie) {
+                setPaymentStatus('error');
+                setIsLoading(false);
+                return;
             }
-        })
-        .finally(() => localStorage.removeItem('cart'));
-    }, []);
 
-  return (
-    <div className="bg-gray-200 min-h-screen flex flex-col relative">
-        <Header />
+            try {
+                const response = await axiosInstance.post('/api/payment/verify/paystack', 
+                    { reference, trxref }, 
+                    { headers: { Authorization: `Bearer ${userCookie.access_token}` } }
+                );
 
-        <div 
-            className="w-[95%] flex flex-col lg:flex-row gap-4 mx-auto mt-12"
-        >
-            <div className="flex flex-col w-[90%] gap-4 mx-auto lg:w-[65%] lg:mr-[2%] mb-4 min-h-fit">
-                <div className="flex flex-col bg-white rounded-md px-4 !py-4 relative min-h-[75%]">
-                    <div className="flex flex-row justify-start gap-4 ">
-                        <h2 className="text-xl font-semibold">{paymentStatus === 'success' ? 'Verified' : 'Verifying'}</h2>
-                        <div>
-                            <PulseLoader 
-                                size={10}
-                                loading={isLoading}
-                                color="#FFA500"
-                            />
-                        </div>
-                    </div>
+                if (response.data?.message?.toLowerCase().includes('successful')) {
+                    setPaymentStatus('success');
+                    toast.success('Payment verified successfully!');
+                } else {
+                    setPaymentStatus('error');
+                }
+            } catch (err) {
+                setPaymentStatus('error');
+                toast.error('Verification failed');
+            } finally {
+                setIsLoading(false);
+            }
+        };
 
-                    {
-                        paymentStatus === 'success' ? (
-                            <div className="flex flex-row justify-between align-middle">
-                                <p className="text-left text-green-600">Payment successful</p>
-                                <div className="h-10 w-[20%]">
-                                    <ButtonFull
-                                        action="View Showcase"
-                                        onClick={() => router.push('/vendor/showcase')}
-                                    />
-                                </div>
-                            </div>
-                        ) : null
-                    }
+        verifyPayment();
+    }, [router.isReady, router.query]);
 
-                    <div className="flex flex-col gap-4 w-[98%] mx-auto mb-4">
-                        <textarea 
-                            name="user-experience"
-                            className="h-48 rounded-[16px] bg-gray-100 w-full outline-none mt-10 px-4 py-5"
-                            placeholder="Tell us about your experience"
-                        />
-                        <div className="flex w-[20%] ml-[80%] h-10 !mb-4 justify-end">
-                            <ButtonGhost
-                                action="Submit"
-                                onClick={() => {}}
-                            />
-                        </div>
-                    </div>
-                </div>
-                <div className="bg-white h-full w-full rounded-md" />
-            </div>
+    return (
+        <div className="bg-[#F8F9FB] min-h-screen flex flex-col">
+            <Header />
 
-            <div className="flex flex-col w-[90%] mx-auto lg:w-[35%]">
-                <div className="flex flex-col bg-white pl-2 rounded-md gap-3 py-3 min-h-[80vh]">
-                    <p className="font-medium text-center">Featured Products</p>
-                    {
-                        featuredProducts?.map((product) => (
-                            <div
-                                className='flex flex-row cursor-pointer mb-6 h-28 text-sm'
-                                // onClick={() => goToProductPage(product?.id)}
-                                key={product.id}
-                            >
-                                <img
-                                    src={product?.image}
-                                    alt="product image"
-                                    className='mr-3 h-full rounded-md'
-                                />
-                                
-                                <div 
-                                    className="flex flex-col py-2"
-                                >
-                                    <div className='flex flex-col mb-2'>
-                                        <h3 className='text-base font-mono line-clamp-1 mb-1'>
-                                            {product?.name}
-                                        </h3>
-                                        { product.rating && <RatingsCard rating={product.rating} /> }
+            <main className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col lg:flex-row gap-8">
+                
+                {/* Left Column: Status & Feedback */}
+                <div className="lg:w-2/3 flex flex-col gap-6">
+                    
+                    {/* Status Card */}
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div className="p-8 text-center flex flex-col items-center">
+                            {isLoading ? (
+                                <>
+                                    <PulseLoader size={15} color="#FFA500" margin={4} />
+                                    <h2 className="mt-6 text-2xl font-bold text-gray-800">Verifying Transaction</h2>
+                                    <p className="text-gray-500 mt-2">Please hold on while we confirm your payment with Paystack...</p>
+                                </>
+                            ) : paymentStatus === 'success' ? (
+                                <>
+                                    <div className="bg-green-50 p-4 rounded-full mb-4">
+                                        <CheckCircle2 className="w-16 h-16 text-green-500" />
                                     </div>
-                                    <div 
-                                        className='flex flex-col'
+                                    <h2 className="text-3xl font-extrabold text-gray-900">Payment Confirmed!</h2>
+                                    <p className="text-gray-600 mt-2 text-lg">Your product is now being featured on the Zuta Showcase.</p>
+                                    
+                                    <div className="mt-8 flex gap-4 w-full max-w-md">
+                                        <ButtonFull
+                                            action="Go to Showcase"
+                                            onClick={() => router.push('/vendor/showcase')}
+                                        />
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <XCircle className="w-20 h-20 text-red-500 mb-4" />
+                                    <h2 className="text-2xl font-bold text-gray-800">Verification Failed</h2>
+                                    <p className="text-gray-500 mt-2">We couldn't verify this payment. If you were debited, please contact Zuta support.</p>
+                                    <button 
+                                        onClick={() => router.push('/vendor')}
+                                        className="mt-6 text-orange-500 font-semibold hover:underline"
                                     >
-                                        <p 
-                                            className='text-orange-300 font-semibold mr-4'
-                                        >
-                                            {product.price}
-                                        </p>
-                                        <span>
-                                            {product.discount}% Off
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        ))
-                    }
+                                        Return to Dashboard
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                    </div>
                 </div>
-
-            </div>
+            </main>
         </div>
-        
-    </div>
-  )
-}
+    );
+};
 
-export default paystack
+export default PaystackCallback;

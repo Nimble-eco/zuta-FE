@@ -32,7 +32,7 @@ const VerticalTextSlider = ({ list, list_name }: IVerticalTextSliderProps) => {
     }, [currentIndex]);
 
   return (
-    <div className="h-fit bg-white rounded-md shadow-xl flex flex-col">
+    <div className="h-fit rounded-md shadow-xl flex flex-col">
         <div className='flex flex-row px-3 mb-1'>
             <h3 className='font-semibold text-base pr-2 whitespace-nowrap'>{list_name}</h3>
             <MdArrowForward className='text-2xl' />
