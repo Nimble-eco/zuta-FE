@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { useSession } from 'next-auth/react';
 
 export { RouteGuard };
 
 function RouteGuard(children: any) {
     const router = useRouter();
     const [authorized, setAuthorized] = useState(false);
-    const { data: session } = useSession();
     
     let token: string;
     if(typeof window !== undefined) {
@@ -36,12 +34,12 @@ function RouteGuard(children: any) {
 
     function authCheck(url: string) {
         // redirect to login page if accessing a private page and not logged in 
-        const publicPaths = ['/login'];
+        const publicPaths = ['/auth/signIn', '/auth/register'];
         const path = url.split('?')[0];
-        if (!session && !publicPaths.includes(path)) {
+        if (!token && !publicPaths.includes(path)) {
             setAuthorized(false);
             router.push({
-                pathname: '/login',
+                pathname: '/auth/signIn',
                 query: { returnUrl: router.asPath }
             });
         } else {
