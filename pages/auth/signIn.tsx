@@ -8,6 +8,7 @@ import { useRouter } from 'next/router';
 import axiosInstance from '../../Utils/axiosConfig';
 import TextInput from '../../Components/inputs/MyTextInput';
 import LoginSelectWorkSpaceModal from '../../Components/modals/switch-worskapce/LoginSelectWorkSpaceModal';
+import Link from 'next/link';
 
 export default function SignIn() {
     const router = useRouter();
@@ -140,7 +141,9 @@ export default function SignIn() {
                     </div>
 
                     <p className="text-center text-xs text-gray-400">
-                        By signing in, you agree to Zuta's <span className="underline cursor-pointer">Terms of Service</span> and <span className="underline cursor-pointer">Privacy Policy</span>.
+                        By signing in, you agree to Zuta's 
+                        <Link href='/legal'><span className="underline text-gray-600 mx-1">Terms of Service</span></Link> and 
+                        <Link href='/legal'><span className="underline text-gray-600 mx-1">Privacy Policy</span></Link>.
                     </p>
                 </div>
             </div>

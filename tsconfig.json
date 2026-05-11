@@ -18,16 +18,17 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "types": [
-      "node",
-      "react"
-    ]
+    // "types": [
+    //   "node",
+    //   "react"
+    // ]
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
-    "**/*.tsx"
-, "pages/experiment/gsap.js"  ],
+    "**/*.tsx", 
+    "pages/experiment/gsap.js"  
+  ],
   "exclude": [
     "node_modules"
   ]

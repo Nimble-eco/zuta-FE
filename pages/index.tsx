@@ -89,7 +89,7 @@ const Home = ({ products, openOrders, categories, tags, featured, catalogues }: 
         </div>
 
         {/* Banner slider */}
-        <div className="h-44 md:h-56 w-full rounded-2xl overflow-hidden">
+        <div className="h-44 md:h-64 w-full rounded-2xl overflow-hidden">
           <SwiperSlider
             slides={cataloguesDummyData}
             // slides={catalogues?.map(c => c.image)}

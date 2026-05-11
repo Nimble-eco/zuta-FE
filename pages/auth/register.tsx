@@ -7,6 +7,7 @@ import axiosInstance from '../../Utils/axiosConfig';
 import { useRouter } from 'next/router';
 import Cookies from 'js-cookie';
 import { FaGoogle } from "react-icons/fa";
+import Link from 'next/link';
 
 const Register = () => {
     const router = useRouter();
@@ -154,7 +155,9 @@ const Register = () => {
                     </div>
 
                     <p className="text-center text-[11px] text-gray-400 px-4 leading-relaxed">
-                        By clicking "Create Zuta Account", you agree to our <span className="text-gray-600 underline">Terms</span>, <span className="text-gray-600 underline">Privacy Policy</span> and <span className="text-gray-600 underline">Cookie Use</span>.
+                        By clicking "Create Zuta Account", you agree to our 
+                        <Link href={'/legal'}><span className="text-gray-600 underline mx-1">Terms</span></Link> and 
+                        <Link href={'/legal'}><span className="text-gray-600 underline mx-1">Privacy Policy</span></Link>
                     </p>
                 </div>
             </div>
