@@ -18,10 +18,10 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    // "types": [
-    //   "node",
-    //   "react"
-    // ]
+    "types": [
+      "node",
+      "react"
+    ]
   },
   "include": [
     "next-env.d.ts",
